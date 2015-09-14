@@ -21,7 +21,7 @@ C接口train相关参数
 -snapshot参数（可选），通常用来从之前训练一半的模型xxx.solverstate继续训练使用
 -weights参数（选填），与训练好的model.caffemodel一起使用，用来在fine-tuning的时候初始化参数
 -gpu参数，用来选择使用GPU，根据nvid">
-<meta property="og:updated_time" content="2015-09-14T13:07:28.841Z">
+<meta property="og:updated_time" content="2015-09-14T13:46:53.541Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="caffe学习（四）caffe的接口参数说明">
 <meta name="twitter:description" content="caffe接口参数
@@ -112,7 +112,7 @@ C接口train相关参数
 <li>-weights参数（选填），与训练好的<code>model.caffemodel</code>一起使用，用来在fine-tuning的时候初始化参数</li>
 <li>-gpu参数，用来选择使用GPU，根据<code>nvidia-smi</code>的GPU的ID选择，比如选择第三块GPU就使用<code>-gpu 2</code>的参数，如果想使用所有的GPU一起跑一个程序，就使用<code>-gpu all</code></li>
 </ul>
-<p>举个例子</p>
+<p>举个例子<br><!-- lang:bash--></p>
 <pre><code># train LeNet
 caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt
 # train on GPU <span class="number">2</span>
@@ -125,13 +125,13 @@ caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</s
 <li>-iterations迭代次数，time的时候测试的次数，默认为50次</li>
 <li>-model测试时候选择加载的模型，对应<code>train_val.prototxt</code>或者<code>deploy.prototxt</code>一起使用</li>
 </ul>
-<p>举个例子</p>
+<p>举个例子<br><!-- lang:bash--></p>
 <pre><code># score the learned LeNet model on the validation <span class="operator"><span class="keyword">set</span> <span class="keyword">as</span> defined <span class="keyword">in</span> the
 # <span class="keyword">model</span> architeture lenet_train_test.prototxt
 caffe <span class="keyword">test</span> -<span class="keyword">model</span> examples/mnist/lenet_train_test.prototxt -weights examples/mnist/lenet_iter_10000.caffemodel -gpu <span class="number">0</span> -iterations <span class="number">100</span>
 # <span class="keyword">time</span> a <span class="keyword">model</span> architecture <span class="keyword">with</span> the given weights <span class="keyword">on</span> the <span class="keyword">first</span> GPU <span class="keyword">for</span> <span class="number">10</span> iterations
 caffe <span class="keyword">time</span> -<span class="keyword">model</span> examples/mnist/lenet_train_test.prototxt -weights examples/mnist/lenet_iter_10000.caffemodel -gpu <span class="number">0</span> -iterations <span class="number">10</span></span>
-</code></pre><h3 id="device_query相关参数">device_query相关参数</h3><p>这个模块用来查看多GPU时候的一些显卡相关信息。举例</p>
+</code></pre><h3 id="device_query相关参数">device_query相关参数</h3><p>这个模块用来查看多GPU时候的一些显卡相关信息。举例<br><!-- lang:bash--></p>
 <pre><code><span class="comment"># query the first device</span>
 <span class="title">caffe</span> device_query -gpu <span class="number">0</span>
 </code></pre><h2 id="python接口">python接口</h2><p>通过<code>import caffe</code>来加载caffe模块，几个比较重要的模块caffe.Net, caffe.SDGSolver, caffe.io, caffe.draw</p>
@@ -139,7 +139,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="ciejzdp3c000nx0fhw63yrvj2" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="ciejzimrm000n9cfh5bxq6ciz" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
