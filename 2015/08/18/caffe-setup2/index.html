@@ -7,29 +7,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="这次全程记录centOS 7 的配置安装过程
 开发环境虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料http://caffe.berkeleyvision.org/installation.html，配置之前先查看一下自己的软硬件环境
-
-dns配置
-显卡K40（没显卡也能玩caffe）,可以看到是4个k40m显卡。。。。我口水直流(@ο@) 
-  lspci |grep">
+dns配置google之，不多介绍，注意centos 7的dns设置与之前的版本不同
+查看显卡显卡K40（没显卡也能玩caffe）,可以看">
 <meta property="og:type" content="article">
 <meta property="og:title" content="caffe学习（三）caffe + centOS 7 + CUDA 7配置">
 <meta property="og:url" content="http://yoursite.com/2015/08/18/caffe-setup2/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
 <meta property="og:description" content="这次全程记录centOS 7 的配置安装过程
 开发环境虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料http://caffe.berkeleyvision.org/installation.html，配置之前先查看一下自己的软硬件环境
-
-dns配置
-显卡K40（没显卡也能玩caffe）,可以看到是4个k40m显卡。。。。我口水直流(@ο@) 
-  lspci |grep">
-<meta property="og:updated_time" content="2015-09-14T13:31:32.754Z">
+dns配置google之，不多介绍，注意centos 7的dns设置与之前的版本不同
+查看显卡显卡K40（没显卡也能玩caffe）,可以看">
+<meta property="og:updated_time" content="2015-09-14T13:38:01.760Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="caffe学习（三）caffe + centOS 7 + CUDA 7配置">
 <meta name="twitter:description" content="这次全程记录centOS 7 的配置安装过程
 开发环境虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料http://caffe.berkeleyvision.org/installation.html，配置之前先查看一下自己的软硬件环境
-
-dns配置
-显卡K40（没显卡也能玩caffe）,可以看到是4个k40m显卡。。。。我口水直流(@ο@) 
-  lspci |grep">
+dns配置google之，不多介绍，注意centos 7的dns设置与之前的版本不同
+查看显卡显卡K40（没显卡也能玩caffe）,可以看">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -107,40 +101,33 @@ dns配置
       
         <p>这次全程记录centOS 7 的配置安装过程</p>
 <h2 id="开发环境">开发环境</h2><p>虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料<a href="http://caffe.berkeleyvision.org/installation.html" target="_blank" rel="external">http://caffe.berkeleyvision.org/installation.html</a>，配置之前先查看一下自己的软硬件环境</p>
-<ul>
-<li>dns配置</li>
-<li><p><strong>显卡K40</strong>（没显卡也能玩caffe）,可以看到是4个k40m显卡。。。。我口水直流(<em>@ο@</em>) </p>
-<p>  lspci |grep -i nvidia</p>
-</li>
-<li><p><strong>Linux服务器版本centOS 7</strong>查看服务器系统版本命令</p>
-<p>  cat /etc/redhat-release</p>
-</li>
-<li><p><strong>python2.7升级到Anaconda版本<a href="https://3230d63b5fc54e62148e-c95ac804525aac4b6dba79b00b39d1d3.ssl.cf1.rackcdn.com/Anaconda-2.3.0-Linux-x86_64.sh" target="_blank" rel="external">Anaconda-2.3.0-Linux-x86_64.sh</a></strong>下载后直接运行即可，numpy,scipy,scikit-learn等相关软件就都配置好了。记得生效一下环境变量<code>source ~/.bashrc</code>。Anaconda直接把python升级到2.7版本，同时安装好了所有相关依赖包，简直完美啊，解决了python多版本共存的问题，同时一键安装python和相关插件，并且配置好了相关环境变量，同时还是64位版本的python，强烈推荐。</p>
-</li>
-<li><p><strong>再把cmake升级到2.8.12版本</strong>，centos 7 的yum只能升级到2.8.11版本</p>
-<p>  yum install gcc<br>  yum install gcc-g++</p>
-<h1 id="下载安装包">下载安装包</h1><p>  tar xvf cmake-2.8.12.1.tar.gz<br>  cd cmake-2.8.12.1/<br>  ./configure<br>  make<br>  make install<br>  vim /etc/profile<br>  ###########[profile末尾添加]<br>  PATH=/usr/local/cmake/bin:$PATH<br>  export PATH<br>  #############关闭文件<br>  source /etc/profile<br>  ########查看是否安装好<br>  cmake –version</p>
-</li>
-</ul>
-<h2 id="安装CUDA和MKL">安装CUDA和MKL</h2><p>这两个商用软件安装相对容易</p>
-<h3 id="CUDA_7">CUDA 7</h3><p>下载CUDA 7<a href="https://developer.nvidia.com/cuda-downloads" target="_blank" rel="external">https://developer.nvidia.com/cuda-downloads</a></p>
-<pre><code>yum install kernel-devel
-init <span class="number">3</span>         <span class="comment"># 关闭GUI</span>
-./cuda_7.<span class="number">0.28_</span>linux.run
-init <span class="number">5</span>         <span class="comment"># 开启GUI</span>
+<h3 id="dns配置">dns配置</h3><p>google之，不多介绍，注意centos 7的dns设置与之前的版本不同</p>
+<h3 id="查看显卡">查看显卡</h3><p><strong>显卡K40</strong>（没显卡也能玩caffe）,可以看到是4个k40m显卡。。。。我口水直流(<em>@ο@</em>)<br>    lspci |grep -i nvidia</p>
+<h3 id="查看linux版本">查看linux版本</h3><p><strong>Linux服务器版本centOS 7</strong>查看服务器系统版本命令<br>    cat /etc/redhat-release</p>
+<h3 id="安装python">安装python</h3><p>python2.7升级到Anaconda版本<a href="https://3230d63b5fc54e62148e-c95ac804525aac4b6dba79b00b39d1d3.ssl.cf1.rackcdn.com/Anaconda-2.3.0-Linux-x86_64.sh" target="_blank" rel="external">Anaconda-2.3.0-Linux-x86_64.sh</a>下载后直接运行即可，numpy,scipy,scikit-learn等相关软件就都配置好了。记得生效一下环境变量<code>source ~/.bashrc</code>。Anaconda直接把python升级到2.7版本，同时安装好了所有相关依赖包，简直完美啊，解决了python多版本共存的问题，同时一键安装python和相关插件，并且配置好了相关环境变量，同时还是64位版本的python，强烈推荐。</p>
+<h3 id="安装cmake">安装cmake</h3><p> 再把cmake升级到2.8.12版本，centos 7 的yum只能升级到2.8.11版本<br>    yum install gcc<br>    yum install gcc-g++</p>
+<pre><code><span class="preprocessor"># 下载安装包</span>
+tar xvf cmake-<span class="number">2.8</span><span class="number">.12</span><span class="number">.1</span>.tar.gz
+cd cmake-<span class="number">2.8</span><span class="number">.12</span><span class="number">.1</span>/
+./configure
+make
+make install
 vim /etc/profile
-<span class="comment">#############[profile]</span>
+<span class="preprocessor">###########[profile末尾添加]</span>
+PATH=/usr/local/cmake/bin:$PATH
+<span class="keyword">export</span> PATH
+<span class="preprocessor">#############关闭文件</span>
+source /etc/profile
+<span class="preprocessor">########查看是否安装好</span>
+cmake --version
+</code></pre><h2 id="安装CUDA和MKL">安装CUDA和MKL</h2><p>这两个商用软件安装相对容易</p>
+<h3 id="CUDA_7">CUDA 7</h3><p>下载CUDA 7<a href="https://developer.nvidia.com/cuda-downloads" target="_blank" rel="external">https://developer.nvidia.com/cuda-downloads</a><br>    yum install kernel-devel<br>    init 3         # 关闭GUI<br>    ./cuda_7.0.28_linux.run<br>    init 5         # 开启GUI<br>    vim /etc/profile</p>
+<pre><code><span class="comment">#############[profile]</span>
 export <span class="constant">PATH</span>=<span class="variable">$PATH</span><span class="symbol">:/usr/local/cuda-</span><span class="number">7.0</span>/bin
 export <span class="constant">LD_LIBRARY_PATH</span>=<span class="variable">$LD_LIBRARY_PATH</span><span class="symbol">:/usr/local/cuda-</span><span class="number">7.0</span>/lib64
 <span class="comment">#############[close profile]</span>
 source /etc/profile
-</code></pre><p>验证CUDA是否安装好</p>
-<pre><code>nvcc -V     <span class="comment"># 验证nvidia-CUDA-Toolkit是否安装好</span>
-<span class="built_in">cd</span> ~/NVIDIA_CUDA-<span class="number">7.0</span>_Samples
-make
-<span class="built_in">cd</span> bin/x86_64/linux/release
-./deviceQuery
-</code></pre><p>从输出的信息就可以判断是否安装好CUDA</p>
+</code></pre><p>验证CUDA是否安装好<br>    nvcc -V     # 验证nvidia-CUDA-Toolkit是否安装好<br>    cd ~/NVIDIA_CUDA-7.0_Samples<br>    make<br>    cd bin/x86_64/linux/release<br>    ./deviceQuery<br>从输出的信息就可以判断是否安装好CUDA</p>
 <h3 id="intel_MKL">intel MKL</h3><p>下载intel MKL，解压后执行<br>    tar xzvf parallel_studio_xe_2015.tgz<br>    cd parallel_studio_xe_2015<br>    ./install.sh</p>
 <pre><code><span class="comment"># 偷偷记录一下自己的序列号SGZG-6NRGK57H</span>
 vim /etc/ld.so.conf.d/intel_mkl.conf
@@ -223,7 +210,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="ciejyyx5v000h1kfhlssqd4md" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="ciejz7dji000h3ofhte4cr9f5" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
