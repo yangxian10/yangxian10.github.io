@@ -93,10 +93,10 @@
       
         <p>caffe接口参数</p>
 <h2 id="C接口">C接口</h2><h3 id="train相关参数">train相关参数</h3><ul>
-<li>-solver参数（必须有），与solver.prototxt文件一起使用</li>
-<li>-snapshot参数（可选），通常用来从之前训练一半的模型xxx.solverstate继续训练使用</li>
-<li>-weights参数（选填），与训练好的model.caffemodel一起使用，用来在fine-tuning的时候初始化参数</li>
-<li>-gpu参数，用来选择使用GPU，根据nvidia-smi的GPU的ID选择，比如选择第三块GPU就使用-gpu 2的参数，如果想使用所有的GPU一起跑一个程序，就使用-gpu all</li>
+<li>-solver参数（必须有），与<code>solver.prototxt</code>文件一起使用</li>
+<li>-snapshot参数（可选），通常用来从之前训练一半的模型<code>xxx.solverstate</code>继续训练使用</li>
+<li>-weights参数（选填），与训练好的<code>model.caffemodel</code>一起使用，用来在fine-tuning的时候初始化参数</li>
+<li>-gpu参数，用来选择使用GPU，根据<code>nvidia-smi</code>的GPU的ID选择，比如选择第三块GPU就使用<code>-gpu 2</code>的参数，如果想使用所有的GPU一起跑一个程序，就使用<code>-gpu all</code></li>
 </ul>
 <p>举个例子</p>
 <pre><code># train LeNet
@@ -109,16 +109,23 @@ caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prot
 caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</span>solver.prototxt -weights models<span class="regexp">/bvlc_reference_caffenet/</span>bvlc_reference_caffenet.caffemodel
 </code></pre><h3 id="test、time相关参数">test、time相关参数</h3><ul>
 <li>-iterations迭代次数，time的时候测试的次数，默认为50次</li>
-<li>-model测试时候选择加载的模型，对应train_val.prototxt或者deploy.prototxt一起使用</li>
+<li>-model测试时候选择加载的模型，对应<code>train_val.prototxt</code>或者<code>deploy.prototxt</code>一起使用</li>
 </ul>
-<p>举个例子<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># score the learned LeNet model on the validation <span class="operator"><span class="keyword">set</span> <span class="keyword">as</span> defined <span class="keyword">in</span> the</span><br><span class="line"># <span class="keyword">model</span> architeture lenet_train_test.prototxt</span><br><span class="line">caffe <span class="keyword">test</span> -<span class="keyword">model</span> examples/mnist/lenet_train_test.prototxt -weights examples/mnist/lenet_iter_10000.caffemodel -gpu <span class="number">0</span> -iterations <span class="number">100</span></span><br><span class="line"># <span class="keyword">time</span> a <span class="keyword">model</span> architecture <span class="keyword">with</span> the given weights <span class="keyword">on</span> the <span class="keyword">first</span> GPU <span class="keyword">for</span> <span class="number">10</span> iterations</span><br><span class="line">caffe <span class="keyword">time</span> -<span class="keyword">model</span> examples/mnist/lenet_train_test.prototxt -weights examples/mnist/lenet_iter_10000.caffemodel -gpu <span class="number">0</span> -iterations <span class="number">10</span></span></span><br></pre></td></tr></table></figure></p>
-<h3 id="device_query相关参数">device_query相关参数</h3><p>这个模块用来查看多GPU时候的一些显卡相关信息。举例<br><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># query the first device</span></span><br><span class="line"><span class="title">caffe</span> device_query -gpu <span class="number">0</span></span><br></pre></td></tr></table></figure></p>
-<h2 id="python接口">python接口</h2><p>通过import caffe来加载caffe模块，几个比较重要的模块caffe.Net, caffe.SDGSolver, caffe.io, caffe.draw</p>
+<p>举个例子</p>
+<pre><code># score the learned LeNet model on the validation <span class="operator"><span class="keyword">set</span> <span class="keyword">as</span> defined <span class="keyword">in</span> the
+# <span class="keyword">model</span> architeture lenet_train_test.prototxt
+caffe <span class="keyword">test</span> -<span class="keyword">model</span> examples/mnist/lenet_train_test.prototxt -weights examples/mnist/lenet_iter_10000.caffemodel -gpu <span class="number">0</span> -iterations <span class="number">100</span>
+# <span class="keyword">time</span> a <span class="keyword">model</span> architecture <span class="keyword">with</span> the given weights <span class="keyword">on</span> the <span class="keyword">first</span> GPU <span class="keyword">for</span> <span class="number">10</span> iterations
+caffe <span class="keyword">time</span> -<span class="keyword">model</span> examples/mnist/lenet_train_test.prototxt -weights examples/mnist/lenet_iter_10000.caffemodel -gpu <span class="number">0</span> -iterations <span class="number">10</span></span>
+</code></pre><h3 id="device_query相关参数">device_query相关参数</h3><p>这个模块用来查看多GPU时候的一些显卡相关信息。举例</p>
+<pre><code><span class="comment"># query the first device</span>
+<span class="title">caffe</span> device_query -gpu <span class="number">0</span>
+</code></pre><h2 id="python接口">python接口</h2><p>通过<code>import caffe</code>来加载caffe模块，几个比较重要的模块caffe.Net, caffe.SDGSolver, caffe.io, caffe.draw</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="ciejxxb6y000ngofhnibombzl" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="ciejy3zm0000ntwfhi0oe02ju" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -203,7 +210,7 @@ caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</s
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="ciejxxb6i000hgofh95usy8zo" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="ciejy3zlk000htwfhi6carlrx" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -267,7 +274,7 @@ caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</s
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="ciejxxb4s0000gofh7ugimpz6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="ciejy3zju0000twfhhik5s460" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -348,7 +355,7 @@ caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</s
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="ciejxxb6i000kgofhhhniy61y" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="ciejy3zlk000ktwfhugancocz" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -462,7 +469,7 @@ caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</s
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="ciejxxb630005gofhx07xchk8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="ciejy3zl50005twfh4itercz4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -522,7 +529,7 @@ caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</s
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="ciejxxb6i000dgofh7e4ucvis" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="ciejy3zlk000dtwfhphpwlocn" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -583,7 +590,7 @@ caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</s
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="ciejxxb6i000agofh4ztvlx5h" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="ciejy3zlk000atwfh9d5agvrx" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -630,7 +637,7 @@ caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</s
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="ciejxxb6i000ggofh9s71lvwx" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="ciejy3zlk000gtwfh01zm5kox" class="article-share-link">Share</a>
       
       
     </footer>
