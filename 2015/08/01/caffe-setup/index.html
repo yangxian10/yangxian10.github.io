@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>caffe学习（一）caffe + centOS 6.5 + CUDA 6.5配置 | 杨现的个人博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="caffe应该是当下最火的深度学习开源框架了，其性能强大，每天可以处理60M的图片（K40显卡），测试一张图片只要1ms，而且其模块都已经定义好，不需要写什么代码就能轻松调用，虽然是c++开发的却能很好的支持python，简直不能更赞。
+开发环境虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料http://caffe.berkeleyvision.org/installat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="caffe学习（一）caffe + centOS 6.5 + CUDA 6.5配置">
+<meta property="og:url" content="http://yoursite.com/2015/08/01/caffe-setup/index.html">
+<meta property="og:site_name" content="杨现的个人博客">
+<meta property="og:description" content="caffe应该是当下最火的深度学习开源框架了，其性能强大，每天可以处理60M的图片（K40显卡），测试一张图片只要1ms，而且其模块都已经定义好，不需要写什么代码就能轻松调用，虽然是c++开发的却能很好的支持python，简直不能更赞。
+开发环境虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料http://caffe.berkeleyvision.org/installat">
+<meta property="og:updated_time" content="2015-08-15T01:25:06.117Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="caffe学习（一）caffe + centOS 6.5 + CUDA 6.5配置">
+<meta name="twitter:description" content="caffe应该是当下最火的深度学习开源框架了，其性能强大，每天可以处理60M的图片（K40显卡），测试一张图片只要1ms，而且其模块都已经定义好，不需要写什么代码就能轻松调用，虽然是c++开发的却能很好的支持python，简直不能更赞。
+开发环境虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料http://caffe.berkeleyvision.org/installat">
+  
+    <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">杨现的个人博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">分享计算机视觉、算法、生活累积的点滴</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-caffe-setup" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/08/01/caffe-setup/" class="article-date">
+  <time datetime="2015-08-01T10:56:27.000Z" itemprop="datePublished">2015-08-01</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      caffe学习（一）caffe + centOS 6.5 + CUDA 6.5配置
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>caffe应该是当下最火的深度学习开源框架了，其性能强大，每天可以处理60M的图片（K40显卡），测试一张图片只要1ms，而且其模块都已经定义好，不需要写什么代码就能轻松调用，虽然是c++开发的却能很好的支持python，简直不能更赞。</p>
+<h2 id="开发环境">开发环境</h2><p>虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料<a href="http://caffe.berkeleyvision.org/installation.html" target="_blank" rel="external">http://caffe.berkeleyvision.org/installation.html</a>，配置之前先介绍一下自己的软硬件环境</p>
+<ul>
+<li><strong>显卡K20c</strong>（没显卡也能玩caffe）</li>
+<li><strong>Linux服务器版本centOS6.5</strong>（版本有点低，这有点坑，系统自带的python是2.6版本，cmake是2.6版本，这都给安装带来了不便，由于是服务器没得选，只能硬着头皮上了，而且网上多是基于Ubuntu系统的配置，所以更要把安装过程记录一下）</li>
+<li><p><strong>python升级到2.7版本，再把cmake升级到2.8版本</strong>，我都是下载的源代码安装的，要注意的是安装好之后还要将原来版本移除掉并<strong>链接到新版本</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ mv /usr/bin/python /usr/bin/python_old</span><br><span class="line">$ ln <span class="operator">-s</span>  /usr/<span class="built_in">local</span>/bin/python2.<span class="number">7</span> /usr/bin/python</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>安装numpy1.9.2版本</strong>，也是官网源代码</p>
+</li>
+</ul>
+<h2 id="安装CUDA和MKL">安装CUDA和MKL</h2><p>我使用的是CUDA 6.5版本，并且通过edu邮箱申请了一个MKL的student版本。这两个都是商业软件，问题比较少，安照网上的资料很容易就配置好了。</p>
+<h2 id="依赖库安装">依赖库安装</h2><p>按照官网说法，先试了一遍<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum install protobuf-devel leveldb-devel snappy-devel opencv-devel boost-devel hdf5-devel</span><br></pre></td></tr></table></figure></p>
+<p>但是有几个包是不行的，protobuf-devel, leveldb-devel, hdf5-devel找不到，由于我服务器版本比较低，boost和boost-devel都只有1.41版本，注意要把boost也升级一下。protobuf是谷歌开发的一种实现内存外存交换的协议接口，再这个统一的通讯协议下不同开发者可以使用自己喜欢的方式进行模型参数的管理。</p>
+<p>首先先把protobuf, leveldb, hdf5, boost高级版本的tar包下载下来解压并用make和make install安装起来，然后下载其分别对应的devel的rpm安装，并通过rpm命令安装：<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rpm -i xxx.rpm</span><br></pre></td></tr></table></figure></p>
+<h2 id="安装OpenCV">安装OpenCV</h2><p>安装了这么多年OpenCV，头一次遇到这么大坑，先尝试了大家推荐的shell一键安装<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git https://github.com/ouxinyu/Install-OpenCV-master</span><br><span class="line">$ <span class="built_in">cd</span> Install-OpenCV-master/RedHat</span><br><span class="line">$ ./opencv_latest.sh</span><br></pre></td></tr></table></figure></p>
+<p>看上去一切很美，但是执行downloading ippicv_linux_20140513.tgz这个文件的时候就怎么都过不去了，没能解决，于是还是乖乖的安装官网的教程去下载了一个OpenCV 2.4.9的tar解压安装，安装过程也是安装OpenCV官方的教程来的，但是由于要使用其中的GPU模块，原本预想很顺利的安装过程出了error，查了资料发现是OpenCV的bug<a href="http://code.opencv.org/issues/3814" target="_blank" rel="external">http://code.opencv.org/issues/3814</a>，拷贝文件<a href="http://code.opencv.org/projects/opencv/repository/revisions/feb74b125d7923c0bc11054b66863e1e9f753141/raw/modules/gpu/src/nvidia/core/NCVPixelOperations.hpp" target="_blank" rel="external">NCVPixelOperations.hpp</a>替换掉源文件，重新build make，搞定<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ~/opencv</span><br><span class="line">$ mkdir release</span><br><span class="line">$ <span class="built_in">cd</span> release</span><br><span class="line">$ cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/<span class="built_in">local</span> ..</span><br><span class="line"></span><br><span class="line">$ <span class="built_in">cd</span> ..</span><br><span class="line">$ make</span><br><span class="line">$ sudo make install</span><br></pre></td></tr></table></figure></p>
+<h2 id="安装caffe">安装caffe</h2><p>复制一个配置文件先<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ cp Makefile.config.example Makefile.config</span><br></pre></td></tr></table></figure></p>
+<p>把里面的CPU_ONLY，BLAS，PYTHON_DIR目录都按照情况配置好，然后执行<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ make all -j8</span><br><span class="line">$ make <span class="built_in">test</span> -j8</span><br><span class="line">$ make runtest -j8</span><br></pre></td></tr></table></figure></p>
+<p>-j8选项可以提高编译速度，不是必须的，如果在runtest时候一片绿色，没报错，恭喜，说明caffe已经配置好了，可以愉快的使用了。</p>
+<h2 id="测试MNIST">测试MNIST</h2><p>进入到caffe根目录下，执行如下操作<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./data/mnist/get_mnist.sh               <span class="comment"># 下载minst数据库</span></span><br><span class="line">./examples/mnist/create_mnist.sh        <span class="comment"># 把数据转成lmdb格式</span></span><br><span class="line">./examples/mnist/train_lenet.sh         <span class="comment"># 训练mnist</span></span><br></pre></td></tr></table></figure></p>
+<p>从输出结果看到，test集上得到99.2%的正确率，还是很不错的。</p>
+<h2 id="其他说明">其他说明</h2><h3 id="pycaffe配置">pycaffe配置</h3><ul>
+<li>由于我这里python没配置好，所以make pycaffe没能通过，有待解决。<br>解决方案，下载<a href="https://3230d63b5fc54e62148e-c95ac804525aac4b6dba79b00b39d1d3.ssl.cf1.rackcdn.com/Anaconda-2.3.0-Linux-x86_64.sh" target="_blank" rel="external">Anaconda-2.3.0-Linux-x86_64.sh</a>，下载后运行，<br>直接把python升级到2.7版本，同时安装好了所有相关依赖包，简直完美啊，，解决了python2.6和2.7共存的问题，同时一键安装python和相关插件，并且配置好了相关环境变量，同时还是64位版本的python，强烈推荐。<br>修改Makefile.config中和python相关内容<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="constant">PYTHON_INCLUDE</span> <span class="symbol">:</span>= <span class="regexp">/root/anaconda</span><span class="regexp">/include/python</span>2.<span class="number">7</span> \</span><br><span class="line">    /root/anaconda/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">numpy</span>/<span class="title">core</span>/<span class="title">include</span>/ \</span></span><br><span class="line"><span class="constant">PYTHON_LIB</span> <span class="symbol">:</span>= <span class="regexp">/root/anaconda</span><span class="regexp">/pkgs/python</span>-<span class="number">2.7</span>.<span class="number">10</span>-<span class="number">0</span>/<span class="class"><span class="keyword">lib</span></span></span><br><span class="line"><span class="constant">INCLUDE_DIRS</span> <span class="symbol">:</span>= <span class="variable">$(</span><span class="constant">PYTHON_INCLUDE</span>) /usr/local/<span class="keyword">include</span></span><br><span class="line"><span class="constant">LIBRARY_DIRS</span> <span class="symbol">:</span>= <span class="variable">$(</span><span class="constant">PYTHON_LIB</span>) /usr/local/<span class="class"><span class="keyword">lib</span> /<span class="title">usr</span>/<span class="title">lib</span></span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>执行</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ make pycaffe</span><br></pre></td></tr></table></figure>
+<p>编译成功了，简直酸爽。<br>最后配置一下环境变量<br><figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export PYTHONPATH=/root/caffe_test/caffe/python:<span class="variable">$PYTHONPATH</span></span><br></pre></td></tr></table></figure></p>
+<p>python环境下<br><figure class="highlight monkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor"><span class="keyword">import</span> caffe</span></span><br></pre></td></tr></table></figure></p>
+<p>报错信息<br><figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">from ._caffe import <span class="constant">Net</span>, <span class="constant">SGDSolver</span></span><br><span class="line"><span class="constant">ImportError</span><span class="symbol">:</span> /usr/local/<span class="class"><span class="keyword">lib</span>/<span class="title">libboost_python</span>.<span class="title">so</span>.1.58.0: <span class="title">undefined</span> <span class="title">symbol</span>: <span class="title">PyUnicodeUCS2_FromEncodedObject</span></span></span><br></pre></td></tr></table></figure></p>
+<p>anaconda只差boost没有包含，而是我安装的boost版本1.58跟anaconda要求的1.57版本，重新安装一遍boost 1.57<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># download boost_1_57_0.tar.bz2</span></span><br><span class="line">$ tar xvf boost_1_57_0.tar.bz2</span><br><span class="line">$ <span class="built_in">cd</span> boost_1_57_0</span><br><span class="line">$ ./bootstrap.sh</span><br><span class="line">$ ./b2</span><br><span class="line">$ ./b2 install /usr</span><br></pre></td></tr></table></figure></p>
+<p>记得安装完boost一定要yum install boost-devel一下（血和泪的教训）<br>出现新的错误，说no module name google.portobuf，重新安装protobuf和protobuf-devel并没有解决这个问题，上网上重新下载protobuf2.6.1版本，弄错了是不行的。解压后，<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ ./autogen.sh</span><br><span class="line">$ ./configure</span><br><span class="line">$ make</span><br><span class="line">$ make check</span><br><span class="line">$ make install</span><br></pre></td></tr></table></figure></p>
+<p>出错loading shared libraries: libprotobuf.so.8: cannot open shared object file: No such file or directory，此时应该是连接出错<br>locate libprotobuf.so.9 看下libprotobuf.so.9的确存在/opt/ protobuf /lib下面<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /etc/ld.so.conf.d/</span><br><span class="line">$ vi protobuf.conf   protobuf.conf中只要加入一行： /opt/ protobuf /lib</span><br><span class="line">$ ldconfig</span><br></pre></td></tr></table></figure></p>
+<p>安装protobuf的python模块<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">cd</span> <span class="keyword">python</span></span><br><span class="line">$ <span class="keyword">python</span> setup.<span class="keyword">py</span> build</span><br><span class="line">$ <span class="keyword">python</span> setup.<span class="keyword">py</span> test</span><br><span class="line">$ <span class="keyword">python</span> setup.<span class="keyword">py</span> install</span><br></pre></td></tr></table></figure></p>
+<p>python setup.py build的过程中可能报几个错，然而没关系，我们并不需要所有的protobuf的模块，配置pycaffe最重要的就是注意anaconda和依赖包版本的对应，boost要求1.57版本，protobuf是2.6.1版本，弄错了是不行的。</p>
+<ul>
+<li>cuDNN的加速模块也没有安装测试一下，有空再配置一下。</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="ciejxr02l000k10fhj78p8s2t" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/08/15/caffe-dataprepare/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          caffe学习（二）用自己的数据训练模型
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/04/12/单反拍摄入门/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">单反拍摄入门</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2015/08/23/caffe-interface/">caffe学习（四）caffe的接口参数说明</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/18/caffe-setup2/">caffe学习（三）caffe + centOS 7 + CUDA 7配置</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/15/caffe-dataprepare/">caffe学习（二）用自己的数据训练模型</a>
+          </li>
+        
+          <li>
+            <a href="/2015/08/01/caffe-setup/">caffe学习（一）caffe + centOS 6.5 + CUDA 6.5配置</a>
+          </li>
+        
+          <li>
+            <a href="/2015/04/12/单反拍摄入门/">单反拍摄入门</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2015 Xian Yang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+
+  </div>
+</body>
+</html>
