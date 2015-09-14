@@ -21,7 +21,7 @@ C接口train相关参数
 -snapshot参数（可选），通常用来从之前训练一半的模型xxx.solverstate继续训练使用
 -weights参数（选填），与训练好的model.caffemodel一起使用，用来在fine-tuning的时候初始化参数
 -gpu参数，用来选择使用GPU，根据nvid">
-<meta property="og:updated_time" content="2015-08-23T12:29:13.729Z">
+<meta property="og:updated_time" content="2015-09-14T13:02:17.337Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="caffe学习（四）caffe的接口参数说明">
 <meta name="twitter:description" content="caffe接口参数
@@ -112,8 +112,16 @@ C接口train相关参数
 <li>-weights参数（选填），与训练好的model.caffemodel一起使用，用来在fine-tuning的时候初始化参数</li>
 <li>-gpu参数，用来选择使用GPU，根据nvidia-smi的GPU的ID选择，比如选择第三块GPU就使用-gpu 2的参数，如果想使用所有的GPU一起跑一个程序，就使用-gpu all</li>
 </ul>
-<p>举个例子<br><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># train LeNet</span><br><span class="line">caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt</span><br><span class="line"># train on GPU <span class="number">2</span></span><br><span class="line">caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt -gpu <span class="number">2</span></span><br><span class="line"># resume training <span class="keyword">from</span> the half-way point snapshot</span><br><span class="line">caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt -snapshot examples<span class="regexp">/mnist/</span>lenet_iter_5000.solverstate</span><br><span class="line"># fine-tune CaffeNet model weights <span class="keyword">for</span> style recognition</span><br><span class="line">caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</span>solver.prototxt -weights models<span class="regexp">/bvlc_reference_caffenet/</span>bvlc_reference_caffenet.caffemodel</span><br></pre></td></tr></table></figure></p>
-<h3 id="test、time相关参数">test、time相关参数</h3><ul>
+<p>举个例子</p>
+<pre><code># train LeNet
+caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt
+# train on GPU <span class="number">2</span>
+caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt -gpu <span class="number">2</span>
+# resume training <span class="keyword">from</span> the half-way point snapshot
+caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt -snapshot examples<span class="regexp">/mnist/</span>lenet_iter_5000.solverstate
+# fine-tune CaffeNet model weights <span class="keyword">for</span> style recognition
+caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</span>solver.prototxt -weights models<span class="regexp">/bvlc_reference_caffenet/</span>bvlc_reference_caffenet.caffemodel
+</code></pre><h3 id="test、time相关参数">test、time相关参数</h3><ul>
 <li>-iterations迭代次数，time的时候测试的次数，默认为50次</li>
 <li>-model测试时候选择加载的模型，对应train_val.prototxt或者deploy.prototxt一起使用</li>
 </ul>
@@ -124,7 +132,7 @@ C接口train相关参数
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="ciejxr02l000n10fh9pc3k2yf" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="ciejxxb6y000ngofhnibombzl" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>

@@ -98,8 +98,16 @@
 <li>-weights参数（选填），与训练好的model.caffemodel一起使用，用来在fine-tuning的时候初始化参数</li>
 <li>-gpu参数，用来选择使用GPU，根据nvidia-smi的GPU的ID选择，比如选择第三块GPU就使用-gpu 2的参数，如果想使用所有的GPU一起跑一个程序，就使用-gpu all</li>
 </ul>
-<p>举个例子<br><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># train LeNet</span><br><span class="line">caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt</span><br><span class="line"># train on GPU <span class="number">2</span></span><br><span class="line">caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt -gpu <span class="number">2</span></span><br><span class="line"># resume training <span class="keyword">from</span> the half-way point snapshot</span><br><span class="line">caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt -snapshot examples<span class="regexp">/mnist/</span>lenet_iter_5000.solverstate</span><br><span class="line"># fine-tune CaffeNet model weights <span class="keyword">for</span> style recognition</span><br><span class="line">caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</span>solver.prototxt -weights models<span class="regexp">/bvlc_reference_caffenet/</span>bvlc_reference_caffenet.caffemodel</span><br></pre></td></tr></table></figure></p>
-<h3 id="test、time相关参数">test、time相关参数</h3><ul>
+<p>举个例子</p>
+<pre><code># train LeNet
+caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt
+# train on GPU <span class="number">2</span>
+caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt -gpu <span class="number">2</span>
+# resume training <span class="keyword">from</span> the half-way point snapshot
+caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt -snapshot examples<span class="regexp">/mnist/</span>lenet_iter_5000.solverstate
+# fine-tune CaffeNet model weights <span class="keyword">for</span> style recognition
+caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</span>solver.prototxt -weights models<span class="regexp">/bvlc_reference_caffenet/</span>bvlc_reference_caffenet.caffemodel
+</code></pre><h3 id="test、time相关参数">test、time相关参数</h3><ul>
 <li>-iterations迭代次数，time的时候测试的次数，默认为50次</li>
 <li>-model测试时候选择加载的模型，对应train_val.prototxt或者deploy.prototxt一起使用</li>
 </ul>
@@ -110,7 +118,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="ciejxr02l000n10fh9pc3k2yf" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="ciejxxb6y000ngofhnibombzl" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -195,7 +203,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="ciejxr02l000h10fhyo9nxljo" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="ciejxxb6i000hgofh95usy8zo" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -259,7 +267,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="ciejxqzz4000010fhch1b5w8x" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="ciejxxb4s0000gofh7ugimpz6" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -340,7 +348,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="ciejxr02l000k10fhj78p8s2t" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="ciejxxb6i000kgofhhhniy61y" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -454,7 +462,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="ciejxr026000510fh1ssdn5ku" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="ciejxxb630005gofhx07xchk8" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -514,7 +522,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="ciejxr026000d10fhtee1oibt" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="ciejxxb6i000dgofh7e4ucvis" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -575,7 +583,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="ciejxr026000a10fhx8b48uul" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="ciejxxb6i000agofh4ztvlx5h" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -622,7 +630,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="ciejxr02l000g10fh79ad1tgw" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="ciejxxb6i000ggofh9s71lvwx" class="article-share-link">Share</a>
       
       
     </footer>
