@@ -119,7 +119,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cielgbqhn000qbsfh5chkuk11" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cielghi41000qvwfhof4pb8tp" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -191,7 +191,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cielgbqh7000nbsfhmkfo5gkx" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cielghi41000nvwfhb3udrbu1" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -343,7 +343,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cielgbqh7000hbsfh3q3em42i" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cielghi3l000hvwfh8kusrdaj" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -382,15 +382,24 @@ make runtest -j8
     <div class="article-entry" itemprop="articleBody">
       
         <h2 id="数据准备">数据准备</h2><h3 id="整理、去重">整理、去重</h3><p>将图片文件按照类别放入不同的文件夹下面，同时去掉相同文件夹下的相同图片</p>
-<h3 id="打tag">打tag</h3><p>将图片数据按8:1:1的比例分成train，val，test三个子集，并产生“文件路径 标签”的标签数据，如下<br>    ../data/train_img/104166241/143088862023832744.jpg 0<br>    ../data/train_img/104166241/143088862023832435.jpg 0<br>    ../data/train_img/121391188/142096822616212389.jpg 1</p>
-<h3 id="生成lmdb数据库文件">生成lmdb数据库文件</h3><p>copy一份<code>examples/imagenet/create_imagenet.sh</code>文件并修改其中EXAMPLE、DATA、TOOLS、TRAIN_DATA_ROOT、VAL_DATA_ROOT的对应路径，并且修改<code>RESIZE=true</code>，因为我们的训练图片要归一化到256*256，我的修改如下<br>    EXAMPLE=.<br>    DATA=.<br>    TOOLS=../build/tools</p>
-<pre><code><span class="setting">TRAIN_DATA_ROOT=<span class="value">./</span></span>
+<h3 id="打tag">打tag</h3><p>将图片数据按8:1:1的比例分成train，val，test三个子集，并产生“文件路径 标签”的标签数据，如下</p>
+<pre><code>../data/train_img/<span class="number">104166241</span>/<span class="number">143088862023832744.</span>jpg <span class="number">0</span>
+../data/train_img/<span class="number">104166241</span>/<span class="number">143088862023832435.</span>jpg <span class="number">0</span>
+../data/train_img/<span class="number">121391188</span>/<span class="number">142096822616212389.</span>jpg <span class="number">1</span>
+</code></pre><h3 id="生成lmdb数据库文件">生成lmdb数据库文件</h3><p>copy一份<code>examples/imagenet/create_imagenet.sh</code>文件并修改其中EXAMPLE、DATA、TOOLS、TRAIN_DATA_ROOT、VAL_DATA_ROOT的对应路径，并且修改<code>RESIZE=true</code>，因为我们的训练图片要归一化到256*256，我的修改如下</p>
+<pre><code><span class="setting">EXAMPLE=<span class="value">.</span></span>
+<span class="setting">DATA=<span class="value">.</span></span>
+<span class="setting">TOOLS=<span class="value">../build/tools</span></span>
+
+<span class="setting">TRAIN_DATA_ROOT=<span class="value">./</span></span>
 <span class="setting">VAL_DATA_ROOT=<span class="value">./</span></span>
 
 <span class="setting">RESIZE=<span class="value"><span class="keyword">true</span></span></span>
-</code></pre><p>最后把其中的脚本语句中的convert_imageset命令中的标签文件改为自己的文件名(train.txt、val.txt)，然后执行<br>    ./create_db.sh</p>
-<h3 id="生成均值文件">生成均值文件</h3><p>copy一份<code>examples/imagenet/make_imagenet_mean.sh</code>文件并修改其中的EXAMPLE、DATA、TOOLS路径位置，以及命令compute_image_mean中的训练数据集的路径和保存的均值文件的路径文件名，然后执行<br>    ./make_db_mean.sh</p>
-<h2 id="模型参数调整">模型参数调整</h2><p>选择一个模型，这里选择GoogleNet，将models/bvlc_googlenet中的<code>solver.prototxt</code>和<code>train_val.prototxt</code>复制到新文件夹下。</p>
+</code></pre><p>最后把其中的脚本语句中的convert_imageset命令中的标签文件改为自己的文件名(train.txt、val.txt)，然后执行</p>
+<pre><code>./create_db.<span class="keyword">sh</span>
+</code></pre><h3 id="生成均值文件">生成均值文件</h3><p>copy一份<code>examples/imagenet/make_imagenet_mean.sh</code>文件并修改其中的EXAMPLE、DATA、TOOLS路径位置，以及命令compute_image_mean中的训练数据集的路径和保存的均值文件的路径文件名，然后执行</p>
+<pre><code>./make_db_mean.<span class="keyword">sh</span>
+</code></pre><h2 id="模型参数调整">模型参数调整</h2><p>选择一个模型，这里选择GoogleNet，将models/bvlc_googlenet中的<code>solver.prototxt</code>和<code>train_val.prototxt</code>复制到新文件夹下。</p>
 <h3 id="train_val-prototxt文件">train_val.prototxt文件</h3><ul>
 <li>修改输入layer中的TRAIN source和TEST中的source到自己的数据库路径</li>
 <li>同时注意一下其中的<code>batch_size</code>参数，决定每次迭代送多少图片去训练</li>
@@ -405,12 +414,14 @@ make runtest -j8
 <li>snapshot_prefix是保存的模型文件名</li>
 <li>solver_mode是用GPU还是CPU<br>其他参数都是模型参数学习的相关参数，决定了模型的初始值和收敛速度，暂时先不调节</li>
 </ul>
-<h2 id="训练">训练</h2><p>简单，执行<br>    ../build/tools/caffe train –solver=solver.prototxt<br>看到了terminal不停的喷log了，那酸爽，记得看一下log中的test结果，可以看到top-1/top-5的验证结果。</p>
+<h2 id="训练">训练</h2><p>简单，执行</p>
+<pre><code>../build/tools/caffe train --<span class="keyword">solver</span><span class="built_in">=</span><span class="keyword">solver</span>.prototxt
+</code></pre><p>看到了terminal不停的喷log了，那酸爽，记得看一下log中的test结果，可以看到top-1/top-5的验证结果。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cielgbqfg0000bsfhqhuqx8u6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cielghi2a0000vwfhz726t7fc" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -491,7 +502,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cielgbqh7000kbsfhevhf02pd" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cielghi41000kvwfhv64shexr" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -605,7 +616,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cielgbqgr0005bsfh27076f8f" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cielghi3l0005vwfhk8daqoar" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -665,7 +676,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cielgbqgr000dbsfhiydt9i5n" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cielghi3l000dvwfholtfifoz" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -726,7 +737,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cielgbqgr000absfhtnugza5n" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cielghi3l000avwfh851cpbw4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -773,7 +784,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="cielgbqh7000gbsfhi1htoc9u" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="cielghi3l000gvwfh6szqbj7n" class="article-share-link">Share</a>
       
       
     </footer>
