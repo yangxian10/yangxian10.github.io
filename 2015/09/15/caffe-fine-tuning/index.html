@@ -3,21 +3,21 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Hello World | 杨现的个人博客</title>
+  <title>fine-tuning已有模型到新数据 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick">
+  <meta name="description" content="概述最近试了一个新的数据集，由于每一类别训练数据较少，算法无法收敛。于是尝试使用fine-tuning，利用已有训练模型权重参数适应到新的数据集。
+由于我们新的分类器与之前的分类器都采用googLeNet的框架，只是在最后一层由3000个类别增加到60000类，所以需要更改最后一层的参数，把原来的loss3/classifier层改成新名字loss3/classifier/fn，这样由于在原来的模">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://yoursite.com/2015/03/17/hello-world/index.html">
+<meta property="og:title" content="fine-tuning已有模型到新数据">
+<meta property="og:url" content="http://yoursite.com/2015/09/15/caffe-fine-tuning/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick">
-<meta property="og:updated_time" content="2015-03-16T05:49:48.000Z">
+<meta property="og:description" content="概述最近试了一个新的数据集，由于每一类别训练数据较少，算法无法收敛。于是尝试使用fine-tuning，利用已有训练模型权重参数适应到新的数据集。
+由于我们新的分类器与之前的分类器都采用googLeNet的框架，只是在最后一层由3000个类别增加到60000类，所以需要更改最后一层的参数，把原来的loss3/classifier层改成新名字loss3/classifier/fn，这样由于在原来的模">
+<meta property="og:updated_time" content="2015-09-15T14:11:39.023Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hello World">
-<meta name="twitter:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick">
+<meta name="twitter:title" content="fine-tuning已有模型到新数据">
+<meta name="twitter:description" content="概述最近试了一个新的数据集，由于每一类别训练数据较少，算法无法收敛。于是尝试使用fine-tuning，利用已有训练模型权重参数适应到新的数据集。
+由于我们新的分类器与之前的分类器都采用googLeNet的框架，只是在最后一层由3000个类别增加到60000类，所以需要更改最后一层的参数，把原来的loss3/classifier层改成新名字loss3/classifier/fn，这样由于在原来的模">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -67,12 +67,16 @@ Quick">
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-caffe-fine-tuning" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2015/03/17/hello-world/" class="article-date">
-  <time datetime="2015-03-17T13:31:09.205Z" itemprop="datePublished">2015-03-17</time>
+    <a href="/2015/09/15/caffe-fine-tuning/" class="article-date">
+  <time datetime="2015-09-15T14:10:22.000Z" itemprop="datePublished">2015-09-15</time>
 </a>
     
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
   </div>
   <div class="article-inner">
     
@@ -81,7 +85,7 @@ Quick">
         
   
     <h1 class="article-title" itemprop="name">
-      Hello World
+      fine-tuning已有模型到新数据
     </h1>
   
 
@@ -89,37 +93,50 @@ Quick">
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>Welcome to <a href="http://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="http://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="http://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick_Start">Quick Start</h2><h3 id="Create_a_new_post">Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run_server">Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate_static_files">Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy_to_remote_sites">Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
-
+        <h2 id="概述">概述</h2><p>最近试了一个新的数据集，由于每一类别训练数据较少，算法无法收敛。于是尝试使用fine-tuning，利用已有训练模型权重参数适应到新的数据集。</p>
+<p>由于我们新的分类器与之前的分类器都采用googLeNet的框架，只是在最后一层由3000个类别增加到60000类，所以需要更改最后一层的参数，把原来的<code>loss3/classifier</code>层改成新名字<code>loss3/classifier/fn</code>，这样由于在原来的模型中找不到这层的名字，这层在训练的时候会用随机变量赋初始值重新训练。</p>
+<p>由于原来模型已经收敛，在fine-tuning时候要把<code>base_lr</code>更新学习率降低，同时增加<code>blobs_lr</code>在新的层上，让其他层的参数在新数据来的时候慢点更新，同时让新的层快速学习。同时<code>stepsize</code>参数也适当减少，从而让学习率下降的更快一些。</p>
+<h2 id="具体步骤">具体步骤</h2><h3 id="数据准备">数据准备</h3><p>这个没啥好说的，将新的训练数据分为train和valuation集，然后转换成lmdb格式，然后得到其均值文件，准备完毕。</p>
+<h3 id="train_val-prototxt">train_val.prototxt</h3><ul>
+<li>data-layer里的train和test均值文件和训练数据源要设置正确</li>
+<li>loss1/classifier-layer层的name改为<code>loss1/classifier/fn</code>，top参数<code>loss1/classifier/fn</code>，lr_mult参数乘10倍，又原来的1和2改为10和20，num_output改为60000</li>
+<li>loss1/loss的softmax层的bottom参数改为<code>loss1/classifier/fn</code></li>
+<li>loss1/top-1的accuracy层的bottom参数改为<code>loss1/classifier/fn</code></li>
+<li>loss1/top-5的accuracy层的bottom参数改为<code>loss1/classifier/fn</code></li>
+<li>上述4个步骤的参数修改同时也要应用到loss2和loss3层中</li>
+</ul>
+<h3 id="solver-prototxt">solver.prototxt</h3><ul>
+<li>将<code>test_initialization</code>这句屏蔽掉</li>
+<li>gamma改为0.1</li>
+<li>weight_decay改为0.0005</li>
+<li>base_lr参数降低10倍，改为0.001，这个改动最为重要</li>
+</ul>
+<h3 id="deploy-prototxt">deploy.prototxt</h3><ul>
+<li>loss3/classifier-layer层的name改为<code>loss1/classifier/fn</code>，top参数<code>loss1/classifier/fn</code>，lr_mult参数乘10倍，又原来的1和2改为10和20，num_output改为60000</li>
+<li>loss3/loss的softmax层的bottom参数改为<code>loss1/classifier/fn</code></li>
+<li>prob的accuracy层的bottom参数改为<code>loss1/classifier/fn</code></li>
+</ul>
+<h3 id="调用接口">调用接口</h3><pre><code>../../build/tools/caffe train --solver=solver<span class="class">.prototxt</span> -weights sku3081_googlenet_quick_iter_900000<span class="class">.caffemodel</span> -gpu <span class="number">2</span>
+</code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="cielfuogp000gqofhb577qo0w" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cielfuoh4000qqofhibrh9wl7" class="article-share-link">Share</a>
       
       
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
+
     </footer>
   </div>
   
     
 <nav id="article-nav">
   
-    <a href="/2015/03/23/五险一金/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          五险一金
-        
-      </div>
-    </a>
   
+    <a href="/2015/08/23/caffe-interface/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">caffe学习（四）caffe的接口参数说明</div>
+    </a>
   
 </nav>
 
