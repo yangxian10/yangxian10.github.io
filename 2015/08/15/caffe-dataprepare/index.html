@@ -6,18 +6,18 @@
   <title>caffe学习（二）用自己的数据训练模型 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="数据准备整理、去重将图片文件按照类别放入不同的文件夹下面，同时去掉相同文件夹下的相同图片
-打tag将图片数据按8:1:1的比例分成train，val，test三个子集，并产生“文件路径 标签”的标签数据，如下123../data/train_img/104166241/143088862023832744.jpg 0../data/train_img/104166241/1430888620238">
+打tag将图片数据按8:1:1的比例分成train，val，test三个子集，并产生“文件路径 标签”的标签数据，如下    ../data/train_img/104166241/143088862023832744.jpg 0    ../data/train_img/104166241/14308886">
 <meta property="og:type" content="article">
 <meta property="og:title" content="caffe学习（二）用自己的数据训练模型">
 <meta property="og:url" content="http://yoursite.com/2015/08/15/caffe-dataprepare/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
 <meta property="og:description" content="数据准备整理、去重将图片文件按照类别放入不同的文件夹下面，同时去掉相同文件夹下的相同图片
-打tag将图片数据按8:1:1的比例分成train，val，test三个子集，并产生“文件路径 标签”的标签数据，如下123../data/train_img/104166241/143088862023832744.jpg 0../data/train_img/104166241/1430888620238">
-<meta property="og:updated_time" content="2015-08-15T00:26:12.031Z">
+打tag将图片数据按8:1:1的比例分成train，val，test三个子集，并产生“文件路径 标签”的标签数据，如下    ../data/train_img/104166241/143088862023832744.jpg 0    ../data/train_img/104166241/14308886">
+<meta property="og:updated_time" content="2015-09-15T14:25:10.078Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="caffe学习（二）用自己的数据训练模型">
 <meta name="twitter:description" content="数据准备整理、去重将图片文件按照类别放入不同的文件夹下面，同时去掉相同文件夹下的相同图片
-打tag将图片数据按8:1:1的比例分成train，val，test三个子集，并产生“文件路径 标签”的标签数据，如下123../data/train_img/104166241/143088862023832744.jpg 0../data/train_img/104166241/1430888620238">
+打tag将图片数据按8:1:1的比例分成train，val，test三个子集，并产生“文件路径 标签”的标签数据，如下    ../data/train_img/104166241/143088862023832744.jpg 0    ../data/train_img/104166241/14308886">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -94,15 +94,19 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h2 id="数据准备">数据准备</h2><h3 id="整理、去重">整理、去重</h3><p>将图片文件按照类别放入不同的文件夹下面，同时去掉相同文件夹下的相同图片</p>
-<h3 id="打tag">打tag</h3><p>将图片数据按8:1:1的比例分成train，val，test三个子集，并产生“文件路径 标签”的标签数据，如下<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">../data/train_img/<span class="number">104166241</span>/<span class="number">143088862023832744.</span>jpg <span class="number">0</span></span><br><span class="line">../data/train_img/<span class="number">104166241</span>/<span class="number">143088862023832435.</span>jpg <span class="number">0</span></span><br><span class="line">../data/train_img/<span class="number">121391188</span>/<span class="number">142096822616212389.</span>jpg <span class="number">1</span></span><br></pre></td></tr></table></figure></p>
-<h3 id="生成lmdb数据库文件">生成lmdb数据库文件</h3><p>copy一份examples/imagenet/create_imagenet.sh文件并修改其中EXAMPLE、DATA、TOOLS、TRAIN_DATA_ROOT、VAL_DATA_ROOT的对应路径，并且修改RESIZE=true，因为我们的训练图片要归一化到256*256，我的修改如下<br><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="setting">EXAMPLE=<span class="value">.</span></span></span><br><span class="line"><span class="setting">DATA=<span class="value">.</span></span></span><br><span class="line"><span class="setting">TOOLS=<span class="value">../build/tools</span></span></span><br><span class="line"></span><br><span class="line"><span class="setting">TRAIN_DATA_ROOT=<span class="value">./</span></span></span><br><span class="line"><span class="setting">VAL_DATA_ROOT=<span class="value">./</span></span></span><br><span class="line"></span><br><span class="line"><span class="setting">RESIZE=<span class="value"><span class="keyword">true</span></span></span></span><br></pre></td></tr></table></figure></p>
-<p>最后把其中的脚本语句中的convert_imageset命令中的标签文件改为自己的文件名(train.txt、val.txt)，然后执行<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ./create_db.sh</span><br></pre></td></tr></table></figure></p>
-<h3 id="生成均值文件">生成均值文件</h3><p>copy一份examples/imagenet/make_imagenet_mean.sh文件并修改其中的EXAMPLE、DATA、TOOLS路径位置，以及命令compute_image_mean中的训练数据集的路径和保存的均值文件的路径文件名，然后执行<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ./make_db_mean.sh</span><br></pre></td></tr></table></figure></p>
-<h2 id="模型参数调整">模型参数调整</h2><p>选择一个模型，这里选择GoogleNet，将models/bvlc_googlenet中的solver.prototxt和train_val.prototxt复制到新文件夹下。</p>
+<h3 id="打tag">打tag</h3><p>将图片数据按8:1:1的比例分成train，val，test三个子集，并产生“文件路径 标签”的标签数据，如下<br>    ../data/train_img/104166241/143088862023832744.jpg 0<br>    ../data/train_img/104166241/143088862023832435.jpg 0<br>    ../data/train_img/121391188/142096822616212389.jpg 1</p>
+<h3 id="生成lmdb数据库文件">生成lmdb数据库文件</h3><p>copy一份<code>examples/imagenet/create_imagenet.sh</code>文件并修改其中EXAMPLE、DATA、TOOLS、TRAIN_DATA_ROOT、VAL_DATA_ROOT的对应路径，并且修改<code>RESIZE=true</code>，因为我们的训练图片要归一化到256*256，我的修改如下<br>    EXAMPLE=.<br>    DATA=.<br>    TOOLS=../build/tools</p>
+<pre><code><span class="setting">TRAIN_DATA_ROOT=<span class="value">./</span></span>
+<span class="setting">VAL_DATA_ROOT=<span class="value">./</span></span>
+
+<span class="setting">RESIZE=<span class="value"><span class="keyword">true</span></span></span>
+</code></pre><p>最后把其中的脚本语句中的convert_imageset命令中的标签文件改为自己的文件名(train.txt、val.txt)，然后执行<br>    ./create_db.sh</p>
+<h3 id="生成均值文件">生成均值文件</h3><p>copy一份<code>examples/imagenet/make_imagenet_mean.sh</code>文件并修改其中的EXAMPLE、DATA、TOOLS路径位置，以及命令compute_image_mean中的训练数据集的路径和保存的均值文件的路径文件名，然后执行<br>    ./make_db_mean.sh</p>
+<h2 id="模型参数调整">模型参数调整</h2><p>选择一个模型，这里选择GoogleNet，将models/bvlc_googlenet中的<code>solver.prototxt</code>和<code>train_val.prototxt</code>复制到新文件夹下。</p>
 <h3 id="train_val-prototxt文件">train_val.prototxt文件</h3><ul>
 <li>修改输入layer中的TRAIN source和TEST中的source到自己的数据库路径</li>
-<li>同时注意一下其中的batch_size参数，决定每次迭代送多少图片去训练</li>
-<li>googleNet有3个弱分类器，修改3个最终的loss1/classifier层中的num_output为我们样本的实际类别数，imageNet类别为1000</li>
+<li>同时注意一下其中的<code>batch_size</code>参数，决定每次迭代送多少图片去训练</li>
+<li>googleNet有3个弱分类器，修改3个最终的loss1/classifier层中的<code>num_output</code>为我们样本的实际类别数，imageNet类别为1000</li>
 </ul>
 <h3 id="solver-prototxt文件">solver.prototxt文件</h3><ul>
 <li>test_iter按照caffe官方的推荐，应该满足<strong>batch_size * test_iter = val子集的数据数</strong>，比如有1万张验证集图片，batch_size是50，那么test_iter应该设置为200左右。</li>
@@ -113,13 +117,12 @@
 <li>snapshot_prefix是保存的模型文件名</li>
 <li>solver_mode是用GPU还是CPU<br>其他参数都是模型参数学习的相关参数，决定了模型的初始值和收敛速度，暂时先不调节</li>
 </ul>
-<h2 id="训练">训练</h2><p>简单，执行<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../build/tools/caffe train --solver=solver.prototxt</span><br></pre></td></tr></table></figure></p>
-<p>看到了terminal不停的喷log了，那酸爽，记得看一下log中的test结果，可以看到top-1/top-5的验证结果。</p>
+<h2 id="训练">训练</h2><p>简单，执行<br>    ../build/tools/caffe train –solver=solver.prototxt<br>看到了terminal不停的喷log了，那酸爽，记得看一下log中的test结果，可以看到top-1/top-5的验证结果。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cielg7muj0000xgfh0rd5m6xr" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cielgbqfg0000bsfhqhuqx8u6" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
