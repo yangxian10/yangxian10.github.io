@@ -17,7 +17,7 @@ dns配置google之，不多介绍，注意centos 7的dns设置与之前的版本
 开发环境虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料http://caffe.berkeleyvision.org/installation.html，配置之前先查看一下自己的软硬件环境
 dns配置google之，不多介绍，注意centos 7的dns设置与之前的版本不同
 查看显卡我们的显卡是K40（没显卡也能玩caffe）">
-<meta property="og:updated_time" content="2015-09-14T13:56:28.243Z">
+<meta property="og:updated_time" content="2015-09-15T14:21:56.343Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="caffe学习（三）caffe + centOS 7 + CUDA 7配置">
 <meta name="twitter:description" content="这次全程记录centOS 7 的配置安装过程
@@ -102,12 +102,10 @@ dns配置google之，不多介绍，注意centos 7的dns设置与之前的版本
         <p>这次全程记录centOS 7 的配置安装过程</p>
 <h2 id="开发环境">开发环境</h2><p>虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料<a href="http://caffe.berkeleyvision.org/installation.html" target="_blank" rel="external">http://caffe.berkeleyvision.org/installation.html</a>，配置之前先查看一下自己的软硬件环境</p>
 <h3 id="dns配置">dns配置</h3><p>google之，不多介绍，注意centos 7的dns设置与之前的版本不同</p>
-<h3 id="查看显卡">查看显卡</h3><p>我们的显卡是K40（没显卡也能玩caffe）,可以看到是4个k40m显卡。。。。我口水直流(<em>@ο@</em>)<br><code>&lt;!-- lang:bash--&gt;
-    lspci |grep -i nvidia</code></p>
-<h3 id="查看linux版本">查看linux版本</h3><p>Linux服务器版本是centOS 7，查看服务器系统版本命令<br><code>&lt;!-- lang:bash--&gt;
-    cat /etc/redhat-release</code></p>
+<h3 id="查看显卡">查看显卡</h3><p>我们的显卡是K40（没显卡也能玩caffe）,可以看到是4个k40m显卡。。。。我口水直流(<em>@ο@</em>)<br>    lspci |grep -i nvidia</p>
+<h3 id="查看linux版本">查看linux版本</h3><p>Linux服务器版本是centOS 7，查看服务器系统版本命令<br>    cat /etc/redhat-release</p>
 <h3 id="安装python">安装python</h3><p>python2.7升级到Anaconda版本<a href="https://3230d63b5fc54e62148e-c95ac804525aac4b6dba79b00b39d1d3.ssl.cf1.rackcdn.com/Anaconda-2.3.0-Linux-x86_64.sh" target="_blank" rel="external">Anaconda-2.3.0-Linux-x86_64.sh</a>下载后直接运行即可，numpy,scipy,scikit-learn等相关软件就都配置好了。记得生效一下环境变量<code>source ~/.bashrc</code>。Anaconda直接把python升级到2.7版本，同时安装好了所有相关依赖包，简直完美啊，解决了python多版本共存的问题，同时一键安装python和相关插件，并且配置好了相关环境变量，同时还是64位版本的python，强烈推荐。</p>
-<h3 id="安装cmake">安装cmake</h3><p>再把cmake升级到2.8.12版本，centos 7 的yum只能升级到2.8.11版本<br><!-- lang:bash--></p>
+<h3 id="安装cmake">安装cmake</h3><p>再把cmake升级到2.8.12版本，centos 7 的yum只能升级到2.8.11版本</p>
 <pre><code> <span class="preprocessor"># 先安装依赖</span>
 yum install gcc
 yum install gcc-g++
@@ -147,7 +145,7 @@ export <span class="constant">LD_LIBRARY_PATH</span>=<span class="variable">$LD_
 <span class="comment"># 或者直接把/opt/intel/mkl/lib copy到/usr/local/lib</span>
 <span class="comment">############[close profile]</span>
 source /etc/profile
-</code></pre><h2 id="依赖库安装">依赖库安装</h2><h3 id="Install_protobuf">Install protobuf</h3><p>protobuf是谷歌开发的一种实现内存外存交换的协议接口，在这个统一的通讯协议下不同开发者可以使用自己喜欢的方式进行模型参数的管理。<br>上网下载protobuf2.6.1版本, anaconda的python对应的依赖包要求protobuf是2.6.1版本，弄错了是不行的。<br>解压后，<br>    yum install autoconf automake libtool<br>    tar xzvf protobuf-2.6.1.tar.gz<br>    cd protobuf-2.6.1<br>    ./autogen.sh<br>    ./configure<br>    make<br>    make check<br>    make install<br>或者直接<code>pip install protobuf</code>，发现版本刚好也是2.6.1</p>
+</code></pre><h2 id="依赖库安装">依赖库安装</h2><h3 id="Install_protobuf">Install protobuf</h3><p>protobuf是谷歌开发的一种实现内存外存交换的协议接口，在这个统一的通讯协议下不同开发者可以使用自己喜欢的方式进行模型参数的管理。<br>上网下载protobuf2.6.1版本, anaconda的python对应的依赖包要求protobuf是2.6.1版本，弄错了是不行的。解压后，<br>    yum install autoconf automake libtool<br>    tar xzvf protobuf-2.6.1.tar.gz<br>    cd protobuf-2.6.1<br>    ./autogen.sh<br>    ./configure<br>    make<br>    make check<br>    make install<br>或者直接<code>pip install protobuf</code>，发现版本刚好也是2.6.1</p>
 <h3 id="Install_boost">Install boost</h3><p>anaconda没有包含boost，anaconda要求的boost版本为1.57</p>
 <pre><code># download <span class="keyword">boost_1_57_0.tar.bz2
 </span><span class="label">tar</span> xvf <span class="keyword">boost_1_57_0.tar.bz2
@@ -169,7 +167,7 @@ export <span class="constant">LD_LIBRARY_PATH</span>=<span class="variable">$LD_
 <span class="comment"># 或者直接把/opt/hdf5/lib copy到/usr/local/lib</span>
 <span class="comment">############[close profile]</span>
 source /etc/profile
-</code></pre><p>其他依赖库按照官网说法，先试了一遍<br>    yum install snappy-devel opencv-devel boost-devel<br>    yum install python-devel<br>    yum install protobuf-devel leveldb-devel hdf5-devel # 这几个包不行<br>    yum install gflags-devel glog-devel lmdb-devel # 这几个包也不行<br>关于gflags, glog, lmdb的解决方案，官网给出了</p>
+</code></pre><h3 id="其他依赖库">其他依赖库</h3><p>其他依赖库按照官网说法，先试了一遍<br>    yum install snappy-devel opencv-devel boost-devel<br>    yum install python-devel<br>    yum install protobuf-devel leveldb-devel hdf5-devel # 这几个包不行<br>    yum install gflags-devel glog-devel lmdb-devel # 这几个包也不行<br>关于gflags, glog, lmdb的解决方案，官网给出了</p>
 <pre><code># glog
 wget http<span class="variable">s:</span>//google-glog.googlecode.<span class="keyword">com</span>/<span class="keyword">files</span>/glog-<span class="number">0.3</span>.<span class="number">3</span>.tar.gz
 tar zxvf glog-<span class="number">0.3</span>.<span class="number">3</span>.tar.gz
@@ -215,7 +213,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cielfuogp000hqofhvaamc8y6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cielg7mw9000hxgfhlj69hdlj" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -293,7 +291,7 @@ make runtest -j8
       <ul>
         
           <li>
-            <a href="/2015/09/15/caffe-fine-tuning/">fine-tuning已有模型到新数据</a>
+            <a href="/2015/09/15/caffe-fine-tuning/">caffe学习（五）fine-tuning已有模型到新数据</a>
           </li>
         
           <li>

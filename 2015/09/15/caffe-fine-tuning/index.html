@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   
-  <title>fine-tuning已有模型到新数据 | 杨现的个人博客</title>
+  <title>caffe学习（五）fine-tuning已有模型到新数据 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="概述最近试了一个新的数据集，由于每一类别训练数据较少，算法无法收敛。于是尝试使用fine-tuning，利用已有训练模型权重参数适应到新的数据集。
 由于我们新的分类器与之前的分类器都采用googLeNet的框架，只是在最后一层由3000个类别增加到60000类，所以需要更改最后一层的参数，把原来的loss3/classifier层改成新名字loss3/classifier/fn，这样由于在原来的模">
 <meta property="og:type" content="article">
-<meta property="og:title" content="fine-tuning已有模型到新数据">
+<meta property="og:title" content="caffe学习（五）fine-tuning已有模型到新数据">
 <meta property="og:url" content="http://yoursite.com/2015/09/15/caffe-fine-tuning/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
 <meta property="og:description" content="概述最近试了一个新的数据集，由于每一类别训练数据较少，算法无法收敛。于是尝试使用fine-tuning，利用已有训练模型权重参数适应到新的数据集。
 由于我们新的分类器与之前的分类器都采用googLeNet的框架，只是在最后一层由3000个类别增加到60000类，所以需要更改最后一层的参数，把原来的loss3/classifier层改成新名字loss3/classifier/fn，这样由于在原来的模">
-<meta property="og:updated_time" content="2015-09-15T14:11:39.023Z">
+<meta property="og:updated_time" content="2015-09-15T14:14:44.765Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="fine-tuning已有模型到新数据">
+<meta name="twitter:title" content="caffe学习（五）fine-tuning已有模型到新数据">
 <meta name="twitter:description" content="概述最近试了一个新的数据集，由于每一类别训练数据较少，算法无法收敛。于是尝试使用fine-tuning，利用已有训练模型权重参数适应到新的数据集。
 由于我们新的分类器与之前的分类器都采用googLeNet的框架，只是在最后一层由3000个类别增加到60000类，所以需要更改最后一层的参数，把原来的loss3/classifier层改成新名字loss3/classifier/fn，这样由于在原来的模">
   
@@ -85,7 +85,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      fine-tuning已有模型到新数据
+      caffe学习（五）fine-tuning已有模型到新数据
     </h1>
   
 
@@ -99,7 +99,7 @@
 <h2 id="具体步骤">具体步骤</h2><h3 id="数据准备">数据准备</h3><p>这个没啥好说的，将新的训练数据分为train和valuation集，然后转换成lmdb格式，然后得到其均值文件，准备完毕。</p>
 <h3 id="train_val-prototxt">train_val.prototxt</h3><ul>
 <li>data-layer里的train和test均值文件和训练数据源要设置正确</li>
-<li>loss1/classifier-layer层的name改为<code>loss1/classifier/fn</code>，top参数<code>loss1/classifier/fn</code>，lr_mult参数乘10倍，又原来的1和2改为10和20，num_output改为60000</li>
+<li>loss1/classifier-layer层的name改为<code>loss1/classifier/fn</code>，top参数<code>loss1/classifier/fn</code>，lr_mult参数乘10倍，由原来的1和2改为10和20，num_output改为60000</li>
 <li>loss1/loss的softmax层的bottom参数改为<code>loss1/classifier/fn</code></li>
 <li>loss1/top-1的accuracy层的bottom参数改为<code>loss1/classifier/fn</code></li>
 <li>loss1/top-5的accuracy层的bottom参数改为<code>loss1/classifier/fn</code></li>
@@ -112,7 +112,7 @@
 <li>base_lr参数降低10倍，改为0.001，这个改动最为重要</li>
 </ul>
 <h3 id="deploy-prototxt">deploy.prototxt</h3><ul>
-<li>loss3/classifier-layer层的name改为<code>loss1/classifier/fn</code>，top参数<code>loss1/classifier/fn</code>，lr_mult参数乘10倍，又原来的1和2改为10和20，num_output改为60000</li>
+<li>loss3/classifier-layer层的name改为<code>loss1/classifier/fn</code>，top参数<code>loss1/classifier/fn</code>，lr_mult参数乘10倍，由原来的1和2改为10和20，num_output改为60000</li>
 <li>loss3/loss的softmax层的bottom参数改为<code>loss1/classifier/fn</code></li>
 <li>prob的accuracy层的bottom参数改为<code>loss1/classifier/fn</code></li>
 </ul>
@@ -121,7 +121,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cielfuoh4000qqofhibrh9wl7" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cielg7mwp000qxgfht84aj3f4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -190,7 +190,7 @@
       <ul>
         
           <li>
-            <a href="/2015/09/15/caffe-fine-tuning/">fine-tuning已有模型到新数据</a>
+            <a href="/2015/09/15/caffe-fine-tuning/">caffe学习（五）fine-tuning已有模型到新数据</a>
           </li>
         
           <li>
