@@ -119,7 +119,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cielh2c57000q8ofhppasb6sv" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="ciemuok40000qvsfhe1a4ysvq" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -191,7 +191,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cielh2c4r000n8ofhz2esgih4" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="ciemuok40000nvsfh0uevnn1f" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -238,7 +238,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
 <pre><code>cat <span class="regexp">/etc/</span>redhat-release
 </code></pre><h3 id="安装python">安装python</h3><p>python2.7升级到Anaconda版本<a href="https://3230d63b5fc54e62148e-c95ac804525aac4b6dba79b00b39d1d3.ssl.cf1.rackcdn.com/Anaconda-2.3.0-Linux-x86_64.sh" target="_blank" rel="external">Anaconda-2.3.0-Linux-x86_64.sh</a>下载后直接运行即可，numpy,scipy,scikit-learn等相关软件就都配置好了。记得生效一下环境变量<code>source ~/.bashrc</code>。Anaconda直接把python升级到2.7版本，同时安装好了所有相关依赖包，简直完美啊，解决了python多版本共存的问题，同时一键安装python和相关插件，并且配置好了相关环境变量，同时还是64位版本的python，强烈推荐。</p>
 <h3 id="安装cmake">安装cmake</h3><p>再把cmake升级到2.8.12版本，centos 7 的yum只能升级到2.8.11版本</p>
-<pre><code> <span class="preprocessor"># 先安装依赖</span>
+<pre><code><span class="preprocessor"># 先安装依赖</span>
 yum install gcc
 yum install gcc-g++
 <span class="preprocessor"># 下载安装包</span>
@@ -403,12 +403,12 @@ make runtest -j8
 </code></pre><p>python环境下</p>
 <pre><code><span class="preprocessor"><span class="keyword">import</span> caffe</span>
 </code></pre><p>检测caffe-python是否配置好</p>
-<p>###cuDNN<br>cuDNN加速模块也没有安装测试一下，有空再配置一下。</p>
+<h3 id="cuDNN">cuDNN</h3><p>cuDNN加速模块也没有安装测试一下，有空再配置一下。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cielh2c4r000h8ofhlz76j82z" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="ciemuok3k000hvsfhhabkgpew" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -486,7 +486,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cielh2c3100008ofhup1srp4s" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="ciemuok2p0000vsfhyufy261v" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -529,7 +529,7 @@ make runtest -j8
 <ul>
 <li><strong>显卡K20c</strong>（没显卡也能玩caffe）</li>
 <li><strong>Linux服务器版本centOS6.5</strong>（版本有点低，这有点坑，系统自带的python是2.6版本，cmake是2.6版本，这都给安装带来了不便，由于是服务器没得选，只能硬着头皮上了，而且网上多是基于Ubuntu系统的配置，所以更要把安装过程记录一下）</li>
-<li><p><strong>python升级到2.7版本，再把cmake升级到2.8版本</strong>，我都是下载的源代码安装的，要注意的是安装好之后还要将原来版本移除掉并<strong>链接到新版本</strong></p>
+<li><p><strong>python升级到2.7版本，再把cmake升级到2.8版本</strong>，我都是下载的源代码安装的，要注意的是安装好之后还要将原来版本移除掉并<strong>链接到新版本</strong>，如下</p>
 <p>  mv /usr/bin/python /usr/bin/python_old<br>  ln -s  /usr/local/bin/python2.7 /usr/bin/python</p>
 </li>
 <li><p><strong>安装numpy1.9.2版本</strong>，也是官网源代码</p>
@@ -568,9 +568,7 @@ sudo make <span class="keyword">install</span></span>
 </code></pre><p>从输出结果看到，test集上得到99.2%的正确率，还是很不错的。</p>
 <h2 id="其他说明">其他说明</h2><h3 id="pycaffe配置">pycaffe配置</h3><ul>
 <li><p>由于我这里python没配置好，所以make pycaffe没能通过，有待解决。<br>解决方案，下载<a href="https://3230d63b5fc54e62148e-c95ac804525aac4b6dba79b00b39d1d3.ssl.cf1.rackcdn.com/Anaconda-2.3.0-Linux-x86_64.sh" target="_blank" rel="external">Anaconda-2.3.0-Linux-x86_64.sh</a>，下载后运行，<br>直接把python升级到2.7版本，同时安装好了所有相关依赖包，简直完美啊，，解决了python2.6和2.7共存的问题，同时一键安装python和相关插件，并且配置好了相关环境变量，同时还是64位版本的python，强烈推荐。<br>修改Makefile.config中和python相关内容</p>
-<p>  PYTHON_INCLUDE := /root/anaconda/include/python2.7 \</p>
-<pre><code>/root/anaconda/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">numpy</span>/<span class="title">core</span>/<span class="title">include</span>/ \</span>
-</code></pre><p>  PYTHON_LIB := /root/anaconda/pkgs/python-2.7.10-0/lib<br>  INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include<br>  LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib</p>
+<p>  PYTHON_INCLUDE := /root/anaconda/include/python2.7 /root/anaconda/lib/python2.7/site-packages/numpy/core/include/<br>  PYTHON_LIB := /root/anaconda/pkgs/python-2.7.10-0/lib<br>  INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include<br>  LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib</p>
 </li>
 </ul>
 <p>执行</p>
@@ -612,7 +610,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cielh2c4r000k8ofhe0ot49tg" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="ciemuok40000kvsfhdd8c2lqs" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -726,7 +724,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cielh2c4c00058ofha084wlot" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="ciemuok350005vsfhp9ek7kas" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -786,7 +784,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cielh2c4r000d8ofhmtivy0b3" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="ciemuok3k000dvsfhq48iro3j" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -847,7 +845,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cielh2c4c000a8ofhb3qtayev" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="ciemuok3k000avsfhzbrk7h00" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -894,7 +892,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="cielh2c4r000g8ofhsglj93pj" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="ciemuok3k000gvsfhtxnvk67z" class="article-share-link">Share</a>
       
       
     </footer>

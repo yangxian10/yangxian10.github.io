@@ -13,7 +13,7 @@
 <meta property="og:site_name" content="杨现的个人博客">
 <meta property="og:description" content="caffe应该是当下最火的深度学习开源框架了，其性能强大，每天可以处理60M的图片（K40显卡），测试一张图片只要1ms，而且其模块都已经定义好，不需要写什么代码就能轻松调用，虽然是c++开发的却能很好的支持python，简直不能更赞。
 开发环境虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料http://caffe.berkeleyvision.org/installat">
-<meta property="og:updated_time" content="2015-09-15T14:45:52.652Z">
+<meta property="og:updated_time" content="2015-09-16T13:54:23.999Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="caffe学习（一）caffe + centOS 6.5 + CUDA 6.5配置">
 <meta name="twitter:description" content="caffe应该是当下最火的深度学习开源框架了，其性能强大，每天可以处理60M的图片（K40显卡），测试一张图片只要1ms，而且其模块都已经定义好，不需要写什么代码就能轻松调用，虽然是c++开发的却能很好的支持python，简直不能更赞。
@@ -98,7 +98,7 @@
 <ul>
 <li><strong>显卡K20c</strong>（没显卡也能玩caffe）</li>
 <li><strong>Linux服务器版本centOS6.5</strong>（版本有点低，这有点坑，系统自带的python是2.6版本，cmake是2.6版本，这都给安装带来了不便，由于是服务器没得选，只能硬着头皮上了，而且网上多是基于Ubuntu系统的配置，所以更要把安装过程记录一下）</li>
-<li><p><strong>python升级到2.7版本，再把cmake升级到2.8版本</strong>，我都是下载的源代码安装的，要注意的是安装好之后还要将原来版本移除掉并<strong>链接到新版本</strong></p>
+<li><p><strong>python升级到2.7版本，再把cmake升级到2.8版本</strong>，我都是下载的源代码安装的，要注意的是安装好之后还要将原来版本移除掉并<strong>链接到新版本</strong>，如下</p>
 <p>  mv /usr/bin/python /usr/bin/python_old<br>  ln -s  /usr/local/bin/python2.7 /usr/bin/python</p>
 </li>
 <li><p><strong>安装numpy1.9.2版本</strong>，也是官网源代码</p>
@@ -137,9 +137,7 @@ sudo make <span class="keyword">install</span></span>
 </code></pre><p>从输出结果看到，test集上得到99.2%的正确率，还是很不错的。</p>
 <h2 id="其他说明">其他说明</h2><h3 id="pycaffe配置">pycaffe配置</h3><ul>
 <li><p>由于我这里python没配置好，所以make pycaffe没能通过，有待解决。<br>解决方案，下载<a href="https://3230d63b5fc54e62148e-c95ac804525aac4b6dba79b00b39d1d3.ssl.cf1.rackcdn.com/Anaconda-2.3.0-Linux-x86_64.sh" target="_blank" rel="external">Anaconda-2.3.0-Linux-x86_64.sh</a>，下载后运行，<br>直接把python升级到2.7版本，同时安装好了所有相关依赖包，简直完美啊，，解决了python2.6和2.7共存的问题，同时一键安装python和相关插件，并且配置好了相关环境变量，同时还是64位版本的python，强烈推荐。<br>修改Makefile.config中和python相关内容</p>
-<p>  PYTHON_INCLUDE := /root/anaconda/include/python2.7 \</p>
-<pre><code>/root/anaconda/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">numpy</span>/<span class="title">core</span>/<span class="title">include</span>/ \</span>
-</code></pre><p>  PYTHON_LIB := /root/anaconda/pkgs/python-2.7.10-0/lib<br>  INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include<br>  LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib</p>
+<p>  PYTHON_INCLUDE := /root/anaconda/include/python2.7 /root/anaconda/lib/python2.7/site-packages/numpy/core/include/<br>  PYTHON_LIB := /root/anaconda/pkgs/python-2.7.10-0/lib<br>  INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include<br>  LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib</p>
 </li>
 </ul>
 <p>执行</p>
@@ -181,7 +179,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cielh2c4r000k8ofhe0ot49tg" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="ciemuok40000kvsfhdd8c2lqs" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
