@@ -3,17 +3,21 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2015 | 杨现的个人博客</title>
+  <title>mxnet学习（一） mxnet + CentOS 7安装配置 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="迭代的是人，递归的是神">
-<meta property="og:type" content="website">
-<meta property="og:title" content="杨现的个人博客">
-<meta property="og:url" content="http://yoursite.com/archives/2015/index.html">
+  <meta name="description" content="mxnet是最近DMLC那群牛人搞的一个开源的深度学习库，可以看作是cxxnet的升级版本，其中到底的美妙还是慢慢专研感受，话不多说，先跑起来看看。整个学习系列都是参考http://mxnet.readthedocs.org/en/latest/index.html学习完成的。
+相关开发环境的配置系统的检测以及python的安装都是基本的，主要依赖软件是CUDA、intel mkl以及OpenCV">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mxnet学习（一） mxnet + CentOS 7安装配置">
+<meta property="og:url" content="http://yoursite.com/2015/10/09/mxnet-install/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="迭代的是人，递归的是神">
+<meta property="og:description" content="mxnet是最近DMLC那群牛人搞的一个开源的深度学习库，可以看作是cxxnet的升级版本，其中到底的美妙还是慢慢专研感受，话不多说，先跑起来看看。整个学习系列都是参考http://mxnet.readthedocs.org/en/latest/index.html学习完成的。
+相关开发环境的配置系统的检测以及python的安装都是基本的，主要依赖软件是CUDA、intel mkl以及OpenCV">
+<meta property="og:updated_time" content="2015-10-09T13:32:07.239Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="杨现的个人博客">
-<meta name="twitter:description" content="迭代的是人，递归的是神">
+<meta name="twitter:title" content="mxnet学习（一） mxnet + CentOS 7安装配置">
+<meta name="twitter:description" content="mxnet是最近DMLC那群牛人搞的一个开源的深度学习库，可以看作是cxxnet的升级版本，其中到底的美妙还是慢慢专研感受，话不多说，先跑起来看看。整个学习系列都是参考http://mxnet.readthedocs.org/en/latest/index.html学习完成的。
+相关开发环境的配置系统的检测以及python的安装都是基本的，主要依赖软件是CUDA、intel mkl以及OpenCV">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -63,210 +67,76 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2015" class="archive-year">2015</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/10/09/mxnet-install/" class="archive-article-date">
-  <time datetime="2015-10-09T13:13:36.000Z" itemprop="datePublished">10月 9</time>
+        <section id="main"><article id="post-mxnet-install" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/10/09/mxnet-install/" class="article-date">
+  <time datetime="2015-10-09T13:13:36.000Z" itemprop="datePublished">2015-10-09</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/10/09/mxnet-install/">mxnet学习（一） mxnet + CentOS 7安装配置</a>
+    <h1 class="article-title" itemprop="name">
+      mxnet学习（一） mxnet + CentOS 7安装配置
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/09/15/caffe-fine-tuning/" class="archive-article-date">
-  <time datetime="2015-09-15T14:10:22.000Z" itemprop="datePublished">9月 15</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/09/15/caffe-fine-tuning/">caffe学习（五）fine-tuning已有模型到新数据</a>
-    </h1>
-  
+        <p>mxnet是最近DMLC那群牛人搞的一个开源的深度学习库，可以看作是cxxnet的升级版本，其中到底的美妙还是慢慢专研感受，话不多说，先跑起来看看。整个学习系列都是参考<a href="http://mxnet.readthedocs.org/en/latest/index.html" target="_blank" rel="external">http://mxnet.readthedocs.org/en/latest/index.html</a>学习完成的。</p>
+<h2 id="相关开发环境的配置">相关开发环境的配置</h2><p>系统的检测以及python的安装都是基本的，主要依赖软件是CUDA、intel mkl以及OpenCV的安装配置，具体可以参考之前写的<a href="http://yangxian10.github.io/2015/08/18/caffe-setup2/" target="_blank" rel="external">caffe学习（三）caffe + centOS 7 + CUDA 7配置</a>，已经写的很详细了，这里就不再多言。mxnet不像caffe那样依赖众多的google的工具库，这一点还是必须点赞的（caffe安装坑太多了）</p>
+<h2 id="安装mxnet">安装mxnet</h2><pre><code>git clone --recursive http<span class="variable">s:</span>//github.<span class="keyword">com</span>/dmlc/mxnet
+<span class="keyword">cd</span> mxnet/<span class="keyword">make</span>
+<span class="keyword">cp</span> config.<span class="keyword">mk</span> config.<span class="keyword">mk</span>.bak
+<span class="keyword">vim</span> config.<span class="keyword">mk</span>
+################# <span class="keyword">open</span>[config.<span class="keyword">mk</span>]
+USE_CUDA = <span class="number">1</span>
+USE_CUDA_PATH = /usr/local/cuda
+USE_BLAS = mkl
+USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
+################# <span class="keyword">close</span>[config.<span class="keyword">mk</span>]
+<span class="keyword">cd</span> ..
+<span class="keyword">make</span> -j4
+<span class="keyword">cd</span> <span class="keyword">python</span>
+<span class="keyword">python</span> setup.<span class="keyword">py</span> install
+<span class="keyword">cd</span> ..
+</code></pre><p>测试mxnet是否安装ok<br>    python example/mnist/mlp.py</p>
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/08/23/caffe-interface/" class="archive-article-date">
-  <time datetime="2015-08-23T12:28:12.000Z" itemprop="datePublished">8月 23</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/08/23/caffe-interface/">caffe学习（四）caffe的接口参数说明</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/08/18/caffe-setup2/" class="archive-article-date">
-  <time datetime="2015-08-18T15:22:33.000Z" itemprop="datePublished">8月 18</time>
-</a>
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cifjp05pj000gfcfhjaosrfe1" class="article-share-link">Share</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/08/18/caffe-setup2/">caffe学习（三）caffe + centOS 7 + CUDA 7配置</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/08/15/caffe-dataprepare/" class="archive-article-date">
-  <time datetime="2015-08-15T00:12:16.000Z" itemprop="datePublished">8月 15</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/08/15/caffe-dataprepare/">caffe学习（二）用自己的数据训练模型</a>
-    </h1>
-  
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mxnet/">mxnet</a></li></ul>
 
-    </header>
+    </footer>
   </div>
-</article>
   
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/08/01/caffe-setup/" class="archive-article-date">
-  <time datetime="2015-08-01T10:56:27.000Z" itemprop="datePublished">8月 1</time>
-</a>
-      
+<nav id="article-nav">
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/08/01/caffe-setup/">caffe学习（一）caffe + centOS 6.5 + CUDA 6.5配置</a>
-    </h1>
   
+    <a href="/2015/09/15/caffe-fine-tuning/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">caffe学习（五）fine-tuning已有模型到新数据</div>
+    </a>
+  
+</nav>
 
-    </header>
-  </div>
+  
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/04/12/单反拍摄入门/" class="archive-article-date">
-  <time datetime="2015-04-12T13:06:30.000Z" itemprop="datePublished">4月 12</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/12/单反拍摄入门/">单反拍摄入门</a>
-    </h1>
-  
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/04/04/三万元搞定两室两厅装修攻略/" class="archive-article-date">
-  <time datetime="2015-04-04T00:37:28.000Z" itemprop="datePublished">4月 4</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/04/三万元搞定两室两厅装修攻略/">三万元搞定两室两厅装修攻略</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/03/23/五险一金/" class="archive-article-date">
-  <time datetime="2015-03-23T13:31:36.000Z" itemprop="datePublished">3月 23</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/03/23/五险一金/">五险一金</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/03/17/hello-world/" class="archive-article-date">
-  <time datetime="2015-03-17T13:31:09.205Z" itemprop="datePublished">3月 17</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/03/17/hello-world/">Hello World</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
 </section>
         
           <aside id="sidebar">

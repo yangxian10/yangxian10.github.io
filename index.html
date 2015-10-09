@@ -65,6 +65,66 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-mxnet-install" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/10/09/mxnet-install/" class="article-date">
+  <time datetime="2015-10-09T13:13:36.000Z" itemprop="datePublished">2015-10-09</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/10/09/mxnet-install/">mxnet学习（一） mxnet + CentOS 7安装配置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>mxnet是最近DMLC那群牛人搞的一个开源的深度学习库，可以看作是cxxnet的升级版本，其中到底的美妙还是慢慢专研感受，话不多说，先跑起来看看。整个学习系列都是参考<a href="http://mxnet.readthedocs.org/en/latest/index.html" target="_blank" rel="external">http://mxnet.readthedocs.org/en/latest/index.html</a>学习完成的。</p>
+<h2 id="相关开发环境的配置">相关开发环境的配置</h2><p>系统的检测以及python的安装都是基本的，主要依赖软件是CUDA、intel mkl以及OpenCV的安装配置，具体可以参考之前写的<a href="http://yangxian10.github.io/2015/08/18/caffe-setup2/" target="_blank" rel="external">caffe学习（三）caffe + centOS 7 + CUDA 7配置</a>，已经写的很详细了，这里就不再多言。mxnet不像caffe那样依赖众多的google的工具库，这一点还是必须点赞的（caffe安装坑太多了）</p>
+<h2 id="安装mxnet">安装mxnet</h2><pre><code>git clone --recursive http<span class="variable">s:</span>//github.<span class="keyword">com</span>/dmlc/mxnet
+<span class="keyword">cd</span> mxnet/<span class="keyword">make</span>
+<span class="keyword">cp</span> config.<span class="keyword">mk</span> config.<span class="keyword">mk</span>.bak
+<span class="keyword">vim</span> config.<span class="keyword">mk</span>
+################# <span class="keyword">open</span>[config.<span class="keyword">mk</span>]
+USE_CUDA = <span class="number">1</span>
+USE_CUDA_PATH = /usr/local/cuda
+USE_BLAS = mkl
+USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
+################# <span class="keyword">close</span>[config.<span class="keyword">mk</span>]
+<span class="keyword">cd</span> ..
+<span class="keyword">make</span> -j4
+<span class="keyword">cd</span> <span class="keyword">python</span>
+<span class="keyword">python</span> setup.<span class="keyword">py</span> install
+<span class="keyword">cd</span> ..
+</code></pre><p>测试mxnet是否安装ok<br>    python example/mnist/mlp.py</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cifjp05pj000gfcfhjaosrfe1" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mxnet/">mxnet</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-caffe-fine-tuning" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2015/09/15/caffe-fine-tuning/" class="article-date">
@@ -111,15 +171,14 @@
 </ul>
 <h3 id="deploy-prototxt">deploy.prototxt</h3><ul>
 <li>loss3/classifier-layer层的name改为<code>loss1/classifier/fn</code>，top参数<code>loss1/classifier/fn</code>，lr_mult参数乘10倍，由原来的1和2改为10和20，num_output改为60000</li>
-<li>loss3/loss的softmax层的bottom参数改为<code>loss1/classifier/fn</code></li>
-<li>prob的accuracy层的bottom参数改为<code>loss1/classifier/fn</code></li>
+<li>prob的softmax层的bottom参数改为<code>loss1/classifier/fn</code></li>
 </ul>
 <h3 id="调用接口">调用接口</h3><pre><code>../../build/tools/caffe train --solver=solver<span class="class">.prototxt</span> -weights sku3081_googlenet_quick_iter_900000<span class="class">.caffemodel</span> -gpu <span class="number">2</span>
 </code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="ciemuok40000qvsfhe1a4ysvq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cifjp05py000ufcfhenxlkr81" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -191,7 +250,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="ciemuok40000nvsfh0uevnn1f" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cifjp05py000rfcfh7gfjvmjn" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -408,7 +467,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="ciemuok3k000hvsfhhabkgpew" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cifjp05pj000lfcfhfu5qwq4h" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -486,7 +545,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="ciemuok2p0000vsfhyufy261v" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cifjp05on0000fcfhb6ur6gwx" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -610,7 +669,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="ciemuok40000kvsfhdd8c2lqs" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cifjp05pj000ofcfh9lnlrpar" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -724,7 +783,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="ciemuok350005vsfhp9ek7kas" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cifjp05p30005fcfhnybjdatg" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -784,7 +843,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="ciemuok3k000dvsfhq48iro3j" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cifjp05p3000dfcfhtvlgeyol" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -845,7 +904,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="ciemuok3k000avsfhzbrk7h00" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cifjp05p3000afcfh6mrld0dg" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -892,7 +951,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="ciemuok3k000gvsfhtxnvk67z" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="cifjp05pj000kfcfhxvfhhw0p" class="article-share-link">Share</a>
       
       
     </footer>
@@ -911,7 +970,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">5</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">6</span></li></ul>
     </div>
   </div>
 
@@ -920,7 +979,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
     </div>
   </div>
 
@@ -929,7 +988,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/生活/" style="font-size: 10px;">生活</a>
+      <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
     </div>
   </div>
 
@@ -938,7 +997,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -948,6 +1007,10 @@ ldconfig
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2015/10/09/mxnet-install/">mxnet学习（一） mxnet + CentOS 7安装配置</a>
+          </li>
         
           <li>
             <a href="/2015/09/15/caffe-fine-tuning/">caffe学习（五）fine-tuning已有模型到新数据</a>
@@ -963,10 +1026,6 @@ ldconfig
         
           <li>
             <a href="/2015/08/15/caffe-dataprepare/">caffe学习（二）用自己的数据训练模型</a>
-          </li>
-        
-          <li>
-            <a href="/2015/08/01/caffe-setup/">caffe学习（一）caffe + centOS 6.5 + CUDA 6.5配置</a>
           </li>
         
       </ul>
