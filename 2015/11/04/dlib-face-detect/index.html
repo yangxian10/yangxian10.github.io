@@ -13,7 +13,7 @@ dlib安装在windows下我的环境是vs2013和cmake3.2，cmake版本低了会�
 <meta property="og:site_name" content="杨现的个人博客">
 <meta property="og:description" content="dlib的人脸检测模块要比OpenCV的效果好一些，归功于其使用的是HOG特征。
 dlib安装在windows下我的环境是vs2013和cmake3.2，cmake版本低了会导致编译失败。下载dlib的zip包，然后解压，然后执行如下，就把c++和python的配置好了。注意其中的CMakeLists.txt文件中的OpenCV宏与新版本的OpenCV不相配，需要改成OpenCV REQUIRED">
-<meta property="og:updated_time" content="2015-11-04T14:05:09.471Z">
+<meta property="og:updated_time" content="2015-11-04T14:08:41.086Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="基于dlib的人脸检测">
 <meta name="twitter:description" content="dlib的人脸检测模块要比OpenCV的效果好一些，归功于其使用的是HOG特征。
@@ -148,7 +148,7 @@ detector = dlib.get_frontal_face_detector()
 <pre><code><span class="tag">python</span> <span class="tag">face_detector</span><span class="class">.py</span> *<span class="class">.jpg</span>
 </code></pre><h2 id="补充">补充</h2><p>C++环境也是一样的，执行<code>cmake build</code>后在<code>examples/build</code>目录下生成可执行文件<code>face_detection_ex</code>，执行</p>
 <pre><code><span class="title">face_detection_ex</span> ../faces/<span class="regexp">*.jpg</span>
-</code></pre><p>注意C++接口要想得到矩形框对应的置信度的话也是可以的，也可以根据置信度设置矩形框筛选的阈值，默认阈值为0，下面为两种接口的函数声明：</p>
+</code></pre><p>注意<strong>C++接口要想得到矩形框对应的置信度的话也是可以的，也可以根据置信度设置矩形框筛选的阈值，默认阈值为0</strong>，下面为两种接口的函数声明：</p>
 <pre><code><span class="keyword">template</span> &lt;
     <span class="keyword">typename</span> image_type
     &gt;

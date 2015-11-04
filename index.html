@@ -146,7 +146,7 @@ detector = dlib.get_frontal_face_detector()
 <pre><code><span class="tag">python</span> <span class="tag">face_detector</span><span class="class">.py</span> *<span class="class">.jpg</span>
 </code></pre><h2 id="补充">补充</h2><p>C++环境也是一样的，执行<code>cmake build</code>后在<code>examples/build</code>目录下生成可执行文件<code>face_detection_ex</code>，执行</p>
 <pre><code><span class="title">face_detection_ex</span> ../faces/<span class="regexp">*.jpg</span>
-</code></pre><p>注意C++接口要想得到矩形框对应的置信度的话也是可以的，也可以根据置信度设置矩形框筛选的阈值，默认阈值为0，下面为两种接口的函数声明：</p>
+</code></pre><p>注意<strong>C++接口要想得到矩形框对应的置信度的话也是可以的，也可以根据置信度设置矩形框筛选的阈值，默认阈值为0</strong>，下面为两种接口的函数声明：</p>
 <pre><code><span class="keyword">template</span> &lt;
     <span class="keyword">typename</span> image_type
     &gt;
