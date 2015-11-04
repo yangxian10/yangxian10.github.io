@@ -92,8 +92,10 @@
     <div class="article-entry" itemprop="articleBody">
       
         <p>dlib的人脸检测模块要比OpenCV的效果好一些，归功于其使用的是HOG特征。</p>
-<h2 id="dlib安装">dlib安装</h2><p>在windows下我的环境是vs2013和cmake3.2，cmake版本低了会导致编译失败。下载dlib的zip包，然后解压，然后执行如下，就把c++和python的配置好了。注意其中的CMakeLists.txt文件中的OpenCV宏与新版本的OpenCV不相配，需要改成OpenCV REQUIRED，否则<code>webcam_face_pose_ex</code>这个与摄像头有关的模块不会执行成功。<br>    cd examples<br>    vim CMakeLists.txt</p>
-<pre><code><span class="comment">######</span><span class="comment">######</span><span class="comment">######</span><span class="comment">####[open CMakeList.txt]
+<h2 id="dlib安装">dlib安装</h2><p>在windows下我的环境是vs2013和cmake3.2，cmake版本低了会导致编译失败。下载dlib的zip包，然后解压，然后执行如下，就把c++和python的配置好了。注意其中的CMakeLists.txt文件中的OpenCV宏与新版本的OpenCV不相配，需要改成OpenCV REQUIRED，否则<code>webcam_face_pose_ex</code>这个与摄像头有关的模块不会执行成功。</p>
+<pre><code>cd examples
+vim CMakeLists.txt
+<span class="comment">######</span><span class="comment">######</span><span class="comment">######</span><span class="comment">####[open CMakeList.txt]
 # find_package(OpenCV) --&gt;
 find_package(OpenCV REQUIRED)
 ###</span><span class="comment">######</span><span class="comment">######</span><span class="comment">######</span><span class="comment">#[close CMakeList.txt]</span>
@@ -103,10 +105,11 @@ cmake .. -DUSE_AVX_INSTRUCTIONS=ON
 cmake --build . --config Release
 cd ..<span class="regexp">/../</span>
 python setup.py install --<span class="literal">yes</span> USE_AVX_INSTRUCTIONS <span class="comment"># AVX为object detector的加速开关</span>
-</code></pre><h2 id="人脸检测demo">人脸检测demo</h2><p>在<code>exmaples/faces</code>文件夹下面新建文件<code>face_detector.py</code>，根据官网例程添加代码：<br>    import sys</p>
-<pre><code>import dlib
-from skimage import io
+</code></pre><h2 id="人脸检测demo">人脸检测demo</h2><p>在<code>exmaples/faces</code>文件夹下面新建文件<code>face_detector.py</code>，根据官网例程添加代码：</p>
+<pre><code>import sys
 
+import dlib
+from skimage import io
 
 detector = dlib.get_frontal_face_detector()
 <span class="keyword">win</span> = dlib.image_window()
@@ -139,9 +142,20 @@ detector = dlib.get_frontal_face_detector()
     <span class="keyword">for</span> i, <span class="keyword">d</span> <span class="keyword">in</span> enumerate(dets):
         <span class="keyword">print</span>(<span class="string">"Detection {}, score: {}, face_type:{}"</span>.<span class="keyword">format</span>(
             <span class="keyword">d</span>, scores[i], idx[i]))
-</code></pre><p>然后执行如下命令即可看到人脸检测效果：<br>    python face_detector.py *.jpg</p>
-<h2 id="补充">补充</h2><p>C++环境也是一样的，执行<code>cmake build</code>后在<code>examples/build</code>目录下生成可执行文件<code>face_detection_ex</code>，执行<br>    face_detection_ex ../faces/*.jpg<br>注意C++接口要想得到矩形框对应的置信度的话也是可以的，也可以根据置信度设置矩形框筛选的阈值，默认阈值为0，下面为两种接口的函数声明：<br>    template &lt;<br>        typename image_type<br>        &gt;<br>    std::vector<rectangle> operator() (<br>        const image_type&amp; img,<br>        double adjust_threshold = 0<br>    );</rectangle></p>
+</code></pre><p>然后执行如下命令即可看到人脸检测效果：</p>
+<pre><code><span class="tag">python</span> <span class="tag">face_detector</span><span class="class">.py</span> *<span class="class">.jpg</span>
+</code></pre><h2 id="补充">补充</h2><p>C++环境也是一样的，执行<code>cmake build</code>后在<code>examples/build</code>目录下生成可执行文件<code>face_detection_ex</code>，执行</p>
+<pre><code><span class="title">face_detection_ex</span> ../faces/<span class="regexp">*.jpg</span>
+</code></pre><p>注意C++接口要想得到矩形框对应的置信度的话也是可以的，也可以根据置信度设置矩形框筛选的阈值，默认阈值为0，下面为两种接口的函数声明：</p>
 <pre><code><span class="keyword">template</span> &lt;
+    <span class="keyword">typename</span> image_type
+    &gt;
+<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;rectangle&gt; <span class="keyword">operator</span>() (
+    <span class="keyword">const</span> image_type&amp; img,
+    <span class="keyword">double</span> adjust_threshold = <span class="number">0</span>
+);
+
+<span class="keyword">template</span> &lt;
     <span class="keyword">typename</span> image_type
     &gt;
 <span class="function"><span class="keyword">void</span> <span class="title">operator</span><span class="params">()</span> <span class="params">(
@@ -149,12 +163,13 @@ detector = dlib.get_frontal_face_detector()
     <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::pair&lt;<span class="keyword">double</span>, rectangle&gt; &gt;&amp; final_dets,
     <span class="keyword">double</span> adjust_threshold = <span class="number">0</span>
 )</span></span>;
-</code></pre><h2 id="dlib的人脸关键点检测">dlib的人脸关键点检测</h2><p>下载文件<a href="http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2" target="_blank" rel="external">http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2</a>解压后将<code>shape_predictor_68_face_landmarks.dat</code>放到<code>examples/build</code>目录，执行<br>    webcam_face_pose_ex shape_predictor_68_face_landmarks.dat</p>
-
+</code></pre><h2 id="dlib的人脸关键点检测">dlib的人脸关键点检测</h2><p>下载文件<a href="http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2" target="_blank" rel="external">http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2</a>解压后将<code>shape_predictor_68_face_landmarks.dat</code>放到<code>examples/build</code>目录，执行</p>
+<pre><code><span class="tag">webcam_face_pose_ex</span> <span class="tag">shape_predictor_68_face_landmarks</span><span class="class">.dat</span>
+</code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cigkvccev000l9cfhfu9eawdq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cigkvh974000lt0fhw8e8xa2i" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/face-dlib/">face dlib</a></li></ul>
@@ -215,7 +230,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cigkvccef000g9cfhigquisfb" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cigkvh974000gt0fhw7k8bxh2" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mxnet/">mxnet</a></li></ul>
@@ -280,7 +295,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cigkvccfb000z9cfhe519ybu8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cigkvh97z000zt0fh5xhfzpbl" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -352,7 +367,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cigkvccev000w9cfho3x13iyq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cigkvh97k000wt0fhyifroazn" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -569,7 +584,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cigkvccev000q9cfhjdjv0zqq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cigkvh97k000qt0fh420iosfe" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -647,7 +662,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cigkvcccp00009cfh8h6cxoaf" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cigkvh94y0000t0fh1b9ihgoe" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -771,7 +786,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cigkvccev000t9cfhdiibctca" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cigkvh97k000tt0fhq2c90rie" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -885,7 +900,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cigkvcce000059cfh14s30z86" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cigkvh96o0005t0fha6ev25y4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -945,7 +960,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cigkvccef000d9cfhxp1zk4zt" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cigkvh974000dt0fh0ud86ed5" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -1006,7 +1021,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cigkvccef000a9cfhermysx88" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cigkvh974000at0fhalsv8kjf" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
