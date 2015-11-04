@@ -65,6 +65,107 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-dlib-face-detect" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/11/04/dlib-face-detect/" class="article-date">
+  <time datetime="2015-11-04T13:53:46.000Z" itemprop="datePublished">2015-11-04</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Computer-Vision/">Computer Vision</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/11/04/dlib-face-detect/">基于dlib的人脸检测</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>dlib的人脸检测模块要比OpenCV的效果好一些，归功于其使用的是HOG特征。</p>
+<h2 id="dlib安装">dlib安装</h2><p>在windows下我的环境是vs2013和cmake3.2，cmake版本低了会导致编译失败。下载dlib的zip包，然后解压，然后执行如下，就把c++和python的配置好了。注意其中的CMakeLists.txt文件中的OpenCV宏与新版本的OpenCV不相配，需要改成OpenCV REQUIRED，否则<code>webcam_face_pose_ex</code>这个与摄像头有关的模块不会执行成功。<br>    cd examples<br>    vim CMakeLists.txt</p>
+<pre><code><span class="comment">######</span><span class="comment">######</span><span class="comment">######</span><span class="comment">####[open CMakeList.txt]
+# find_package(OpenCV) --&gt;
+find_package(OpenCV REQUIRED)
+###</span><span class="comment">######</span><span class="comment">######</span><span class="comment">######</span><span class="comment">#[close CMakeList.txt]</span>
+mkdir build
+cd build
+cmake .. -DUSE_AVX_INSTRUCTIONS=ON
+cmake --build . --config Release
+cd ..<span class="regexp">/../</span>
+python setup.py install --<span class="literal">yes</span> USE_AVX_INSTRUCTIONS <span class="comment"># AVX为object detector的加速开关</span>
+</code></pre><h2 id="人脸检测demo">人脸检测demo</h2><p>在<code>exmaples/faces</code>文件夹下面新建文件<code>face_detector.py</code>，根据官网例程添加代码：<br>    import sys</p>
+<pre><code>import dlib
+from skimage import io
+
+
+detector = dlib.get_frontal_face_detector()
+<span class="keyword">win</span> = dlib.image_window()
+
+<span class="keyword">for</span> f <span class="keyword">in</span> sys.argv[1:]:
+    <span class="keyword">print</span>(<span class="string">"Processing file: {}"</span>.<span class="keyword">format</span>(f))
+    img = io.imread(f)
+    # The 1 <span class="keyword">in</span> the second argument indicates that we should upsample the image
+    # 1 time.  This will make everything bigger and allow <span class="keyword">us</span> to detect <span class="keyword">more</span>
+    # faces.
+    dets = detector(img, 1)
+    <span class="keyword">print</span>(<span class="string">"Number of faces detected: {}"</span>.<span class="keyword">format</span>(len(dets)))
+    <span class="keyword">for</span> i, <span class="keyword">d</span> <span class="keyword">in</span> enumerate(dets):
+        <span class="keyword">print</span>(<span class="string">"Detection {}: Left: {} Top: {} Right: {} Bottom: {}"</span>.<span class="keyword">format</span>(
+            i, <span class="keyword">d</span>.left(), <span class="keyword">d</span>.top(), <span class="keyword">d</span>.right(), <span class="keyword">d</span>.bottom()))
+
+    <span class="keyword">win</span>.clear_overlay()
+    <span class="keyword">win</span>.set_image(img)
+    <span class="keyword">win</span>.add_overlay(dets)
+    dlib.hit_enter_to_continue()
+
+
+# Finally, <span class="keyword">if</span> you really want to you can ask the detector to tell you the <span class="keyword">score</span>
+# <span class="keyword">for</span> each detection.  The <span class="keyword">score</span> is bigger <span class="keyword">for</span> <span class="keyword">more</span> confident detections.
+# Also, the idx tells you <span class="keyword">which</span> of the face sub-detectors matched.  This can be
+# used to broadly identify faces <span class="keyword">in</span> different orientations.
+<span class="keyword">if</span> (len(sys.argv[1:]) &gt; 0):
+    img = io.imread(sys.argv[1])
+    dets, scores, idx = detector.<span class="keyword">run</span>(img, 1)
+    <span class="keyword">for</span> i, <span class="keyword">d</span> <span class="keyword">in</span> enumerate(dets):
+        <span class="keyword">print</span>(<span class="string">"Detection {}, score: {}, face_type:{}"</span>.<span class="keyword">format</span>(
+            <span class="keyword">d</span>, scores[i], idx[i]))
+</code></pre><p>然后执行如下命令即可看到人脸检测效果：<br>    python face_detector.py *.jpg</p>
+<h2 id="补充">补充</h2><p>C++环境也是一样的，执行<code>cmake build</code>后在<code>examples/build</code>目录下生成可执行文件<code>face_detection_ex</code>，执行<br>    face_detection_ex ../faces/*.jpg<br>注意C++接口要想得到矩形框对应的置信度的话也是可以的，也可以根据置信度设置矩形框筛选的阈值，默认阈值为0，下面为两种接口的函数声明：<br>    template &lt;<br>        typename image_type<br>        &gt;<br>    std::vector<rectangle> operator() (<br>        const image_type&amp; img,<br>        double adjust_threshold = 0<br>    );</rectangle></p>
+<pre><code><span class="keyword">template</span> &lt;
+    <span class="keyword">typename</span> image_type
+    &gt;
+<span class="function"><span class="keyword">void</span> <span class="title">operator</span><span class="params">()</span> <span class="params">(
+    <span class="keyword">const</span> image_type&amp; img,
+    <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::pair&lt;<span class="keyword">double</span>, rectangle&gt; &gt;&amp; final_dets,
+    <span class="keyword">double</span> adjust_threshold = <span class="number">0</span>
+)</span></span>;
+</code></pre><h2 id="dlib的人脸关键点检测">dlib的人脸关键点检测</h2><p>下载文件<a href="http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2" target="_blank" rel="external">http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2</a>解压后将<code>shape_predictor_68_face_landmarks.dat</code>放到<code>examples/build</code>目录，执行<br>    webcam_face_pose_ex shape_predictor_68_face_landmarks.dat</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cigkvccev000l9cfhfu9eawdq" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/face-dlib/">face dlib</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-mxnet-install" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2015/10/09/mxnet-install/" class="article-date">
@@ -114,7 +215,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cifjq1bo3000gqsfhdwr8i5bs" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cigkvccef000g9cfhigquisfb" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mxnet/">mxnet</a></li></ul>
@@ -179,7 +280,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cifjq1boj000uqsfhs76bivsb" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cigkvccfb000z9cfhe519ybu8" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -251,7 +352,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cifjq1boj000rqsfhg21e5bak" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cigkvccev000w9cfho3x13iyq" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -468,7 +569,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cifjq1bo3000lqsfhk9l7qcp3" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cigkvccev000q9cfhjdjv0zqq" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -546,7 +647,7 @@ make runtest -j8
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cifjq1bmt0000qsfhw2iu11eq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cigkvcccp00009cfh8h6cxoaf" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -670,7 +771,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cifjq1boj000oqsfhzuu159uz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cigkvccev000t9cfhdiibctca" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -784,7 +885,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cifjq1bno0005qsfho9ic4w6w" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cigkvcce000059cfh14s30z86" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -844,7 +945,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cifjq1bo3000dqsfhyrscklon" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cigkvccef000d9cfhxp1zk4zt" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -905,7 +1006,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cifjq1bo3000aqsfhz68rg1r6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cigkvccef000a9cfhermysx88" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -917,51 +1018,10 @@ ldconfig
 
 
   
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/03/17/hello-world/" class="article-date">
-  <time datetime="2015-03-17T13:31:09.205Z" itemprop="datePublished">2015-03-17</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/17/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a href="http://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="http://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="http://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick_Start">Quick Start</h2><h3 id="Create_a_new_post">Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run_server">Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate_static_files">Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy_to_remote_sites">Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="http://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="cifjq1bo3000kqsfh061qasq2" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
+    <nav id="page-nav">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    </nav>
   
 </section>
         
@@ -971,7 +1031,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">6</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">6</span></li></ul>
     </div>
   </div>
 
@@ -980,7 +1040,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face-dlib/">face dlib</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
     </div>
   </div>
 
@@ -989,7 +1049,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
+      <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/face-dlib/" style="font-size: 10px;">face dlib</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
     </div>
   </div>
 
@@ -998,7 +1058,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -1008,6 +1068,10 @@ ldconfig
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2015/11/04/dlib-face-detect/">基于dlib的人脸检测</a>
+          </li>
         
           <li>
             <a href="/2015/10/09/mxnet-install/">mxnet学习（一） mxnet + CentOS 7安装配置</a>
@@ -1023,10 +1087,6 @@ ldconfig
         
           <li>
             <a href="/2015/08/18/caffe-setup2/">caffe学习（三）caffe + centOS 7 + CUDA 7配置</a>
-          </li>
-        
-          <li>
-            <a href="/2015/08/15/caffe-dataprepare/">caffe学习（二）用自己的数据训练模型</a>
           </li>
         
       </ul>
