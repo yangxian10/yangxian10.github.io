@@ -17,7 +17,7 @@ dns配置google之，不多介绍，注意centos 7的dns设置与之前的版本
 开发环境虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料http://caffe.berkeleyvision.org/installation.html，配置之前先查看一下自己的软硬件环境
 dns配置google之，不多介绍，注意centos 7的dns设置与之前的版本不同
 查看显卡我们的显卡是K40（没显卡也能玩caffe）">
-<meta property="og:updated_time" content="2015-09-16T13:51:48.309Z">
+<meta property="og:updated_time" content="2015-12-06T02:16:00.913Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="caffe学习（三）caffe + centOS 7 + CUDA 7配置">
 <meta name="twitter:description" content="这次全程记录centOS 7 的配置安装过程
@@ -273,12 +273,16 @@ make runtest -j8
 </code></pre><p>python环境下</p>
 <pre><code><span class="preprocessor"><span class="keyword">import</span> caffe</span>
 </code></pre><p>检测caffe-python是否配置好</p>
-<h3 id="cuDNN">cuDNN</h3><p>cuDNN加速模块也没有安装测试一下，有空再配置一下。</p>
+<h3 id="cuDNN">cuDNN</h3><pre><code>tar xzvf cudnn-<span class="number">7.0</span>-linux-x64-v3.<span class="number">0</span>-rc.tgz
+cd cuda
+cp <span class="keyword">include</span>/* <span class="regexp">/usr/local</span><span class="regexp">/cuda/include</span>
+cp -d lib64/* <span class="regexp">/usr/local</span><span class="regexp">/cuda/lib</span>64        <span class="comment"># -d 保留link file的属性</span>
+</code></pre><p>在caffe根目录的<code>Makefile.config</code>中把<code>USE_CUDNN := 1</code>的屏蔽取消，然后<code>make all</code>即可。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cih4t09vm000ugkfhlquu17e2" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cihtworrq000u2gfhtdbw0hou" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -317,7 +321,7 @@ make runtest -j8
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">6</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">7</span></li></ul>
     </div>
   </div>
 
@@ -326,7 +330,7 @@ make runtest -j8
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
     </div>
   </div>
 
@@ -335,7 +339,7 @@ make runtest -j8
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
+      <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
     </div>
   </div>
 
@@ -344,7 +348,7 @@ make runtest -j8
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -354,6 +358,10 @@ make runtest -j8
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2015/12/06/adusting-parameter/">深度学习调参技巧笔记</a>
+          </li>
         
           <li>
             <a href="/2015/11/05/dataset-cv/">Computer Vision DataSet资源列表</a>
@@ -369,10 +377,6 @@ make runtest -j8
         
           <li>
             <a href="/2015/09/15/caffe-fine-tuning/">caffe学习（五）fine-tuning已有模型到新数据</a>
-          </li>
-        
-          <li>
-            <a href="/2015/08/23/caffe-interface/">caffe学习（四）caffe的接口参数说明</a>
           </li>
         
       </ul>
