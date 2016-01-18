@@ -65,6 +65,90 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-linux-c-skill" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/01/18/linux-c-skill/" class="article-date">
+  <time datetime="2016-01-18T14:07:18.000Z" itemprop="datePublished">2016-01-18</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/study/">study</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/01/18/linux-c-skill/">Linux c/c++ 技巧总结</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="遍历目录内文件">遍历目录内文件</h2><p>Linux下的dirent.h头文件是专门为了获取文件夹目录内容而设计的结构体。使用示例如下：</p>
+<pre><code><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;dirent.h&gt;</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span>
+
+<span class="function"><span class="keyword">void</span> <span class="title">List</span><span class="params">(<span class="keyword">char</span>* path, <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt;&amp; files)</span>
+</span>{
+    <span class="keyword">struct</span> dirent* ent = <span class="literal">NULL</span>;
+    DIR* pDir;
+    <span class="keyword">char</span> dir[<span class="number">512</span>];
+    <span class="keyword">struct</span> stat statbuf;  
+    <span class="keyword">if</span> ( (pDir=opendir(path))==<span class="literal">NULL</span> )
+    {
+    <span class="built_in">fprintf</span>( <span class="built_in">stderr</span>, <span class="string">"Cannot open directory:%s\n"</span>, path );
+        <span class="keyword">return</span>;
+    }
+    <span class="keyword">while</span>( (ent=readdir(pDir)) != <span class="literal">NULL</span> )
+    {
+        <span class="comment">//得到读取文件的绝对路径名</span>
+        <span class="built_in">snprintf</span>(dir, <span class="number">512</span>, <span class="string">"%s/%s"</span>, path, ent-&gt;d_name);   
+        <span class="comment">//得到文件信息</span>
+        lstat(dir, &amp;statbuf);
+        <span class="comment">//判断是目录还是文件</span>
+        <span class="keyword">if</span> ( S_ISDIR(statbuf.st_mode) )
+        {
+            <span class="comment">//排除当前目录和上级目录</span>
+            <span class="keyword">if</span> (<span class="built_in">strcmp</span>(<span class="string">"."</span>,ent-&gt;d_name) == <span class="number">0</span> || <span class="built_in">strcmp</span>( <span class="string">".."</span>,ent-&gt;d_name) == <span class="number">0</span>) 
+                <span class="keyword">continue</span>;
+            <span class="comment">//如果是子目录,递归调用函数本身,实现子目录中文件遍历</span>
+            <span class="built_in">printf</span>( <span class="string">"子目录:%s/\n"</span>, ent-&gt;d_name );
+            <span class="comment">//递归调用,遍历子目录中文件</span>
+            <span class="comment">//List(dir);</span>
+        }
+        <span class="keyword">else</span>
+        {
+            <span class="built_in">printf</span>( <span class="string">"文件:%s\n"</span>, ent-&gt;d_name );
+            files.push_back(pathName.assign(path).append(<span class="string">"/"</span>).append(ent-&gt;d_name));
+        }       
+    }
+    closedir(pDir);
+}
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cijk1rjv8000kekfh1b7mkrg7" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-book-list" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/01/12/book-list/" class="article-date">
@@ -101,7 +185,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cijh51yop001alcfhak3yaz3a" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cijk1rjwj001fekfhtsr57k4a" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/source/">source</a></li></ul>
@@ -144,7 +228,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cijh51ymj0000lcfhsf44dnsx" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cijk1rjq10000ekfhu0lu2hkr" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tricks/">tricks</a></li></ul>
@@ -195,7 +279,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cijh51ynu000qlcfhjpx9jb7r" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cijk1rjvo000vekfhgzjyvlxz" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dataset/">dataset</a></li></ul>
@@ -311,7 +395,7 @@ detector = dlib.get_frontal_face_detector()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cijh51yne000llcfhkq5mcxk1" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cijk1rjvo000qekfh22j0m38x" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/face/">face</a></li></ul>
@@ -372,7 +456,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cijh51yne000glcfhrgtjyc3l" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cijk1rjv8000gekfha85w3x1z" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mxnet/">mxnet</a></li></ul>
@@ -437,7 +521,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cijh51yo90014lcfhxxo9wsz8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cijk1rjw40019ekfhpf24shbx" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -509,7 +593,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cijh51yo90011lcfhczl5scwk" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cijk1rjw40016ekfhg7fo9259" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -730,7 +814,7 @@ cp -d lib64/* <span class="regexp">/usr/local</span><span class="regexp">/cuda/l
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cijh51ynu000ulcfh5s9bkeoy" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cijk1rjvo000zekfhqbvebitf" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -808,131 +892,7 @@ cp -d lib64/* <span class="regexp">/usr/local</span><span class="regexp">/cuda/l
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cijh51yo90017lcfhoe2hjz5f" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-caffe-setup" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/08/01/caffe-setup/" class="article-date">
-  <time datetime="2015-08-01T10:56:27.000Z" itemprop="datePublished">2015-08-01</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/08/01/caffe-setup/">caffe学习（一）caffe + centOS 6.5 + CUDA 6.5配置</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>caffe应该是当下最火的深度学习开源框架了，其性能强大，每天可以处理60M的图片（K40显卡），测试一张图片只要1ms，而且其模块都已经定义好，不需要写什么代码就能轻松调用，虽然是c++开发的却能很好的支持python，简直不能更赞。</p>
-<h2 id="开发环境">开发环境</h2><p>虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料<a href="http://caffe.berkeleyvision.org/installation.html" target="_blank" rel="external">http://caffe.berkeleyvision.org/installation.html</a>，配置之前先介绍一下自己的软硬件环境</p>
-<ul>
-<li><strong>显卡K20c</strong>（没显卡也能玩caffe）</li>
-<li><strong>Linux服务器版本centOS6.5</strong>（版本有点低，这有点坑，系统自带的python是2.6版本，cmake是2.6版本，这都给安装带来了不便，由于是服务器没得选，只能硬着头皮上了，而且网上多是基于Ubuntu系统的配置，所以更要把安装过程记录一下）</li>
-<li><p><strong>python升级到2.7版本，再把cmake升级到2.8版本</strong>，我都是下载的源代码安装的，要注意的是安装好之后还要将原来版本移除掉并<strong>链接到新版本</strong>，如下</p>
-<p>  mv /usr/bin/python /usr/bin/python_old<br>  ln -s  /usr/local/bin/python2.7 /usr/bin/python</p>
-</li>
-<li><p><strong>安装numpy1.9.2版本</strong>，也是官网源代码</p>
-</li>
-</ul>
-<h2 id="安装CUDA和MKL">安装CUDA和MKL</h2><p>我使用的是CUDA 6.5版本，并且通过edu邮箱申请了一个MKL的student版本。这两个都是商业软件，问题比较少，安照网上的资料很容易就配置好了。</p>
-<h2 id="依赖库安装">依赖库安装</h2><p>按照官网说法，先试了一遍</p>
-<pre><code><span class="label">sudo</span> yum install protobuf-devel leveldb-devel snappy-devel opencv-devel <span class="keyword">boost-devel </span>hdf5-devel
-</code></pre><p>但是有几个包是不行的，protobuf-devel, leveldb-devel, hdf5-devel找不到，由于我服务器版本比较低，boost和boost-devel都只有1.41版本，注意要把boost也升级一下。protobuf是谷歌开发的一种实现内存外存交换的协议接口，再这个统一的通讯协议下不同开发者可以使用自己喜欢的方式进行模型参数的管理。</p>
-<p>首先先把protobuf, leveldb, hdf5, boost高级版本的tar包下载下来解压并用make和make install安装起来，然后下载其分别对应的devel的rpm安装，并通过rpm命令安装：</p>
-<pre><code>rpm -<span class="tag">i</span> xxx.rpm
-</code></pre><h2 id="安装OpenCV">安装OpenCV</h2><p>安装了这么多年OpenCV，头一次遇到这么大坑，先尝试了大家推荐的shell一键安装</p>
-<pre><code>git https://github.com/ouxinyu/<span class="operator"><span class="keyword">Install</span>-OpenCV-<span class="keyword">master</span>
-cd <span class="keyword">Install</span>-OpenCV-<span class="keyword">master</span>/RedHat
-./opencv_latest.sh</span>
-</code></pre><p>看上去一切很美，但是执行downloading ippicv_linux_20140513.tgz这个文件的时候就怎么都过不去了，没能解决，于是还是乖乖的安装官网的教程去下载了一个OpenCV 2.4.9的tar解压安装，安装过程也是安装OpenCV官方的教程来的，但是由于要使用其中的GPU模块，原本预想很顺利的安装过程出了error，查了资料发现是OpenCV的bug<a href="http://code.opencv.org/issues/3814" target="_blank" rel="external">http://code.opencv.org/issues/3814</a>，拷贝文件<a href="http://code.opencv.org/projects/opencv/repository/revisions/feb74b125d7923c0bc11054b66863e1e9f753141/raw/modules/gpu/src/nvidia/core/NCVPixelOperations.hpp" target="_blank" rel="external">NCVPixelOperations.hpp</a>替换掉源文件，重新build make，搞定</p>
-<pre><code>cd ~/opencv
-mkdir <span class="operator"><span class="keyword">release</span>
-cd <span class="keyword">release</span>
-cmake -<span class="keyword">D</span> CMAKE_BUILD_TYPE=<span class="keyword">RELEASE</span> -<span class="keyword">D</span> CMAKE_INSTALL_PREFIX=/usr/<span class="keyword">local</span> ..
-
-cd ..
-make
-sudo make <span class="keyword">install</span></span>
-</code></pre><h2 id="安装caffe">安装caffe</h2><p>复制一个配置文件先</p>
-<pre><code><span class="tag">cp</span> <span class="tag">Makefile</span><span class="class">.config</span><span class="class">.example</span> <span class="tag">Makefile</span><span class="class">.config</span>
-</code></pre><p>把里面的CPU_ONLY，BLAS，PYTHON_DIR目录都按照情况配置好，然后执行</p>
-<pre><code><span class="keyword">make</span> <span class="keyword">all</span> -j8
-<span class="keyword">make</span> test -j8
-<span class="keyword">make</span> runtest -j8
-</code></pre><p>-j8选项可以提高编译速度，不是必须的，如果在runtest时候一片绿色，没报错，恭喜，说明caffe已经配置好了，可以愉快的使用了。</p>
-<h2 id="测试MNIST">测试MNIST</h2><p>进入到caffe根目录下，执行如下操作</p>
-<pre><code>./<span class="keyword">data</span>/mnist/get_mnist.sh               <span class="comment"># 下载minst数据库</span>
-./examples/mnist/create_mnist.sh        <span class="comment"># 把数据转成lmdb格式</span>
-./examples/mnist/train_lenet.sh         <span class="comment"># 训练mnist</span>
-</code></pre><p>从输出结果看到，test集上得到99.2%的正确率，还是很不错的。</p>
-<h2 id="其他说明">其他说明</h2><h3 id="pycaffe配置">pycaffe配置</h3><ul>
-<li><p>由于我这里python没配置好，所以make pycaffe没能通过，有待解决。<br>解决方案，下载<a href="https://3230d63b5fc54e62148e-c95ac804525aac4b6dba79b00b39d1d3.ssl.cf1.rackcdn.com/Anaconda-2.3.0-Linux-x86_64.sh" target="_blank" rel="external">Anaconda-2.3.0-Linux-x86_64.sh</a>，下载后运行，<br>直接把python升级到2.7版本，同时安装好了所有相关依赖包，简直完美啊，，解决了python2.6和2.7共存的问题，同时一键安装python和相关插件，并且配置好了相关环境变量，同时还是64位版本的python，强烈推荐。<br>修改Makefile.config中和python相关内容</p>
-<p>  PYTHON_INCLUDE := /root/anaconda/include/python2.7 /root/anaconda/lib/python2.7/site-packages/numpy/core/include/<br>  PYTHON_LIB := /root/anaconda/pkgs/python-2.7.10-0/lib<br>  INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include<br>  LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib</p>
-</li>
-</ul>
-<p>执行</p>
-<pre><code><span class="built_in">make</span> pycaffe
-</code></pre><p>编译成功了，简直酸爽。<br>最后配置一下环境变量</p>
-<pre><code>export PYTHONPATH=/root/caffe_test/caffe/python:<span class="variable">$PYTHONPATH</span>
-</code></pre><p>python环境下</p>
-<pre><code><span class="preprocessor"><span class="keyword">import</span> caffe</span>
-</code></pre><p>报错信息</p>
-<pre><code>from ._caffe import <span class="constant">Net</span>, <span class="constant">SGDSolver</span>
-<span class="constant">ImportError</span><span class="symbol">:</span> /usr/local/<span class="class"><span class="keyword">lib</span>/<span class="title">libboost_python</span>.<span class="title">so</span>.1.58.0: <span class="title">undefined</span> <span class="title">symbol</span>: <span class="title">PyUnicodeUCS2_FromEncodedObject</span></span>
-</code></pre><p>anaconda只差boost没有包含，而是我安装的boost版本1.58跟anaconda要求的1.57版本，重新安装一遍boost 1.57</p>
-<pre><code># download <span class="keyword">boost_1_57_0.tar.bz2
-</span><span class="label">tar</span> xvf <span class="keyword">boost_1_57_0.tar.bz2
-</span><span class="label">cd</span> <span class="keyword">boost_1_57_0
-</span>./<span class="keyword">bootstrap.sh
-</span>./<span class="keyword">b2
-</span>./<span class="keyword">b2 </span>install /usr
-</code></pre><p>记得安装完boost一定要<code>yum install boost-devel</code>一下（血和泪的教训）<br>出现新的错误，说no module name google.portobuf，重新安装protobuf和protobuf-devel并没有解决这个问题，上网上重新下载protobuf2.6.1版本，弄错了是不行的。解压后，</p>
-<pre><code><span class="keyword">.</span>/autogen.sh
-<span class="keyword">.</span>/configure
-make
-make<span class="instruction"> check
-</span>make install
-</code></pre><p>出错loading shared libraries: libprotobuf.so.8: cannot open shared object file: No such file or directory，此时应该是连接出错<br>locate libprotobuf.so.9 看下libprotobuf.so.9的确存在/opt/protobuf/lib下面</p>
-<pre><code><span class="keyword">cd</span> /etc/ld.<span class="keyword">so</span>.<span class="keyword">conf</span>.<span class="keyword">d</span>/
-<span class="keyword">vi</span> protobuf.<span class="keyword">conf</span>   # protobuf.<span class="keyword">conf</span>中只要加入一行： /<span class="keyword">opt</span>/protobuf/lib
-ldconfig
-</code></pre><p>安装protobuf的python模块</p>
-<pre><code><span class="keyword">cd</span> <span class="keyword">python</span>
-<span class="keyword">python</span> setup.<span class="keyword">py</span> build
-<span class="keyword">python</span> setup.<span class="keyword">py</span> test
-<span class="keyword">python</span> setup.<span class="keyword">py</span> install
-</code></pre><p>python setup.py build的过程中可能报几个错，然而没关系，我们并不需要所有的protobuf的模块，配置pycaffe最重要的就是注意anaconda和依赖包版本的对应，boost要求1.57版本，protobuf是2.6.1版本，弄错了是不行的。</p>
-<ul>
-<li>cuDNN的加速模块也没有安装测试一下，有空再配置一下。</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cijh51ynu000ylcfhw16vjia2" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cijk1rjwj001cekfhwbo95iid" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -957,7 +917,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">7</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">7</span></li></ul>
     </div>
   </div>
 
@@ -966,7 +926,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
     </div>
   </div>
 
@@ -975,7 +935,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
+      <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
     </div>
   </div>
 
@@ -984,7 +944,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -994,6 +954,10 @@ ldconfig
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/01/18/linux-c-skill/">Linux c/c++ 技巧总结</a>
+          </li>
         
           <li>
             <a href="/2016/01/12/book-list/">书单</a>
@@ -1009,10 +973,6 @@ ldconfig
         
           <li>
             <a href="/2015/11/04/dlib-face-detect/">基于dlib的人脸检测</a>
-          </li>
-        
-          <li>
-            <a href="/2015/10/09/mxnet-install/">mxnet学习（一） mxnet + CentOS 7安装配置</a>
           </li>
         
       </ul>
