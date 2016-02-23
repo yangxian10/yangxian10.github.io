@@ -65,6 +65,78 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-caffe-interface" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/08/23/caffe-interface/" class="article-date">
+  <time datetime="2015-08-23T12:28:12.000Z" itemprop="datePublished">2015-08-23</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/08/23/caffe-interface/">caffe学习（四）caffe的接口参数说明</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>caffe接口参数</p>
+<h2 id="C接口">C接口</h2><h3 id="train相关参数">train相关参数</h3><ul>
+<li>-solver参数（必须有），与<code>solver.prototxt</code>文件一起使用</li>
+<li>-snapshot参数（可选），通常用来从之前训练一半的模型<code>xxx.solverstate</code>继续训练使用</li>
+<li>-weights参数（选填），与训练好的<code>model.caffemodel</code>一起使用，用来在fine-tuning的时候初始化参数</li>
+<li>-gpu参数，用来选择使用GPU，根据<code>nvidia-smi</code>的GPU的ID选择，比如选择第三块GPU就使用<code>-gpu 2</code>的参数，如果想使用所有的GPU一起跑一个程序，就使用<code>-gpu all</code></li>
+</ul>
+<p>举个例子<br><!-- lang:bash--></p>
+<pre><code># train LeNet
+caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt
+# train on GPU <span class="number">2</span>
+caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt -gpu <span class="number">2</span>
+# resume training <span class="keyword">from</span> the half-way point snapshot
+caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt -snapshot examples<span class="regexp">/mnist/</span>lenet_iter_5000.solverstate
+# fine-tune CaffeNet model weights <span class="keyword">for</span> style recognition
+caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</span>solver.prototxt -weights models<span class="regexp">/bvlc_reference_caffenet/</span>bvlc_reference_caffenet.caffemodel
+</code></pre><h3 id="test、time相关参数">test、time相关参数</h3><ul>
+<li>-iterations迭代次数，time的时候测试的次数，默认为50次</li>
+<li>-model测试时候选择加载的模型，对应<code>train_val.prototxt</code>或者<code>deploy.prototxt</code>一起使用</li>
+</ul>
+<p>举个例子<br><!-- lang:bash--></p>
+<pre><code># score the learned LeNet model on the validation <span class="operator"><span class="keyword">set</span> <span class="keyword">as</span> defined <span class="keyword">in</span> the
+# <span class="keyword">model</span> architeture lenet_train_test.prototxt
+caffe <span class="keyword">test</span> -<span class="keyword">model</span> examples/mnist/lenet_train_test.prototxt -weights examples/mnist/lenet_iter_10000.caffemodel -gpu <span class="number">0</span> -iterations <span class="number">100</span>
+# <span class="keyword">time</span> a <span class="keyword">model</span> architecture <span class="keyword">with</span> the given weights <span class="keyword">on</span> the <span class="keyword">first</span> GPU <span class="keyword">for</span> <span class="number">10</span> iterations
+caffe <span class="keyword">time</span> -<span class="keyword">model</span> examples/mnist/lenet_train_test.prototxt -weights examples/mnist/lenet_iter_10000.caffemodel -gpu <span class="number">0</span> -iterations <span class="number">10</span></span>
+</code></pre><h3 id="device_query相关参数">device_query相关参数</h3><p>这个模块用来查看多GPU时候的一些显卡相关信息。举例<br><!-- lang:bash--></p>
+<pre><code><span class="comment"># query the first device</span>
+<span class="title">caffe</span> device_query -gpu <span class="number">0</span>
+</code></pre><h2 id="python接口">python接口</h2><p>通过<code>import caffe</code>来加载caffe模块，几个比较重要的模块caffe.Net, caffe.SDGSolver, caffe.io, caffe.draw</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cikzh1vgc001i9ofheyyq6eek" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-caffe-setup2" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2015/08/18/caffe-setup2/" class="article-date">
@@ -274,7 +346,7 @@ cp -d lib64/* <span class="regexp">/usr/local</span><span class="regexp">/cuda/l
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="ciksaz63a0017p4fhbbxep1ck" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cikzh1vgc001b9ofhi1fwq5c0" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -352,7 +424,7 @@ cp -d lib64/* <span class="regexp">/usr/local</span><span class="regexp">/cuda/l
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="ciksaz63q001kp4fhym4dlh40" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cikzh1vgs001o9ofhd61iv0o9" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -476,7 +548,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="ciksaz63a001bp4fhq5jve7t6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cikzh1vgc001f9ofh71b0jvok" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -590,7 +662,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="ciksaz6200005p4fhqha3r3ar" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cikzh1vem00059ofhdl88zj1i" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -650,7 +722,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="ciksaz620000dp4fhn0onurwc" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cikzh1vf2000d9ofhpassymuh" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -711,7 +783,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="ciksaz620000ap4fhcop97uk9" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cikzh1vf2000a9ofhqc0omgym" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -758,7 +830,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="ciksaz62v000xp4fhlt3urm2h" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="cikzh1vfx00119ofh4wm0xrhr" class="article-share-link">Share</a>
       
       
     </footer>
@@ -781,7 +853,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">7</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">7</span></li></ul>
     </div>
   </div>
 
@@ -790,7 +862,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
     </div>
   </div>
 
@@ -799,7 +871,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
+      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
     </div>
   </div>
 
@@ -808,7 +880,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -818,6 +890,10 @@ ldconfig
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/02/23/spark-learn/">Spark学习记录</a>
+          </li>
         
           <li>
             <a href="/2016/02/18/ml-skill/">机器学习技巧总结</a>
@@ -833,10 +909,6 @@ ldconfig
         
           <li>
             <a href="/2016/01/12/book-list/">书单</a>
-          </li>
-        
-          <li>
-            <a href="/2015/12/06/adusting-parameter/">深度学习调参技巧笔记</a>
           </li>
         
       </ul>

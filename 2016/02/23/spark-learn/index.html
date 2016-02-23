@@ -3,17 +3,30 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2015/9 | 杨现的个人博客</title>
+  <title>Spark学习记录 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="迭代的是人，递归的是神">
-<meta property="og:type" content="website">
-<meta property="og:title" content="杨现的个人博客">
-<meta property="og:url" content="http://yoursite.com/archives/2015/09/index.html">
+  <meta name="description" content="本笔记主要记录Spark在Hadoop环境中使用python语言进行算法开发过程中遇到的问题
+Spark的启动在Spark的安装路径中的bin路径中有pyspark，这是一种交互式的调用方法，还可以编写好python脚本之后通过
+spark-submit xxx.py
+的方式来调用。
+sc is not defined任何Spark程序都需要一个SparkContext来开始，其包含了Spark集">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark学习记录">
+<meta property="og:url" content="http://yoursite.com/2016/02/23/spark-learn/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="迭代的是人，递归的是神">
+<meta property="og:description" content="本笔记主要记录Spark在Hadoop环境中使用python语言进行算法开发过程中遇到的问题
+Spark的启动在Spark的安装路径中的bin路径中有pyspark，这是一种交互式的调用方法，还可以编写好python脚本之后通过
+spark-submit xxx.py
+的方式来调用。
+sc is not defined任何Spark程序都需要一个SparkContext来开始，其包含了Spark集">
+<meta property="og:updated_time" content="2016-02-23T13:52:29.126Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="杨现的个人博客">
-<meta name="twitter:description" content="迭代的是人，递归的是神">
+<meta name="twitter:title" content="Spark学习记录">
+<meta name="twitter:description" content="本笔记主要记录Spark在Hadoop环境中使用python语言进行算法开发过程中遇到的问题
+Spark的启动在Spark的安装路径中的bin路径中有pyspark，这是一种交互式的调用方法，还可以编写好python脚本之后通过
+spark-submit xxx.py
+的方式来调用。
+sc is not defined任何Spark程序都需要一个SparkContext来开始，其包含了Spark集">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -63,39 +76,76 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2015" class="archive-year">2015</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/09/15/caffe-fine-tuning/" class="archive-article-date">
-  <time datetime="2015-09-15T14:10:22.000Z" itemprop="datePublished">9月 15</time>
+        <section id="main"><article id="post-spark-learn" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/02/23/spark-learn/" class="article-date">
+  <time datetime="2016-02-23T13:50:37.000Z" itemprop="datePublished">2016-02-23</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/study/">study</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/09/15/caffe-fine-tuning/">caffe学习（五）fine-tuning已有模型到新数据</a>
+    <h1 class="article-title" itemprop="name">
+      Spark学习记录
     </h1>
   
 
-    </header>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本笔记主要记录Spark在Hadoop环境中使用python语言进行算法开发过程中遇到的问题</p>
+<h3 id="Spark的启动">Spark的启动</h3><p>在Spark的安装路径中的<code>bin</code>路径中有pyspark，这是一种交互式的调用方法，还可以编写好python脚本之后通过</p>
+<pre><code><span class="label">spark</span>-<span class="keyword">submit </span>xxx.py
+</code></pre><p>的方式来调用。</p>
+<h3 id="sc_is_not_defined">sc is not defined</h3><p>任何Spark程序都需要一个SparkContext来开始，其包含了Spark集群配置的各种参数，如果代码报错<code>sc is not defined</code>，需要添加如下代码进行初始化：</p>
+<pre><code>from pyspark import SparkContext
+sc = <span class="function"><span class="title">SparkContext</span><span class="params">(<span class="string">'local[2]'</span>, <span class="string">'First Spark App'</span>)</span></span>
+</code></pre><h3 id="常用HDFS_Shell命令">常用HDFS Shell命令</h3><p>大多数FS Shell命令和对应的Unix Shell命令类似，格式为hadoop fs <args>，如下：</args></p>
+<pre><code>hadoop <span class="built_in">fs</span> -cat URI [URI …]
+hadoop <span class="built_in">fs</span> -chmod [-R] &lt;<span class="built_in">MODE</span>[,<span class="built_in">MODE</span>]... | OCTALMODE&gt; URI [URI …]
+hadoop <span class="built_in">fs</span> -cp URI [URI …] &lt;dest&gt;
+hadoop <span class="built_in">fs</span> -du URI [URI …]
+hadoop <span class="built_in">fs</span> -<span class="built_in">mkdir</span> &lt;paths&gt;
+hadoop <span class="built_in">fs</span> -ls &lt;args&gt;
+hadoop <span class="built_in">fs</span> -rmr URI [URI …]    # rm -rf
+</code></pre><p>在HDFS和本地之间复制文件的命令如下：</p>
+<pre><code>hadoop fs -get [-ignorecrc] [-crc] <span class="variable">&lt;src&gt;</span> <span class="variable">&lt;localdst&gt;</span>    <span class="comment"># 复制文件到本地文件系统</span>
+hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="variable">&lt;dst&gt;</span>    <span class="comment"># 本地文件复制到HDFS</span>
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cikzh1vf2000g9ofhyawgm268" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
+
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/02/18/ml-skill/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">机器学习技巧总结</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-  
-    </div></section>
-  
+
 </section>
         
           <aside id="sidebar">
