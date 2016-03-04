@@ -17,7 +17,7 @@ dns配置google之，不多介绍，注意centos 7的dns设置与之前的版本
 开发环境虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料http://caffe.berkeleyvision.org/installation.html，配置之前先查看一下自己的软硬件环境
 dns配置google之，不多介绍，注意centos 7的dns设置与之前的版本不同
 查看显卡我们的显卡是K40（没显卡也能玩caffe）">
-<meta property="og:updated_time" content="2015-12-06T02:16:00.913Z">
+<meta property="og:updated_time" content="2016-03-04T14:02:12.832Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="caffe学习（三）caffe + centOS 7 + CUDA 7配置">
 <meta name="twitter:description" content="这次全程记录centOS 7 的配置安装过程
@@ -238,7 +238,7 @@ sudo make <span class="keyword">install</span></span>
 </code></pre><p>执行python模块</p>
 <pre><code>yum <span class="keyword">install</span> opencv-python
 </code></pre><p>测试python下import cv2检测是否安装成功（自带的python已经配置好opencv，anaconda不能import cv2）,解决办法如下:</p>
-<pre><code>cp /usr/local/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">cv2</span>.<span class="title">so</span> /<span class="title">root</span>/<span class="title">anaconda</span>/<span class="title">lib</span></span>
+<pre><code>cp /usr/local/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">cv2</span>.<span class="title">so</span> /<span class="title">root</span>/<span class="title">anaconda</span>/<span class="title">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span></span>
 cp /usr/local/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">cv</span>.<span class="title">py</span> /<span class="title">root</span>/<span class="title">anaconda</span>/<span class="title">lib</span>/<span class="title">python2</span>.7/</span>
 </code></pre><h2 id="安装caffe">安装caffe</h2><p>进入到caffe的工作目录</p>
 <pre><code>git clone <span class="symbol">https:</span>/<span class="regexp">/github.com/</span><span class="constant">BVLC</span>/caffe

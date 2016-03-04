@@ -302,7 +302,7 @@ sudo make <span class="keyword">install</span></span>
 </code></pre><p>执行python模块</p>
 <pre><code>yum <span class="keyword">install</span> opencv-python
 </code></pre><p>测试python下import cv2检测是否安装成功（自带的python已经配置好opencv，anaconda不能import cv2）,解决办法如下:</p>
-<pre><code>cp /usr/local/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">cv2</span>.<span class="title">so</span> /<span class="title">root</span>/<span class="title">anaconda</span>/<span class="title">lib</span></span>
+<pre><code>cp /usr/local/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">cv2</span>.<span class="title">so</span> /<span class="title">root</span>/<span class="title">anaconda</span>/<span class="title">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span></span>
 cp /usr/local/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">cv</span>.<span class="title">py</span> /<span class="title">root</span>/<span class="title">anaconda</span>/<span class="title">lib</span>/<span class="title">python2</span>.7/</span>
 </code></pre><h2 id="安装caffe">安装caffe</h2><p>进入到caffe的工作目录</p>
 <pre><code>git clone <span class="symbol">https:</span>/<span class="regexp">/github.com/</span><span class="constant">BVLC</span>/caffe
