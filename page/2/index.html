@@ -174,7 +174,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
 <h3 id="安装cmake">安装cmake</h3><p>再把cmake升级到2.8.12版本，centos 7 的yum只能升级到2.8.11版本</p>
 <pre><code><span class="preprocessor"># 先安装依赖</span>
 yum install gcc
-yum install gcc-g++
+yum install gcc-c++
 <span class="preprocessor"># 下载安装包</span>
 tar xvf cmake-<span class="number">2.8</span><span class="number">.12</span><span class="number">.1</span>.tar.gz
 cd cmake-<span class="number">2.8</span><span class="number">.12</span><span class="number">.1</span>/
@@ -201,7 +201,11 @@ export <span class="constant">PATH</span>=<span class="variable">$PATH</span><sp
 export <span class="constant">LD_LIBRARY_PATH</span>=<span class="variable">$LD_LIBRARY_PATH</span><span class="symbol">:/usr/local/cuda-</span><span class="number">7.0</span>/lib64
 <span class="comment">#############[close profile]</span>
 source /etc/profile
-</code></pre><p>验证CUDA是否安装好</p>
+</code></pre><p>PS:有一次CUDA安装失败，显卡驱动安装不成功，解决方法，先卸载系统已载入的显卡相关模块，同时指定kernel-source-path的路径，如下</p>
+<pre><code>lsmod |grep nouveau <span class="preprocessor"># 发现存在相关模块</span>
+modprobe -r nouveau <span class="preprocessor"># 卸载相关模块</span>
+./cuda_7<span class="number">.0</span><span class="number">.28</span>_linux.run --kernel-source-path=<span class="string">"/usr/src/kernels/03.10.0-xxxxxx"</span>
+</code></pre><p>注意有人推荐在安装过程中对OPENGL相关模块不要安装，是否对安装过程有影响，还没有实验验证过。接下来，验证CUDA是否安装好</p>
 <pre><code>nvcc -V     <span class="comment"># 验证nvidia-CUDA-Toolkit是否安装好</span>
 <span class="built_in">cd</span> ~/NVIDIA_CUDA-<span class="number">7.0</span>_Samples
 make
