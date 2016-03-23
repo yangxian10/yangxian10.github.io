@@ -65,6 +65,67 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-mxnet-install" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/10/09/mxnet-install/" class="article-date">
+  <time datetime="2015-10-09T13:13:36.000Z" itemprop="datePublished">2015-10-09</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/10/09/mxnet-install/">mxnet学习（一） mxnet + CentOS 7安装配置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>mxnet是最近DMLC那群牛人搞的一个开源的深度学习库，可以看作是cxxnet的升级版本，其中到底的美妙还是慢慢专研感受，话不多说，先跑起来看看。整个学习系列都是参考<a href="http://mxnet.readthedocs.org/en/latest/index.html" target="_blank" rel="external">http://mxnet.readthedocs.org/en/latest/index.html</a>学习完成的。</p>
+<h2 id="相关开发环境的配置">相关开发环境的配置</h2><p>系统的检测以及python的安装都是基本的，主要依赖软件是CUDA、intel mkl以及OpenCV的安装配置，具体可以参考之前写的<a href="http://yangxian10.github.io/2015/08/18/caffe-setup2/" target="_blank" rel="external">caffe学习（三）caffe + centOS 7 + CUDA 7配置</a>，已经写的很详细了，这里就不再多言。mxnet不像caffe那样依赖众多的google的工具库，这一点还是必须点赞的（caffe安装坑太多了）</p>
+<h2 id="安装mxnet">安装mxnet</h2><pre><code>git clone --recursive http<span class="variable">s:</span>//github.<span class="keyword">com</span>/dmlc/mxnet
+<span class="keyword">cd</span> mxnet/<span class="keyword">make</span>
+<span class="keyword">cp</span> config.<span class="keyword">mk</span> config.<span class="keyword">mk</span>.bak
+<span class="keyword">vim</span> config.<span class="keyword">mk</span>
+################# <span class="keyword">open</span>[config.<span class="keyword">mk</span>]
+USE_CUDA = <span class="number">1</span>
+USE_CUDA_PATH = /usr/local/cuda
+USE_BLAS = mkl
+USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
+################# <span class="keyword">close</span>[config.<span class="keyword">mk</span>]
+<span class="keyword">cd</span> ..
+<span class="keyword">make</span> -j4
+<span class="keyword">cd</span> <span class="keyword">python</span>
+<span class="keyword">python</span> setup.<span class="keyword">py</span> install
+<span class="keyword">cd</span> ..
+</code></pre><p>测试mxnet是否安装ok</p>
+<pre><code><span class="keyword">python</span> example/mnist/mlp.<span class="keyword">py</span>
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cim4xeneb000p50fh789yua5w" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mxnet/">mxnet</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-caffe-fine-tuning" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2015/09/15/caffe-fine-tuning/" class="article-date">
@@ -118,7 +179,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cilyp2yiw001p00fhcoy3n9g0" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cim4xenfk001p50fhz53ta8jq" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -190,7 +251,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cilyp2yiw001m00fhhydhhuhz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cim4xenfg001m50fhjb9uyq57" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -283,8 +344,11 @@ options nouveau modeset=<span class="number">0</span>
 dracut --force
 mv /boot/initramfs-<span class="variable">$(</span>uname -r).img /boot/initramfs-<span class="variable">$(</span>uname -r).img.bak
 dracut /boot/initramfs-<span class="variable">$(</span>uname -r).img <span class="variable">$(</span>uname -r)
-</code></pre><p>init 3和init 5在最新的centOS里并不生效，取而代之的是graphical.target(5)和multi-user.target(3)。<br>    systemctl get-default #查看运行级别<br>    systemctl set-default multi-user.target #切换为文本模式<br>    reboot</p>
-<pre><code>./<span class="constant">NVIDIA</span>-<span class="constant">XXXX</span>.run --kernel-source-path=<span class="regexp">/usr/src</span><span class="regexp">/kernels/</span>内核号 -k <span class="variable">$(</span>uname -r) <span class="comment">#最后面的-k参数是可以解决<span class="doctag">bug:</span> unable to load the kernel module 'nvidia.ko'</span>
+</code></pre><p>init 3和init 5在最新的centOS里并不生效，取而代之的是graphical.target(5)和multi-user.target(3)。</p>
+<pre><code>systemctl <span class="keyword">get</span>-default <span class="comment">#查看运行级别</span>
+systemctl <span class="keyword">set</span>-default multi-user.target <span class="comment">#切换为文本模式</span>
+reboot
+./NVIDIA-XXXX.<span class="command">run</span> <span class="comment">--kernel-source-path=/usr/src/kernels/内核号 -k $(uname -r) #最后面的-k参数是可以解决bug: unable to load the kernel module 'nvidia.ko'</span>
 </code></pre><p>接下来，验证CUDA是否安装好</p>
 <pre><code>nvcc -V     <span class="comment"># 验证nvidia-CUDA-Toolkit是否安装好</span>
 <span class="built_in">cd</span> ~/NVIDIA_CUDA-<span class="number">7.0</span>_Samples
@@ -445,7 +509,7 @@ chmod -R +r *
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cilyp2yiw001f00fhw2lc9p10" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cim4xenf8001f50fhv8wssuhn" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -523,7 +587,7 @@ chmod -R +r *
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cilyp2yjc001s00fhx7qtktv9" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cim4xenfo001s50fhc8h8ny1u" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -647,7 +711,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cilyp2yiw001j00fh0b7dwru7" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cim4xenfc001j50fhryhz7i1x" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -761,7 +825,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cilyp2ygq000500fhm2vsj33x" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cim4xendj000550fh51w9s0eg" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -821,7 +885,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cilyp2yh6000d00fh85lnocgn" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cim4xendz000d50fh4kkd7ddt" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -882,7 +946,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cilyp2yh6000a00fhiqcl4rfu" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cim4xendv000a50fhi2w1gul7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -929,7 +993,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="cilyp2yig001500fh05kxtb05" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="cim4xenez001550fhrxgqnqjh" class="article-share-link">Share</a>
       
       
     </footer>
@@ -952,7 +1016,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">7</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">8</span></li></ul>
     </div>
   </div>
 
@@ -961,7 +1025,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
     </div>
   </div>
 
@@ -979,7 +1043,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -991,7 +1055,11 @@ ldconfig
       <ul>
         
           <li>
-            <a href="/2016/03/19/linux-shell-skill/">linux-shell-skill</a>
+            <a href="/2016/03/23/caffe-add-layer/">caffe学习（五）创建自己的模型</a>
+          </li>
+        
+          <li>
+            <a href="/2016/03/19/linux-shell-skill/">linux shell技巧总结</a>
           </li>
         
           <li>
@@ -1004,10 +1072,6 @@ ldconfig
         
           <li>
             <a href="/2016/02/18/python-skill/">python技巧总结</a>
-          </li>
-        
-          <li>
-            <a href="/2016/01/18/linux-c-skill/">Linux c/c++ 技巧总结</a>
           </li>
         
       </ul>

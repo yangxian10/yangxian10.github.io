@@ -65,6 +65,111 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-caffe-add-layer" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/03/23/caffe-add-layer/" class="article-date">
+  <time datetime="2016-03-23T14:06:35.000Z" itemprop="datePublished">2016-03-23</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/23/caffe-add-layer/">caffe学习（五）创建自己的模型</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近阅读文章《Supervised Learning of Semantics-Preserving Hashing via Deep Neural Networks for Large-Scale Image Search》，对应的开源代码有两个版本<a href="https://github.com/kevinlin311tw/caffe-cvprw15" target="_blank" rel="external">https://github.com/kevinlin311tw/caffe-cvprw15</a>，<a href="https://github.com/kevinlin311tw/Caffe-DeepBinaryCode" target="_blank" rel="external">https://github.com/kevinlin311tw/Caffe-DeepBinaryCode</a>，<strong>两者之间的主要区别在于后者使用了更为复杂的目标函数，而不是简单的做了一层sigmoid</strong>。由于其在alexnet上进行了微小改动，在fc7和fc8层之间添加了一个latent layer，将原本用于检索的4096特征维度哈希为128维的二值特征，取得了不错的效果，借鉴这篇文章的代码，我实验了一下如何创建自己的模型，添加自己的layer</p>
+<h2 id="预训练模型">预训练模型</h2><p>不同于文章使用的alexnet，我的实验使用的是更为复杂的googLeNet。首先要训练好一个模型，对应一个caffemodel文件，和其训练测试对应的prototxt文件，并在此之上进行fine-tune。</p>
+<h2 id="准备训练数据">准备训练数据</h2><p>跟普通的分类训练没有区别，也要准备lmdb格式的文件以及均值文件。</p>
+<h2 id="修改train-prototxt">修改train.prototxt</h2><p>原本的层级结构是<code>pool5/7x7_s1 --&gt; loss3/classifier --&gt; SoftmaxWithLoss &amp; Accuracy</code>，改动后变成<code>pool5/7x7_s1 --&gt; latent_SSDH --&gt; latent_SSDH_encode --&gt; loss3/classifier_change --&gt; SoftmaxWithLoss &amp; Accuracy</code>。具体就是添加了一层InnerProduct，输出数目为哈希的位数，后面接一层Sigmoid层将其二值化，再接到原本的loss3/classifier层，并对该层进行finetune，调整该层的训练参数。改动代码如下：</p>
+<pre><code><span class="preprocessor">#########added by yx followed by layer <span class="string">"pool5/drop_7x7_s1"</span></span>
+layer {
+  name: <span class="string">"latent_SSDH"</span>
+  type: <span class="string">"InnerProduct"</span>
+  bottom: <span class="string">"pool5/7x7_s1"</span>
+  top: <span class="string">"latent_SSDH"</span>
+  param {
+    lr_mult: <span class="number">1</span>
+    decay_mult: <span class="number">1</span>
+  }
+  param {
+    lr_mult: <span class="number">2</span>
+    decay_mult: <span class="number">0</span>
+  }
+  inner_product_param {
+    num_output: <span class="number">128</span>
+    weight_filler {
+      type: <span class="string">"gaussian"</span>
+      <span class="built_in">std</span>: <span class="number">0.005</span>
+    }
+    bias_filler {
+      type: <span class="string">"constant"</span>
+      value: <span class="number">1</span>
+    }
+  }
+}
+layer {
+  name: <span class="string">"latent_SSDH_encode"</span>
+  bottom: <span class="string">"latent_SSDH"</span>
+  top: <span class="string">"latent_SSDH_encode"</span>
+  type: <span class="string">"Sigmoid"</span>
+}
+<span class="preprocessor">##########################</span>
+</code></pre><p>并把loss3/classifier层的名字改为<code>loss3/classifier_change</code>，bottom层改为<code>latent_SSDH_encode</code>，top层改为<code>loss3/classifier_change</code>，把lr_mult参数*10。</p>
+<p>最后把SoftmaxWithLoss层以及Accuracy层的bottom改为新层名<code>loss3/classifier_change</code>。</p>
+<h2 id="修改solver-prototxt">修改solver.prototxt</h2><ul>
+<li>将<code>test_initialization</code>屏蔽掉</li>
+<li>weight_decay改为0.0005</li>
+<li>gamma改为0.1</li>
+<li>base_lr参数降低10倍，改为0.001</li>
+</ul>
+<h2 id="修改deploy-prototxt">修改deploy.prototxt</h2><p>因为原本的deploy是要做分类的任务，而我这里是要做哈希特征提取，所以要把原来的最后两层loss3/classifier_change和Softmax屏蔽掉，并添加如下代码</p>
+<pre><code><span class="comment">############## added by yx #########</span>
+<span class="name">layer</span> {
+  <span class="literal">name</span>: <span class="string">"latent_SSDH"</span>
+  <span class="built_in">type</span>: <span class="string">"InnerProduct"</span>
+  bottom: <span class="string">"pool5/7x7_s1"</span>
+  top: <span class="string">"latent_SSDH"</span>
+  inner_product_param {
+    num_output: <span class="number">128</span>
+  }
+}
+<span class="name">layer</span> {
+  <span class="literal">name</span>: <span class="string">"latent_SSDH_encode"</span>
+  <span class="built_in">type</span>: <span class="string">"Sigmoid"</span>
+  bottom: <span class="string">"latent_SSDH"</span>
+  top: <span class="string">"latent_SSDH_encode"</span>
+}
+</code></pre><h2 id="训练命令">训练命令</h2><pre><code>nohup ../../build/tools/caffe train --solver=solver<span class="class">.prototxt</span> -weights sku30450_googlenet_quick_iter_500000<span class="class">.caffemodel</span> -gpu <span class="number">1</span> &amp;
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cim4xenfs001v50fhjlguy7lv" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-linux-shell-skill" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/03/19/linux-shell-skill/" class="article-date">
@@ -83,7 +188,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/19/linux-shell-skill/">linux-shell-skill</a>
+      <a class="article-title" href="/2016/03/19/linux-shell-skill/">linux shell技巧总结</a>
     </h1>
   
 
@@ -97,7 +202,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cilyp2yi1000x00fhqeq4us0n" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cim4xenei000x50fhjs90l0w2" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell/">shell</a></li></ul>
@@ -157,7 +262,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cilyp2yhl000g00fh68c280et" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cim4xene2000g50fhwi4piivm" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
@@ -214,7 +319,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cilyp2yi1000t00fhj5efafu3" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cim4xenef000t50fhya0x805l" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
@@ -262,7 +367,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cilyp2yhl000l00fh62g02dje" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cim4xene7000l50fhopbm2rie" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -346,7 +451,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cilyp2yi1001100fhgpwqpeeh" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cim4xeneo001150fheavsgi0z" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
@@ -394,7 +499,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cilyp2yjc001v00fhe6i2ujde" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cim4xenfv001y50fhnoaczc30" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/source/">source</a></li></ul>
@@ -437,7 +542,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cilyp2yga000000fh2c230pkp" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cim4xen91000050fhlsueqg2m" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tricks/">tricks</a></li></ul>
@@ -491,7 +596,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cilyp2yig001b00fhc2ab0pda" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cim4xenf5001b50fhaoulgp8t" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dataset/">dataset</a></li></ul>
@@ -607,71 +712,10 @@ detector = dlib.get_frontal_face_detector()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cilyp2yig001600fhz3h0k808" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cim4xenf2001650fhr3elw3fr" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/face/">face</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-mxnet-install" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/10/09/mxnet-install/" class="article-date">
-  <time datetime="2015-10-09T13:13:36.000Z" itemprop="datePublished">2015-10-09</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/10/09/mxnet-install/">mxnet学习（一） mxnet + CentOS 7安装配置</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>mxnet是最近DMLC那群牛人搞的一个开源的深度学习库，可以看作是cxxnet的升级版本，其中到底的美妙还是慢慢专研感受，话不多说，先跑起来看看。整个学习系列都是参考<a href="http://mxnet.readthedocs.org/en/latest/index.html" target="_blank" rel="external">http://mxnet.readthedocs.org/en/latest/index.html</a>学习完成的。</p>
-<h2 id="相关开发环境的配置">相关开发环境的配置</h2><p>系统的检测以及python的安装都是基本的，主要依赖软件是CUDA、intel mkl以及OpenCV的安装配置，具体可以参考之前写的<a href="http://yangxian10.github.io/2015/08/18/caffe-setup2/" target="_blank" rel="external">caffe学习（三）caffe + centOS 7 + CUDA 7配置</a>，已经写的很详细了，这里就不再多言。mxnet不像caffe那样依赖众多的google的工具库，这一点还是必须点赞的（caffe安装坑太多了）</p>
-<h2 id="安装mxnet">安装mxnet</h2><pre><code>git clone --recursive http<span class="variable">s:</span>//github.<span class="keyword">com</span>/dmlc/mxnet
-<span class="keyword">cd</span> mxnet/<span class="keyword">make</span>
-<span class="keyword">cp</span> config.<span class="keyword">mk</span> config.<span class="keyword">mk</span>.bak
-<span class="keyword">vim</span> config.<span class="keyword">mk</span>
-################# <span class="keyword">open</span>[config.<span class="keyword">mk</span>]
-USE_CUDA = <span class="number">1</span>
-USE_CUDA_PATH = /usr/local/cuda
-USE_BLAS = mkl
-USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
-################# <span class="keyword">close</span>[config.<span class="keyword">mk</span>]
-<span class="keyword">cd</span> ..
-<span class="keyword">make</span> -j4
-<span class="keyword">cd</span> <span class="keyword">python</span>
-<span class="keyword">python</span> setup.<span class="keyword">py</span> install
-<span class="keyword">cd</span> ..
-</code></pre><p>测试mxnet是否安装ok</p>
-<pre><code><span class="keyword">python</span> example/mnist/mlp.<span class="keyword">py</span>
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cilyp2yhl000p00fhn3n6pjkh" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mxnet/">mxnet</a></li></ul>
 
     </footer>
   </div>
@@ -693,7 +737,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">7</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">8</span></li></ul>
     </div>
   </div>
 
@@ -702,7 +746,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
     </div>
   </div>
 
@@ -720,7 +764,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -732,7 +776,11 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       <ul>
         
           <li>
-            <a href="/2016/03/19/linux-shell-skill/">linux-shell-skill</a>
+            <a href="/2016/03/23/caffe-add-layer/">caffe学习（五）创建自己的模型</a>
+          </li>
+        
+          <li>
+            <a href="/2016/03/19/linux-shell-skill/">linux shell技巧总结</a>
           </li>
         
           <li>
@@ -745,10 +793,6 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
         
           <li>
             <a href="/2016/02/18/python-skill/">python技巧总结</a>
-          </li>
-        
-          <li>
-            <a href="/2016/01/18/linux-c-skill/">Linux c/c++ 技巧总结</a>
           </li>
         
       </ul>

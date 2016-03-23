@@ -17,7 +17,7 @@ dns配置google之，不多介绍，注意centos 7的dns设置与之前的版本
 开发环境虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料http://caffe.berkeleyvision.org/installation.html，配置之前先查看一下自己的软硬件环境
 dns配置google之，不多介绍，注意centos 7的dns设置与之前的版本不同
 查看显卡我们的显卡是K40（没显卡也能玩caffe）">
-<meta property="og:updated_time" content="2016-03-19T05:25:05.646Z">
+<meta property="og:updated_time" content="2016-03-21T12:43:11.658Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="caffe学习（三）caffe + centOS 7 + CUDA 7配置">
 <meta name="twitter:description" content="这次全程记录centOS 7 的配置安装过程
@@ -154,8 +154,11 @@ options nouveau modeset=<span class="number">0</span>
 dracut --force
 mv /boot/initramfs-<span class="variable">$(</span>uname -r).img /boot/initramfs-<span class="variable">$(</span>uname -r).img.bak
 dracut /boot/initramfs-<span class="variable">$(</span>uname -r).img <span class="variable">$(</span>uname -r)
-</code></pre><p>init 3和init 5在最新的centOS里并不生效，取而代之的是graphical.target(5)和multi-user.target(3)。<br>    systemctl get-default #查看运行级别<br>    systemctl set-default multi-user.target #切换为文本模式<br>    reboot</p>
-<pre><code>./<span class="constant">NVIDIA</span>-<span class="constant">XXXX</span>.run --kernel-source-path=<span class="regexp">/usr/src</span><span class="regexp">/kernels/</span>内核号 -k <span class="variable">$(</span>uname -r) <span class="comment">#最后面的-k参数是可以解决<span class="doctag">bug:</span> unable to load the kernel module 'nvidia.ko'</span>
+</code></pre><p>init 3和init 5在最新的centOS里并不生效，取而代之的是graphical.target(5)和multi-user.target(3)。</p>
+<pre><code>systemctl <span class="keyword">get</span>-default <span class="comment">#查看运行级别</span>
+systemctl <span class="keyword">set</span>-default multi-user.target <span class="comment">#切换为文本模式</span>
+reboot
+./NVIDIA-XXXX.<span class="command">run</span> <span class="comment">--kernel-source-path=/usr/src/kernels/内核号 -k $(uname -r) #最后面的-k参数是可以解决bug: unable to load the kernel module 'nvidia.ko'</span>
 </code></pre><p>接下来，验证CUDA是否安装好</p>
 <pre><code>nvcc -V     <span class="comment"># 验证nvidia-CUDA-Toolkit是否安装好</span>
 <span class="built_in">cd</span> ~/NVIDIA_CUDA-<span class="number">7.0</span>_Samples
@@ -316,7 +319,7 @@ chmod -R +r *
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cilyp2yiw001f00fhw2lc9p10" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cim4xenf8001f50fhv8wssuhn" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -355,7 +358,7 @@ chmod -R +r *
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">7</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">8</span></li></ul>
     </div>
   </div>
 
@@ -364,7 +367,7 @@ chmod -R +r *
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">3</span></li></ul>
     </div>
   </div>
 
@@ -382,7 +385,7 @@ chmod -R +r *
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -394,7 +397,11 @@ chmod -R +r *
       <ul>
         
           <li>
-            <a href="/2016/03/19/linux-shell-skill/">linux-shell-skill</a>
+            <a href="/2016/03/23/caffe-add-layer/">caffe学习（五）创建自己的模型</a>
+          </li>
+        
+          <li>
+            <a href="/2016/03/19/linux-shell-skill/">linux shell技巧总结</a>
           </li>
         
           <li>
@@ -407,10 +414,6 @@ chmod -R +r *
         
           <li>
             <a href="/2016/02/18/python-skill/">python技巧总结</a>
-          </li>
-        
-          <li>
-            <a href="/2016/01/18/linux-c-skill/">Linux c/c++ 技巧总结</a>
           </li>
         
       </ul>

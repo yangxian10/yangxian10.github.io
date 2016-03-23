@@ -3,17 +3,18 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2016/1 | 杨现的个人博客</title>
+  <title>caffe学习（五）创建自己的模型 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="迭代的是人，递归的是神">
-<meta property="og:type" content="website">
-<meta property="og:title" content="杨现的个人博客">
-<meta property="og:url" content="http://yoursite.com/archives/2016/01/index.html">
+  <meta name="description" content="最近阅读文章《Supervised Learning of Semantics-Preserving Hashing via Deep Neural Networks for Large-Scale Image Search》，对应的开源代码有两个版本https://github.com/kevinlin311tw/caffe-cvprw15，https://github.com/kevinlin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="caffe学习（五）创建自己的模型">
+<meta property="og:url" content="http://yoursite.com/2016/03/23/caffe-add-layer/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="迭代的是人，递归的是神">
+<meta property="og:description" content="最近阅读文章《Supervised Learning of Semantics-Preserving Hashing via Deep Neural Networks for Large-Scale Image Search》，对应的开源代码有两个版本https://github.com/kevinlin311tw/caffe-cvprw15，https://github.com/kevinlin">
+<meta property="og:updated_time" content="2016-03-23T14:08:32.631Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="杨现的个人博客">
-<meta name="twitter:description" content="迭代的是人，递归的是神">
+<meta name="twitter:title" content="caffe学习（五）创建自己的模型">
+<meta name="twitter:description" content="最近阅读文章《Supervised Learning of Semantics-Preserving Hashing via Deep Neural Networks for Large-Scale Image Search》，对应的开源代码有两个版本https://github.com/kevinlin311tw/caffe-cvprw15，https://github.com/kevinlin">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -63,58 +64,121 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/01/18/linux-c-skill/" class="archive-article-date">
-  <time datetime="2016-01-18T14:07:18.000Z" itemprop="datePublished">1月 18</time>
+        <section id="main"><article id="post-caffe-add-layer" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/03/23/caffe-add-layer/" class="article-date">
+  <time datetime="2016-03-23T14:06:35.000Z" itemprop="datePublished">2016-03-23</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/01/18/linux-c-skill/">Linux c/c++ 技巧总结</a>
+    <h1 class="article-title" itemprop="name">
+      caffe学习（五）创建自己的模型
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/01/12/book-list/" class="archive-article-date">
-  <time datetime="2016-01-12T13:07:43.000Z" itemprop="datePublished">1月 12</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/01/12/book-list/">书单</a>
-    </h1>
-  
+        <p>最近阅读文章《Supervised Learning of Semantics-Preserving Hashing via Deep Neural Networks for Large-Scale Image Search》，对应的开源代码有两个版本<a href="https://github.com/kevinlin311tw/caffe-cvprw15" target="_blank" rel="external">https://github.com/kevinlin311tw/caffe-cvprw15</a>，<a href="https://github.com/kevinlin311tw/Caffe-DeepBinaryCode" target="_blank" rel="external">https://github.com/kevinlin311tw/Caffe-DeepBinaryCode</a>，<strong>两者之间的主要区别在于后者使用了更为复杂的目标函数，而不是简单的做了一层sigmoid</strong>。由于其在alexnet上进行了微小改动，在fc7和fc8层之间添加了一个latent layer，将原本用于检索的4096特征维度哈希为128维的二值特征，取得了不错的效果，借鉴这篇文章的代码，我实验了一下如何创建自己的模型，添加自己的layer</p>
+<h2 id="预训练模型">预训练模型</h2><p>不同于文章使用的alexnet，我的实验使用的是更为复杂的googLeNet。首先要训练好一个模型，对应一个caffemodel文件，和其训练测试对应的prototxt文件，并在此之上进行fine-tune。</p>
+<h2 id="准备训练数据">准备训练数据</h2><p>跟普通的分类训练没有区别，也要准备lmdb格式的文件以及均值文件。</p>
+<h2 id="修改train-prototxt">修改train.prototxt</h2><p>原本的层级结构是<code>pool5/7x7_s1 --&gt; loss3/classifier --&gt; SoftmaxWithLoss &amp; Accuracy</code>，改动后变成<code>pool5/7x7_s1 --&gt; latent_SSDH --&gt; latent_SSDH_encode --&gt; loss3/classifier_change --&gt; SoftmaxWithLoss &amp; Accuracy</code>。具体就是添加了一层InnerProduct，输出数目为哈希的位数，后面接一层Sigmoid层将其二值化，再接到原本的loss3/classifier层，并对该层进行finetune，调整该层的训练参数。改动代码如下：</p>
+<pre><code><span class="preprocessor">#########added by yx followed by layer <span class="string">"pool5/drop_7x7_s1"</span></span>
+layer {
+  name: <span class="string">"latent_SSDH"</span>
+  type: <span class="string">"InnerProduct"</span>
+  bottom: <span class="string">"pool5/7x7_s1"</span>
+  top: <span class="string">"latent_SSDH"</span>
+  param {
+    lr_mult: <span class="number">1</span>
+    decay_mult: <span class="number">1</span>
+  }
+  param {
+    lr_mult: <span class="number">2</span>
+    decay_mult: <span class="number">0</span>
+  }
+  inner_product_param {
+    num_output: <span class="number">128</span>
+    weight_filler {
+      type: <span class="string">"gaussian"</span>
+      <span class="built_in">std</span>: <span class="number">0.005</span>
+    }
+    bias_filler {
+      type: <span class="string">"constant"</span>
+      value: <span class="number">1</span>
+    }
+  }
+}
+layer {
+  name: <span class="string">"latent_SSDH_encode"</span>
+  bottom: <span class="string">"latent_SSDH"</span>
+  top: <span class="string">"latent_SSDH_encode"</span>
+  type: <span class="string">"Sigmoid"</span>
+}
+<span class="preprocessor">##########################</span>
+</code></pre><p>并把loss3/classifier层的名字改为<code>loss3/classifier_change</code>，bottom层改为<code>latent_SSDH_encode</code>，top层改为<code>loss3/classifier_change</code>，把lr_mult参数*10。</p>
+<p>最后把SoftmaxWithLoss层以及Accuracy层的bottom改为新层名<code>loss3/classifier_change</code>。</p>
+<h2 id="修改solver-prototxt">修改solver.prototxt</h2><ul>
+<li>将<code>test_initialization</code>屏蔽掉</li>
+<li>weight_decay改为0.0005</li>
+<li>gamma改为0.1</li>
+<li>base_lr参数降低10倍，改为0.001</li>
+</ul>
+<h2 id="修改deploy-prototxt">修改deploy.prototxt</h2><p>因为原本的deploy是要做分类的任务，而我这里是要做哈希特征提取，所以要把原来的最后两层loss3/classifier_change和Softmax屏蔽掉，并添加如下代码</p>
+<pre><code><span class="comment">############## added by yx #########</span>
+<span class="name">layer</span> {
+  <span class="literal">name</span>: <span class="string">"latent_SSDH"</span>
+  <span class="built_in">type</span>: <span class="string">"InnerProduct"</span>
+  bottom: <span class="string">"pool5/7x7_s1"</span>
+  top: <span class="string">"latent_SSDH"</span>
+  inner_product_param {
+    num_output: <span class="number">128</span>
+  }
+}
+<span class="name">layer</span> {
+  <span class="literal">name</span>: <span class="string">"latent_SSDH_encode"</span>
+  <span class="built_in">type</span>: <span class="string">"Sigmoid"</span>
+  bottom: <span class="string">"latent_SSDH"</span>
+  top: <span class="string">"latent_SSDH_encode"</span>
+}
+</code></pre><h2 id="训练命令">训练命令</h2><pre><code>nohup ../../build/tools/caffe train --solver=solver<span class="class">.prototxt</span> -weights sku30450_googlenet_quick_iter_500000<span class="class">.caffemodel</span> -gpu <span class="number">1</span> &amp;
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cim4xenfs001v50fhjlguy7lv" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
 
-    </header>
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/03/19/linux-shell-skill/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">linux shell技巧总结</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-  
-    </div></section>
-  
+
 </section>
         
           <aside id="sidebar">
