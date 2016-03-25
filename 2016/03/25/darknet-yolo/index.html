@@ -3,17 +3,39 @@
 <head>
   <meta charset="utf-8">
   
-  <title>杨现的个人博客</title>
+  <title>darknet学习（一）YOLO目标检测 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="迭代的是人，递归的是神">
-<meta property="og:type" content="website">
-<meta property="og:title" content="杨现的个人博客">
-<meta property="og:url" content="http://yoursite.com/index.html">
+  <meta name="description" content="darknet安装darknet的安装还是非常简单的，依赖只有cuda和opencv，安装好之后执行以下命令即可安装编译成功
+git clone https://github.com/pjreddie/darknet.git
+cd darknet
+vim Makefile
+#################[modify Makefile]
+GPU=1
+OPENCV=1
+OPTS=-Ofast">
+<meta property="og:type" content="article">
+<meta property="og:title" content="darknet学习（一）YOLO目标检测">
+<meta property="og:url" content="http://yoursite.com/2016/03/25/darknet-yolo/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="迭代的是人，递归的是神">
+<meta property="og:description" content="darknet安装darknet的安装还是非常简单的，依赖只有cuda和opencv，安装好之后执行以下命令即可安装编译成功
+git clone https://github.com/pjreddie/darknet.git
+cd darknet
+vim Makefile
+#################[modify Makefile]
+GPU=1
+OPENCV=1
+OPTS=-Ofast">
+<meta property="og:updated_time" content="2016-03-25T13:54:50.826Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="杨现的个人博客">
-<meta name="twitter:description" content="迭代的是人，递归的是神">
+<meta name="twitter:title" content="darknet学习（一）YOLO目标检测">
+<meta name="twitter:description" content="darknet安装darknet的安装还是非常简单的，依赖只有cuda和opencv，安装好之后执行以下命令即可安装编译成功
+git clone https://github.com/pjreddie/darknet.git
+cd darknet
+vim Makefile
+#################[modify Makefile]
+GPU=1
+OPENCV=1
+OPTS=-Ofast">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -63,9 +85,7 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-darknet-yolo" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-darknet-yolo" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/03/25/darknet-yolo/" class="article-date">
   <time datetime="2016-03-25T13:54:01.000Z" itemprop="datePublished">2016-03-25</time>
@@ -82,8 +102,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/25/darknet-yolo/">darknet学习（一）YOLO目标检测</a>
+    <h1 class="article-title" itemprop="name">
+      darknet学习（一）YOLO目标检测
     </h1>
   
 
@@ -334,558 +354,20 @@ wget http:<span class="comment">//pjreddie.com/media/files/extraction.conv.weigh
     </footer>
   </div>
   
-</article>
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-caffe-add-layer" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/03/23/caffe-add-layer/" class="article-date">
-  <time datetime="2016-03-23T14:06:35.000Z" itemprop="datePublished">2016-03-23</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/23/caffe-add-layer/">caffe学习（六）创建自己的模型</a>
-    </h1>
+    <a href="/2016/03/23/caffe-add-layer/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">caffe学习（六）创建自己的模型</div>
+    </a>
   
+</nav>
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>最近阅读文章《Supervised Learning of Semantics-Preserving Hashing via Deep Neural Networks for Large-Scale Image Search》，对应的开源代码有两个版本<a href="https://github.com/kevinlin311tw/caffe-cvprw15" target="_blank" rel="external">https://github.com/kevinlin311tw/caffe-cvprw15</a>，<a href="https://github.com/kevinlin311tw/Caffe-DeepBinaryCode" target="_blank" rel="external">https://github.com/kevinlin311tw/Caffe-DeepBinaryCode</a>，<strong>两者之间的主要区别在于后者使用了更为复杂的目标函数，而不是简单的做了一层sigmoid</strong>。由于其在alexnet上进行了微小改动，在fc7和fc8层之间添加了一个latent layer，将原本用于检索的4096特征维度哈希为128维的二值特征，取得了不错的效果，借鉴这篇文章的代码，我实验了一下如何创建自己的模型，添加自己的layer</p>
-<h2 id="预训练模型">预训练模型</h2><p>不同于文章使用的alexnet，我的实验使用的是更为复杂的googLeNet。首先要训练好一个模型，对应一个caffemodel文件，和其训练测试对应的prototxt文件，并在此之上进行fine-tune。</p>
-<h2 id="准备训练数据">准备训练数据</h2><p>跟普通的分类训练没有区别，也要准备lmdb格式的文件以及均值文件。</p>
-<h2 id="修改train-prototxt">修改train.prototxt</h2><p>原本的层级结构是<code>pool5/7x7_s1 --&gt; loss3/classifier --&gt; SoftmaxWithLoss &amp; Accuracy</code>，改动后变成<code>pool5/7x7_s1 --&gt; latent_SSDH --&gt; latent_SSDH_encode --&gt; loss3/classifier_change --&gt; SoftmaxWithLoss &amp; Accuracy</code>。具体就是添加了一层InnerProduct，输出数目为哈希的位数，后面接一层Sigmoid层将其二值化，再接到原本的loss3/classifier层，并对该层进行finetune，调整该层的训练参数。改动代码如下：</p>
-<pre><code><span class="preprocessor">#########added by yx followed by layer <span class="string">"pool5/drop_7x7_s1"</span></span>
-layer {
-  name: <span class="string">"latent_SSDH"</span>
-  type: <span class="string">"InnerProduct"</span>
-  bottom: <span class="string">"pool5/7x7_s1"</span>
-  top: <span class="string">"latent_SSDH"</span>
-  param {
-    lr_mult: <span class="number">1</span>
-    decay_mult: <span class="number">1</span>
-  }
-  param {
-    lr_mult: <span class="number">2</span>
-    decay_mult: <span class="number">0</span>
-  }
-  inner_product_param {
-    num_output: <span class="number">128</span>
-    weight_filler {
-      type: <span class="string">"gaussian"</span>
-      <span class="built_in">std</span>: <span class="number">0.005</span>
-    }
-    bias_filler {
-      type: <span class="string">"constant"</span>
-      value: <span class="number">1</span>
-    }
-  }
-}
-layer {
-  name: <span class="string">"latent_SSDH_encode"</span>
-  bottom: <span class="string">"latent_SSDH"</span>
-  top: <span class="string">"latent_SSDH_encode"</span>
-  type: <span class="string">"Sigmoid"</span>
-}
-<span class="preprocessor">##########################</span>
-</code></pre><p>并把loss3/classifier层的名字改为<code>loss3/classifier_change</code>，bottom层改为<code>latent_SSDH_encode</code>，top层改为<code>loss3/classifier_change</code>，把lr_mult参数*10。</p>
-<p>最后把SoftmaxWithLoss层以及Accuracy层的bottom改为新层名<code>loss3/classifier_change</code>。</p>
-<h2 id="修改solver-prototxt">修改solver.prototxt</h2><ul>
-<li>将<code>test_initialization</code>屏蔽掉</li>
-<li>weight_decay改为0.0005</li>
-<li>gamma改为0.1</li>
-<li>base_lr参数降低10倍，改为0.001</li>
-</ul>
-<h2 id="修改deploy-prototxt">修改deploy.prototxt</h2><p>因为原本的deploy是要做分类的任务，而我这里是要做哈希特征提取，所以要把原来的最后两层loss3/classifier_change和Softmax屏蔽掉，并添加如下代码</p>
-<pre><code><span class="comment">############## added by yx #########</span>
-<span class="name">layer</span> {
-  <span class="literal">name</span>: <span class="string">"latent_SSDH"</span>
-  <span class="built_in">type</span>: <span class="string">"InnerProduct"</span>
-  bottom: <span class="string">"pool5/7x7_s1"</span>
-  top: <span class="string">"latent_SSDH"</span>
-  inner_product_param {
-    num_output: <span class="number">128</span>
-  }
-}
-<span class="name">layer</span> {
-  <span class="literal">name</span>: <span class="string">"latent_SSDH_encode"</span>
-  <span class="built_in">type</span>: <span class="string">"Sigmoid"</span>
-  bottom: <span class="string">"latent_SSDH"</span>
-  top: <span class="string">"latent_SSDH_encode"</span>
-}
-</code></pre><h2 id="训练命令">训练命令</h2><pre><code>nohup ../../build/tools/caffe train --solver=solver<span class="class">.prototxt</span> -weights sku30450_googlenet_quick_iter_500000<span class="class">.caffemodel</span> -gpu <span class="number">1</span> &amp;
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cim7rsfiw001zycfh7eqwunc4" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
-
-    </footer>
-  </div>
   
 </article>
 
-
-  
-    <article id="post-linux-shell-skill" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/03/19/linux-shell-skill/" class="article-date">
-  <time datetime="2016-03-19T05:24:25.000Z" itemprop="datePublished">2016-03-19</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/19/linux-shell-skill/">linux shell技巧总结</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="匹配特殊字符空格">匹配特殊字符空格</h3><pre><code>find . -<span class="property">name</span> <span class="string">"*[[:space:]]*"</span>
-</code></pre><h3 id="找到指定文件并删除">找到指定文件并删除</h3><pre><code>find . -<span class="property">name</span> <span class="string">"abc*"</span> -exec rm {} \;
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cim7rsfhe000xycfhr8vmx9jz" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell/">shell</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-spark-learn" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/02/23/spark-learn/" class="article-date">
-  <time datetime="2016-02-23T13:50:37.000Z" itemprop="datePublished">2016-02-23</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/02/23/spark-learn/">Spark学习记录</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本笔记主要记录Spark在Hadoop环境中使用python语言进行算法开发过程中遇到的问题</p>
-<h3 id="Spark的启动">Spark的启动</h3><p>在Spark的安装路径中的<code>bin</code>路径中有pyspark，这是一种交互式的调用方法，还可以编写好python脚本之后通过</p>
-<pre><code><span class="label">spark</span>-<span class="keyword">submit </span>xxx.py
-</code></pre><p>的方式来调用。</p>
-<h3 id="sc_is_not_defined">sc is not defined</h3><p>任何Spark程序都需要一个SparkContext来开始，其包含了Spark集群配置的各种参数，如果代码报错<code>sc is not defined</code>，需要添加如下代码进行初始化：</p>
-<pre><code>from pyspark import SparkContext
-sc = <span class="function"><span class="title">SparkContext</span><span class="params">(<span class="string">'local[2]'</span>, <span class="string">'First Spark App'</span>)</span></span>
-</code></pre><h3 id="常用HDFS_Shell命令">常用HDFS Shell命令</h3><p>大多数FS Shell命令和对应的Unix Shell命令类似，格式为hadoop fs <args>，如下：</args></p>
-<pre><code>hadoop <span class="built_in">fs</span> -cat URI [URI …]
-hadoop <span class="built_in">fs</span> -chmod [-R] &lt;<span class="built_in">MODE</span>[,<span class="built_in">MODE</span>]... | OCTALMODE&gt; URI [URI …]
-hadoop <span class="built_in">fs</span> -cp URI [URI …] &lt;dest&gt;
-hadoop <span class="built_in">fs</span> -du URI [URI …]
-hadoop <span class="built_in">fs</span> -<span class="built_in">mkdir</span> &lt;paths&gt;
-hadoop <span class="built_in">fs</span> -ls &lt;args&gt;
-hadoop <span class="built_in">fs</span> -rmr URI [URI …]    # rm -rf
-</code></pre><p>在HDFS和本地之间复制文件的命令如下：</p>
-<pre><code>hadoop fs -get [-ignorecrc] [-crc] <span class="variable">&lt;src&gt;</span> <span class="variable">&lt;localdst&gt;</span>    <span class="comment"># 复制文件到本地文件系统</span>
-hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="variable">&lt;dst&gt;</span>    <span class="comment"># 本地文件复制到HDFS</span>
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cim7rsfgy000gycfhop68xw1o" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-ml-skill" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/02/18/ml-skill/" class="article-date">
-  <time datetime="2016-02-18T13:23:36.000Z" itemprop="datePublished">2016-02-18</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/02/18/ml-skill/">机器学习技巧总结</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="SVM_vs_Logistic_Regression">SVM vs Logistic Regression</h3><ol>
-<li>逻辑回归和线性核SVM本质上其实没啥区别；</li>
-<li>特征数大于样本数或者二者数量相当时，逻辑回归或者线性核SVM会有比较好的效果；</li>
-<li>特征数较少，样本数一般多时，高斯核SVM会有比较好的效果；</li>
-<li>特征少，样本特别多时，构建更多的特征，然后用逻辑回归或者线性核SVM</li>
-</ol>
-<h3 id="调参技巧">调参技巧</h3><p>解决测试误差较大的办法</p>
-<ol>
-<li>增加训练样本 -&gt; 降低方差</li>
-<li>减少特征数量 -&gt; 降低方差</li>
-<li>增加新特征 -&gt; 降低偏差</li>
-<li>现有特征多项式组合(x1^2, x2^2, x1*x2等等) -&gt; 降低偏差</li>
-<li>降低正则λ -&gt; 降低偏差</li>
-<li>增加正则λ -&gt; 降低方差</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cim7rsfhb000tycfhda81oif9" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-python-skill" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/02/18/python-skill/" class="article-date">
-  <time datetime="2016-02-18T13:21:09.000Z" itemprop="datePublished">2016-02-18</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/02/18/python-skill/">python技巧总结</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="random随机数模块">random随机数模块</h2><h3 id="random-random">random.random</h3><p>用于生成[0, 1.0)的随机浮点数</p>
-<h3 id="random-uniform(a,_b)">random.uniform(a, b)</h3><p>生成[a, b]的随机浮点数</p>
-<h3 id="random-randint(a,_b)">random.randint(a, b)</h3><p>生成[a, b]的随机整数</p>
-<h3 id="random-choice(sequence)">random.choice(sequence)</h3><p>从sequence中随机得到一个元素</p>
-<h3 id="random-shuffle(x[,_random])">random.shuffle(x[, random])</h3><p>用于将列表x元素打乱顺序</p>
-<h3 id="random-sample(sequence,_k)">random.sample(sequence, k)</h3><p>从指定序列中随机获取长度k的片段，不改变原有序列</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cim7rsfh2000lycfhxdusqoar" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-linux-c-skill" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/01/18/linux-c-skill/" class="article-date">
-  <time datetime="2016-01-18T14:07:18.000Z" itemprop="datePublished">2016-01-18</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/01/18/linux-c-skill/">Linux c/c++ 技巧总结</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="遍历目录内文件">遍历目录内文件</h2><p>Linux下的dirent.h头文件是专门为了获取文件夹目录内容而设计的结构体。使用示例如下：</p>
-<pre><code><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;dirent.h&gt;</span></span>
-<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span>
-<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span>
-<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span>
-
-<span class="function"><span class="keyword">void</span> <span class="title">List</span><span class="params">(<span class="keyword">char</span>* path, <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt;&amp; files)</span>
-</span>{
-    <span class="keyword">struct</span> dirent* ent = <span class="literal">NULL</span>;
-    DIR* pDir;
-    <span class="keyword">char</span> dir[<span class="number">512</span>];
-    <span class="keyword">struct</span> stat statbuf;  
-    <span class="keyword">if</span> ( (pDir=opendir(path))==<span class="literal">NULL</span> )
-    {
-    <span class="built_in">fprintf</span>( <span class="built_in">stderr</span>, <span class="string">"Cannot open directory:%s\n"</span>, path );
-        <span class="keyword">return</span>;
-    }
-    <span class="keyword">while</span>( (ent=readdir(pDir)) != <span class="literal">NULL</span> )
-    {
-        <span class="comment">//得到读取文件的绝对路径名</span>
-        <span class="built_in">snprintf</span>(dir, <span class="number">512</span>, <span class="string">"%s/%s"</span>, path, ent-&gt;d_name);   
-        <span class="comment">//得到文件信息</span>
-        lstat(dir, &amp;statbuf);
-        <span class="comment">//判断是目录还是文件</span>
-        <span class="keyword">if</span> ( S_ISDIR(statbuf.st_mode) )
-        {
-            <span class="comment">//排除当前目录和上级目录</span>
-            <span class="keyword">if</span> (<span class="built_in">strcmp</span>(<span class="string">"."</span>,ent-&gt;d_name) == <span class="number">0</span> || <span class="built_in">strcmp</span>( <span class="string">".."</span>,ent-&gt;d_name) == <span class="number">0</span>) 
-                <span class="keyword">continue</span>;
-            <span class="comment">//如果是子目录,递归调用函数本身,实现子目录中文件遍历</span>
-            <span class="built_in">printf</span>( <span class="string">"子目录:%s/\n"</span>, ent-&gt;d_name );
-            <span class="comment">//递归调用,遍历子目录中文件</span>
-            <span class="comment">//List(dir);</span>
-        }
-        <span class="keyword">else</span>
-        {
-            <span class="built_in">printf</span>( <span class="string">"文件:%s\n"</span>, ent-&gt;d_name );
-            files.push_back(pathName.assign(path).append(<span class="string">"/"</span>).append(ent-&gt;d_name));
-        }       
-    }
-    closedir(pDir);
-}
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cim7rsfhj0011ycfh93sryrvs" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-book-list" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/01/12/book-list/" class="article-date">
-  <time datetime="2016-01-12T13:07:43.000Z" itemprop="datePublished">2016-01-12</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/01/12/book-list/">书单</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="想买的">想买的</h1><h2 id="《Effective_C++中文版》">《Effective C++中文版》</h2><p><img src="http://img13.360buyimg.com/n1/14692/6d94eb5a-75ba-4b73-b38c-e1ceb33532fc.jpg" alt="effective C++"></p>
-<h2 id="《numpy攻略》">《numpy攻略》</h2><p><img src="http://img12.360buyimg.com/n1/jfs/t268/69/1040716404/165584/e6ce3de/53f55c58N3719acaa.jpg" alt="numpy攻略"></p>
-<h2 id="《Python_Cookbook》">《Python Cookbook》</h2><p><img src="http://img11.360buyimg.com/n1/jfs/t1210/198/742186232/357507/4f64f545/55407ebbNc012ae29.jpg" alt="Python Cookbook"></p>
-<h1 id="英文版的">英文版的</h1><h2 id="《OpenCV_3_Blueprints》">《OpenCV 3 Blueprints》</h2><p><img src="http://ww3.sinaimg.cn/bmiddle/5396ee05jw1ezcnc1rnnqj205n06ydgk.jpg" alt="OpenCV 3 Blueprints"></p>
-<h2 id="《Raspberry_Pi_Computer_Vision_Programming》">《Raspberry Pi Computer Vision Programming》</h2><p><img src="http://ww1.sinaimg.cn/bmiddle/5396ee05gw1eyy009xemuj206807oq3g.jpg" alt="Raspberry Pi Computer Vision Programming"></p>
-<h2 id="《Web_Scraping_with_Python_-_Collecting_Data_from_the_Modern_Web》">《Web Scraping with Python - Collecting Data from the Modern Web》</h2><p><img src="http://ww1.sinaimg.cn/bmiddle/5396ee05jw1euxumch0dfj20ai0dv75n.jpg" alt="Web Scraping with Python - Collecting Data from the Modern Web"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cim7rsfiz0022ycfh1ntyl9m9" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/source/">source</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-adusting-parameter" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/12/06/adusting-parameter/" class="article-date">
-  <time datetime="2015-12-06T02:17:08.000Z" itemprop="datePublished">2015-12-06</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/12/06/adusting-parameter/">深度学习调参技巧笔记</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="cnn技巧">cnn技巧</h2><p>南大有个哥们写了一个技巧集合，很不错，推荐给大家<a href="http://lamda.nju.edu.cn/weixs/project/CNNTricks/CNNTricks.html" target="_blank" rel="external">http://lamda.nju.edu.cn/weixs/project/CNNTricks/CNNTricks.html</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cim7rsffi0000ycfhlw81grfs" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tricks/">tricks</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-dataset-cv" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/11/05/dataset-cv/" class="article-date">
-  <time datetime="2015-11-05T14:23:30.000Z" itemprop="datePublished">2015-11-05</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Computer-Vision/">Computer Vision</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/11/05/dataset-cv/">Computer Vision DataSet资源列表</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>俗话说，“算法为王，数据为后”。巧妇难为无米之炊，可见再优秀的算法也得有数据支持。这篇就用来记录我用过的数据集，以备不时之需。</p>
-<h1 id="数据集汇总">数据集汇总</h1><p><a href="http://homepages.inf.ed.ac.uk/rbf/CVonline/Imagedbase.htm" target="_blank" rel="external">http://homepages.inf.ed.ac.uk/rbf/CVonline/Imagedbase.htm</a><br><a href="http://visionandlanguage.net/" target="_blank" rel="external">http://visionandlanguage.net/</a><br><a href="http://riemenschneider.hayko.at/vision/dataset/" target="_blank" rel="external">http://riemenschneider.hayko.at/vision/dataset/</a></p>
-<h1 id="物体">物体</h1><h3 id="INSTRE:_for_INSTance-level_object_REtrieval_and_REcognition">INSTRE: for INSTance-level object REtrieval and REcognition</h3><p><a href="http://vipl.ict.ac.cn/isia/instre/" target="_blank" rel="external">http://vipl.ict.ac.cn/isia/instre/</a><br>(中科院计算所)新的图像数据集（共计28,543幅图像，100个类），用于验证实例级对象检索、识别算法及其他机器视觉算法，如检测、不变特征和特征匹配等</p>
-<h1 id="LOGO图">LOGO图</h1><h3 id="Dataset:_FlickrLogos-32">Dataset: FlickrLogos-32</h3><p><a href="http://www.multimedia-computing.de/flickrlogos/" target="_blank" rel="external">http://www.multimedia-computing.de/flickrlogos/</a><br>2011年公布的一个数据集，包含32类知名商标品牌的logo。</p>
-<h1 id="动植物图像">动植物图像</h1><h3 id="水果FIDS30:_Fruit_Image_Data_set">水果FIDS30: Fruit Image Data set</h3><p><a href="http://www.vicos.si/Downloads/FIDS30" target="_blank" rel="external">http://www.vicos.si/Downloads/FIDS30</a><br>2014年公布的水果图片集，包含971张图片，覆盖30种不同的水果</p>
-<h3 id="鲜花102_Category_Flower_Dataset">鲜花102 Category Flower Dataset</h3><p><a href="http://www.robots.ox.ac.uk/~vgg/data/flowers/102/index.html" target="_blank" rel="external">http://www.robots.ox.ac.uk/~vgg/data/flowers/102/index.html</a><br>牛津大学vgg组2009年搞的花卉图片，包含102类花卉8189张图片，对应标签<code>imagelabels.mat</code></p>
-<h3 id="植物图像库">植物图像库</h3><p><a href="http://www.plantphoto.cn/" target="_blank" rel="external">http://www.plantphoto.cn/</a><br>收录图片208万幅，1.86万种</p>
-<h1 id="人脸">人脸</h1><h3 id="CelebA:_Large-scale_CelebFaces_Attributes_(CelebA)_Dataset">CelebA: Large-scale CelebFaces Attributes (CelebA) Dataset</h3><p><a href="http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html" target="_blank" rel="external">http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html</a><br>香港中文大学组2015年搞的一个最新的目前最大的人脸集，包含10177个人，202599张人脸图片，而且每张图片有5个关键点标注信息以及40个2值属性，属性包括是否带眼睛，是否在笑，是否带帽子，是不是卷发，是否年轻，性别等等，是非常珍贵的人脸数据。</p>
-<h3 id="WIDER_FACE:_A_Face_Detection_Benchmark">WIDER FACE: A Face Detection Benchmark</h3><p><a href="http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/" target="_blank" rel="external">http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/</a><br>香港中文大学再放大招，2015年11月又推出人脸检测标注数据库，包含32203张图片，393703张人脸。其中50%的测试数据集并没有公开标注信息。</p>
-<h1 id="汽车">汽车</h1><h3 id="CompCars:_The_comprehensive_cars_dataset">CompCars: The comprehensive cars dataset</h3><p><a href="http://mmlab.ie.cuhk.edu.hk/datasets/comp_cars/index.html" target="_blank" rel="external">http://mmlab.ie.cuhk.edu.hk/datasets/comp_cars/index.html</a></p>
-<h1 id="图像知识图谱">图像知识图谱</h1><h3 id="Visual_Genome">Visual Genome</h3><p><a href="https://visualgenome.org/" target="_blank" rel="external">https://visualgenome.org/</a><br>100K+图像，400万区域描述，170万图像问答，210万物体，180万的属性和关系，所有都映射到Wordnet Synsets</p>
-<h1 id="OCR">OCR</h1><h3 id="COCO-TEXT">COCO-TEXT</h3><p><a href="http://vision.cornell.edu/se3/coco-text/" target="_blank" rel="external">http://vision.cornell.edu/se3/coco-text/</a><br>该数据库含63686张图像，123589个文本区域及标注（位置、手写/印刷等属性、语言、可辨识性、文本）</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cim7rsfi1001bycfh4buzfsp7" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dataset/">dataset</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-  
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
-    </nav>
-  
 </section>
         
           <aside id="sidebar">
