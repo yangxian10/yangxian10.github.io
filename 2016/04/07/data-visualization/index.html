@@ -3,30 +3,18 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Spark学习记录 | 杨现的个人博客</title>
+  <title>数据可视化 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="本笔记主要记录Spark在Hadoop环境中使用python语言进行算法开发过程中遇到的问题
-Spark的启动在Spark的安装路径中的bin路径中有pyspark，这是一种交互式的调用方法，还可以编写好python脚本之后通过
-spark-submit xxx.py
-的方式来调用。
-sc is not defined任何Spark程序都需要一个SparkContext来开始，其包含了Spark集">
+  <meta name="description" content="经常看到网上一些样本分布图画的非常漂亮，不知道是怎么画出来的，在网上找到了一个好资料http://colah.github.io/posts/2014-10-Visualizing-MNIST/#raw_mnist，代码参考的这个https://www.oreilly.com/learning/an-illustrated-introduction-to-the-t-sne-algorithm研究">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Spark学习记录">
-<meta property="og:url" content="http://yoursite.com/2016/02/23/spark-learn/index.html">
+<meta property="og:title" content="数据可视化">
+<meta property="og:url" content="http://yoursite.com/2016/04/07/data-visualization/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="本笔记主要记录Spark在Hadoop环境中使用python语言进行算法开发过程中遇到的问题
-Spark的启动在Spark的安装路径中的bin路径中有pyspark，这是一种交互式的调用方法，还可以编写好python脚本之后通过
-spark-submit xxx.py
-的方式来调用。
-sc is not defined任何Spark程序都需要一个SparkContext来开始，其包含了Spark集">
-<meta property="og:updated_time" content="2016-02-23T13:52:29.126Z">
+<meta property="og:description" content="经常看到网上一些样本分布图画的非常漂亮，不知道是怎么画出来的，在网上找到了一个好资料http://colah.github.io/posts/2014-10-Visualizing-MNIST/#raw_mnist，代码参考的这个https://www.oreilly.com/learning/an-illustrated-introduction-to-the-t-sne-algorithm研究">
+<meta property="og:updated_time" content="2016-04-07T14:40:35.117Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Spark学习记录">
-<meta name="twitter:description" content="本笔记主要记录Spark在Hadoop环境中使用python语言进行算法开发过程中遇到的问题
-Spark的启动在Spark的安装路径中的bin路径中有pyspark，这是一种交互式的调用方法，还可以编写好python脚本之后通过
-spark-submit xxx.py
-的方式来调用。
-sc is not defined任何Spark程序都需要一个SparkContext来开始，其包含了Spark集">
+<meta name="twitter:title" content="数据可视化">
+<meta name="twitter:description" content="经常看到网上一些样本分布图画的非常漂亮，不知道是怎么画出来的，在网上找到了一个好资料http://colah.github.io/posts/2014-10-Visualizing-MNIST/#raw_mnist，代码参考的这个https://www.oreilly.com/learning/an-illustrated-introduction-to-the-t-sne-algorithm研究">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -76,14 +64,14 @@ sc is not defined任何Spark程序都需要一个SparkContext来开始，其包�
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-spark-learn" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-data-visualization" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/02/23/spark-learn/" class="article-date">
-  <time datetime="2016-02-23T13:50:37.000Z" itemprop="datePublished">2016-02-23</time>
+    <a href="/2016/04/07/data-visualization/" class="article-date">
+  <time datetime="2016-04-07T14:39:17.000Z" itemprop="datePublished">2016-04-07</time>
 </a>
     
   <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
+    <a class="article-category-link" href="/categories/achine-learning/">achine learning</a>
   </div>
 
   </div>
@@ -94,7 +82,7 @@ sc is not defined任何Spark程序都需要一个SparkContext来开始，其包�
         
   
     <h1 class="article-title" itemprop="name">
-      Spark学习记录
+      数据可视化
     </h1>
   
 
@@ -102,32 +90,41 @@ sc is not defined任何Spark程序都需要一个SparkContext来开始，其包�
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>本笔记主要记录Spark在Hadoop环境中使用python语言进行算法开发过程中遇到的问题</p>
-<h3 id="Spark的启动">Spark的启动</h3><p>在Spark的安装路径中的<code>bin</code>路径中有pyspark，这是一种交互式的调用方法，还可以编写好python脚本之后通过</p>
-<pre><code><span class="label">spark</span>-<span class="keyword">submit </span>xxx.py
-</code></pre><p>的方式来调用。</p>
-<h3 id="sc_is_not_defined">sc is not defined</h3><p>任何Spark程序都需要一个SparkContext来开始，其包含了Spark集群配置的各种参数，如果代码报错<code>sc is not defined</code>，需要添加如下代码进行初始化：</p>
-<pre><code>from pyspark import SparkContext
-sc = <span class="function"><span class="title">SparkContext</span><span class="params">(<span class="string">'local[2]'</span>, <span class="string">'First Spark App'</span>)</span></span>
-</code></pre><h3 id="常用HDFS_Shell命令">常用HDFS Shell命令</h3><p>大多数FS Shell命令和对应的Unix Shell命令类似，格式为hadoop fs <args>，如下：</args></p>
-<pre><code>hadoop <span class="built_in">fs</span> -cat URI [URI …]
-hadoop <span class="built_in">fs</span> -chmod [-R] &lt;<span class="built_in">MODE</span>[,<span class="built_in">MODE</span>]... | OCTALMODE&gt; URI [URI …]
-hadoop <span class="built_in">fs</span> -cp URI [URI …] &lt;dest&gt;
-hadoop <span class="built_in">fs</span> -du URI [URI …]
-hadoop <span class="built_in">fs</span> -<span class="built_in">mkdir</span> &lt;paths&gt;
-hadoop <span class="built_in">fs</span> -ls &lt;args&gt;
-hadoop <span class="built_in">fs</span> -rmr URI [URI …]    # rm -rf
-</code></pre><p>在HDFS和本地之间复制文件的命令如下：</p>
-<pre><code>hadoop fs -get [-ignorecrc] [-crc] <span class="variable">&lt;src&gt;</span> <span class="variable">&lt;localdst&gt;</span>    <span class="comment"># 复制文件到本地文件系统</span>
-hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="variable">&lt;dst&gt;</span>    <span class="comment"># 本地文件复制到HDFS</span>
-</code></pre>
+        <p>经常看到网上一些样本分布图画的非常漂亮，不知道是怎么画出来的，在网上找到了一个好资料<a href="http://colah.github.io/posts/2014-10-Visualizing-MNIST/#raw_mnist" target="_blank" rel="external">http://colah.github.io/posts/2014-10-Visualizing-MNIST/#raw_mnist</a>，代码参考的这个<a href="https://www.oreilly.com/learning/an-illustrated-introduction-to-the-t-sne-algorithm" target="_blank" rel="external">https://www.oreilly.com/learning/an-illustrated-introduction-to-the-t-sne-algorithm</a>研究了一番总结一下。</p>
+<p>我们经常要分析一些高维特征的表现能力，由于我们人类只能理解二维、三维的东西，所以要把高维数据降到三维以内展示出来。</p>
+<h3 id="直观想法">直观想法</h3><p>最直观的想法，比如原数据有1000维，从中任意选择两维，然后画图，结果可想而知。</p>
+<h3 id="PCA">PCA</h3><p>一种改进办法就是选择更为合适的两个维度进行展示，于是选择PCA主成分分析，然后选择前两个主成分对应的维度作为可视化的两个维度。</p>
+<h2 id="降维优化算法">降维优化算法</h2><p>可视化的目标就是希望两个向量实际的距离能够跟显示的距离接近，本来向量距离远的显示的距离也远。这就变成了一个优化问题，这也是很多流形学习方法的目标。比较常用解决这个优化问题的方法有MDS和t-SNE</p>
+<h3 id="MDS">MDS</h3><p>结合代码分析，首先，加载必要模块</p>
+<pre><code>from sklearn <span class="preprocessor"><span class="keyword">import</span> manifold</span>
+<span class="preprocessor"><span class="keyword">import</span> matplotlib.pyplot as plt</span>
+<span class="preprocessor"><span class="keyword">import</span> seaborn</span>
+<span class="preprocessor"><span class="keyword">import</span> numpy as np</span>
+</code></pre><p>首先加载数据，用array存储数据以及对应标签。这里用scikit-learn中的digits手写字符数据集作为演示数据，加载之后，其data维度为1797<em>64，图片是8</em>8=64，target维度为1797*1，为0~9的整数。同时加载seaborn模块中的调色板，用这个模板生成的颜色比自己设计的要好看一些</p>
+<pre><code>from sklearn<span class="class">.datasets</span> import load_digits
+digits = <span class="function"><span class="title">load_digits</span><span class="params">()</span></span>
+palette = np.<span class="function"><span class="title">array</span><span class="params">(seaborn.color_palette(<span class="string">'hls'</span>, <span class="number">10</span>)</span></span>)
+x = digits<span class="class">.data</span>
+y = digits.target
+</code></pre><p>加载mds模型</p>
+<pre><code>mds = manifold.<span class="function"><span class="title">MDS</span><span class="params">(n_components=<span class="number">2</span>, max_iter=<span class="number">300</span>, eps=<span class="number">1</span>e-<span class="number">5</span>)</span></span>
+x_mds = mds.<span class="function"><span class="title">fit_transform</span><span class="params">(x)</span></span>
+</code></pre><p>画图</p>
+<pre><code>fig = plt.<span class="function"><span class="title">figure</span><span class="params">()</span></span>
+plt.<span class="function"><span class="title">scatter</span><span class="params">(x_mds[:,<span class="number">0</span>], x_mds[:,<span class="number">1</span>], c=palette[y])</span></span>
+plt.<span class="function"><span class="title">show</span><span class="params">()</span></span>
+</code></pre><h3 id="t-SNE">t-SNE</h3><p>加载数据与上一种方法相同，加载模型代码如下</p>
+<pre><code>tsne = manifold.<span class="function"><span class="title">TSNE</span><span class="params">(n_components=<span class="number">2</span>, learning_rate=<span class="number">1000.0</span>)</span></span>
+x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><span class="params">(x)</span></span>
+</code></pre><h2 id="显示动态流形变化图像">显示动态流形变化图像</h2><p>TBD</p>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cimqe5zeq000gowfhaxzi1xyx" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cimqe5zfl001iowfh5qxyp9pm" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/visualization/">visualization</a></li></ul>
 
     </footer>
   </div>
@@ -135,19 +132,10 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
     
 <nav id="article-nav">
   
-    <a href="/2016/03/19/linux-shell-skill/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          linux shell技巧总结
-        
-      </div>
-    </a>
   
-  
-    <a href="/2016/02/18/ml-skill/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2016/03/30/good-site/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">机器学习技巧总结</div>
+      <div class="article-nav-title">good_site</div>
     </a>
   
 </nav>

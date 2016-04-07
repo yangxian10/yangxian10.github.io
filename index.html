@@ -65,6 +65,75 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-data-visualization" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/07/data-visualization/" class="article-date">
+  <time datetime="2016-04-07T14:39:17.000Z" itemprop="datePublished">2016-04-07</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/achine-learning/">achine learning</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/04/07/data-visualization/">数据可视化</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>经常看到网上一些样本分布图画的非常漂亮，不知道是怎么画出来的，在网上找到了一个好资料<a href="http://colah.github.io/posts/2014-10-Visualizing-MNIST/#raw_mnist" target="_blank" rel="external">http://colah.github.io/posts/2014-10-Visualizing-MNIST/#raw_mnist</a>，代码参考的这个<a href="https://www.oreilly.com/learning/an-illustrated-introduction-to-the-t-sne-algorithm" target="_blank" rel="external">https://www.oreilly.com/learning/an-illustrated-introduction-to-the-t-sne-algorithm</a>研究了一番总结一下。</p>
+<p>我们经常要分析一些高维特征的表现能力，由于我们人类只能理解二维、三维的东西，所以要把高维数据降到三维以内展示出来。</p>
+<h3 id="直观想法">直观想法</h3><p>最直观的想法，比如原数据有1000维，从中任意选择两维，然后画图，结果可想而知。</p>
+<h3 id="PCA">PCA</h3><p>一种改进办法就是选择更为合适的两个维度进行展示，于是选择PCA主成分分析，然后选择前两个主成分对应的维度作为可视化的两个维度。</p>
+<h2 id="降维优化算法">降维优化算法</h2><p>可视化的目标就是希望两个向量实际的距离能够跟显示的距离接近，本来向量距离远的显示的距离也远。这就变成了一个优化问题，这也是很多流形学习方法的目标。比较常用解决这个优化问题的方法有MDS和t-SNE</p>
+<h3 id="MDS">MDS</h3><p>结合代码分析，首先，加载必要模块</p>
+<pre><code>from sklearn <span class="preprocessor"><span class="keyword">import</span> manifold</span>
+<span class="preprocessor"><span class="keyword">import</span> matplotlib.pyplot as plt</span>
+<span class="preprocessor"><span class="keyword">import</span> seaborn</span>
+<span class="preprocessor"><span class="keyword">import</span> numpy as np</span>
+</code></pre><p>首先加载数据，用array存储数据以及对应标签。这里用scikit-learn中的digits手写字符数据集作为演示数据，加载之后，其data维度为1797<em>64，图片是8</em>8=64，target维度为1797*1，为0~9的整数。同时加载seaborn模块中的调色板，用这个模板生成的颜色比自己设计的要好看一些</p>
+<pre><code>from sklearn<span class="class">.datasets</span> import load_digits
+digits = <span class="function"><span class="title">load_digits</span><span class="params">()</span></span>
+palette = np.<span class="function"><span class="title">array</span><span class="params">(seaborn.color_palette(<span class="string">'hls'</span>, <span class="number">10</span>)</span></span>)
+x = digits<span class="class">.data</span>
+y = digits.target
+</code></pre><p>加载mds模型</p>
+<pre><code>mds = manifold.<span class="function"><span class="title">MDS</span><span class="params">(n_components=<span class="number">2</span>, max_iter=<span class="number">300</span>, eps=<span class="number">1</span>e-<span class="number">5</span>)</span></span>
+x_mds = mds.<span class="function"><span class="title">fit_transform</span><span class="params">(x)</span></span>
+</code></pre><p>画图</p>
+<pre><code>fig = plt.<span class="function"><span class="title">figure</span><span class="params">()</span></span>
+plt.<span class="function"><span class="title">scatter</span><span class="params">(x_mds[:,<span class="number">0</span>], x_mds[:,<span class="number">1</span>], c=palette[y])</span></span>
+plt.<span class="function"><span class="title">show</span><span class="params">()</span></span>
+</code></pre><h3 id="t-SNE">t-SNE</h3><p>加载数据与上一种方法相同，加载模型代码如下</p>
+<pre><code>tsne = manifold.<span class="function"><span class="title">TSNE</span><span class="params">(n_components=<span class="number">2</span>, learning_rate=<span class="number">1000.0</span>)</span></span>
+x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><span class="params">(x)</span></span>
+</code></pre><h2 id="显示动态流形变化图像">显示动态流形变化图像</h2><p>TBD</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cimqe5zfl001iowfh5qxyp9pm" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/visualization/">visualization</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-good-site" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/03/30/good-site/" class="article-date">
@@ -96,7 +165,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cimesn5j50016o8fhqk1gopsp" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cimqe5zfl0016owfhbx5gwjki" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -369,7 +438,7 @@ wget http:<span class="comment">//pjreddie.com/media/files/extraction.conv.weigh
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="cimesn5jl001io8fhutxssk5f" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="cimqe5zg0001nowfhiw0v1rmt" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/darknet/">darknet</a></li></ul>
@@ -474,7 +543,7 @@ layer {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cimesn5kg0022o8fhsaqatxbl" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cimqe5zgw0027owfhlt0qbvgb" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -657,7 +726,7 @@ awk <span class="string">'{print vara}'</span> vara=$<span class="keyword">var</
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cimesn5ia000xo8fhcc2rg30j" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cimqe5zf5000xowfhjw7qec7e" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell/">shell</a></li></ul>
@@ -717,7 +786,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cimesn5hu000go8fher20ryd8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cimqe5zeq000gowfhaxzi1xyx" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
@@ -774,7 +843,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cimesn5ia000to8fh38k2fzrn" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cimqe5zeq000towfhvymd50g7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
@@ -822,7 +891,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cimesn5ia000lo8fh4ih6uf6e" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cimqe5zeq000lowfh4na2b7v8" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -906,7 +975,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cimesn5iq0011o8fh6yg054y4" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cimqe5zf50011owfhgauk5api" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
@@ -954,53 +1023,10 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cimesn5kg0025o8fhy4s69gw7" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cimqe5zgw002aowfhck0d9pyq" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/source/">source</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-adusting-parameter" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/12/06/adusting-parameter/" class="article-date">
-  <time datetime="2015-12-06T02:17:08.000Z" itemprop="datePublished">2015-12-06</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/12/06/adusting-parameter/">深度学习调参技巧笔记</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="cnn技巧">cnn技巧</h2><p>南大有个哥们写了一个技巧集合，很不错，推荐给大家<a href="http://lamda.nju.edu.cn/weixs/project/CNNTricks/CNNTricks.html" target="_blank" rel="external">http://lamda.nju.edu.cn/weixs/project/CNNTricks/CNNTricks.html</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cimesn5g40000o8fhi06cwpvq" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tricks/">tricks</a></li></ul>
 
     </footer>
   </div>
@@ -1022,7 +1048,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">9</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/achine-learning/">achine learning</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">9</span></li></ul>
     </div>
   </div>
 
@@ -1031,7 +1057,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">4</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">4</span></li></ul>
     </div>
   </div>
 
@@ -1040,7 +1066,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
+      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
     </div>
   </div>
 
@@ -1049,7 +1075,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -1059,6 +1085,10 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/04/07/data-visualization/">数据可视化</a>
+          </li>
         
           <li>
             <a href="/2016/03/30/good-site/">good_site</a>
@@ -1074,10 +1104,6 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
         
           <li>
             <a href="/2016/03/19/linux-shell-skill/">linux shell技巧总结</a>
-          </li>
-        
-          <li>
-            <a href="/2016/02/23/spark-learn/">Spark学习记录</a>
           </li>
         
       </ul>
