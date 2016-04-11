@@ -3,17 +3,21 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Category: Computer Vision | 杨现的个人博客</title>
+  <title>Python高维数据最近邻快速检索库 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="迭代的是人，递归的是神">
-<meta property="og:type" content="website">
-<meta property="og:title" content="杨现的个人博客">
-<meta property="og:url" content="http://yoursite.com/categories/Computer-Vision/index.html">
+  <meta name="description" content="Pannshttps://github.com/ryanrhymes/panns这是一个用python写的针对高维数据的approximate k-nearest neighbors算法包，目前支持欧式距离和余弦距离两种度量。对500维以上的高维特征进行了优化。虽然性能弱于Annoy，但是更加轻量，比FLANN和scikit-learn更为好用
+安装sudo pip install panns -">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python高维数据最近邻快速检索库">
+<meta property="og:url" content="http://yoursite.com/2016/04/11/panns-nnsearch/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="迭代的是人，递归的是神">
+<meta property="og:description" content="Pannshttps://github.com/ryanrhymes/panns这是一个用python写的针对高维数据的approximate k-nearest neighbors算法包，目前支持欧式距离和余弦距离两种度量。对500维以上的高维特征进行了优化。虽然性能弱于Annoy，但是更加轻量，比FLANN和scikit-learn更为好用
+安装sudo pip install panns -">
+<meta property="og:updated_time" content="2016-04-11T13:03:42.365Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="杨现的个人博客">
-<meta name="twitter:description" content="迭代的是人，递归的是神">
+<meta name="twitter:title" content="Python高维数据最近邻快速检索库">
+<meta name="twitter:description" content="Pannshttps://github.com/ryanrhymes/panns这是一个用python写的针对高维数据的approximate k-nearest neighbors算法包，目前支持欧式距离和余弦距离两种度量。对500维以上的高维特征进行了优化。虽然性能弱于Annoy，但是更加轻量，比FLANN和scikit-learn更为好用
+安装sudo pip install panns -">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -63,58 +67,89 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2015" class="archive-year">2015</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/11/05/dataset-cv/" class="archive-article-date">
-  <time datetime="2015-11-05T14:23:30.000Z" itemprop="datePublished">11月 5</time>
+        <section id="main"><article id="post-panns-nnsearch" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/11/panns-nnsearch/" class="article-date">
+  <time datetime="2016-04-11T13:01:36.000Z" itemprop="datePublished">2016-04-11</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/study/">study</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/11/05/dataset-cv/">Computer Vision DataSet资源列表</a>
+    <h1 class="article-title" itemprop="name">
+      Python高维数据最近邻快速检索库
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/11/04/dlib-face-detect/" class="archive-article-date">
-  <time datetime="2015-11-04T13:53:46.000Z" itemprop="datePublished">11月 4</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/11/04/dlib-face-detect/">基于dlib的人脸检测</a>
-    </h1>
-  
+        <h1 id="Panns">Panns</h1><p><a href="https://github.com/ryanrhymes/panns" target="_blank" rel="external">https://github.com/ryanrhymes/panns</a>这是一个用python写的针对高维数据的approximate k-nearest neighbors算法包，目前支持欧式距离和余弦距离两种度量。对500维以上的高维特征进行了优化。虽然性能弱于Annoy，但是更加轻量，比FLANN和scikit-learn更为好用</p>
+<h3 id="安装">安装</h3><pre><code>sudo pip <span class="operator"><span class="keyword">install</span> panns <span class="comment">--upgrade</span></span>
+</code></pre><h3 id="使用示例">使用示例</h3><pre><code><span class="keyword">from</span> panns import *
 
-    </header>
+# <span class="keyword">create</span> an <span class="keyword">index</span> <span class="keyword">of</span> Euclidean distance
+p = PannsIndex(dimension=<span class="number">100</span>, metric=<span class="string">'euclidean'</span>)
+
+# generate a <span class="number">1000</span> x <span class="number">100</span> dataset
+<span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="number">1000</span>):
+    v = gaussian_vector(<span class="number">100</span>)
+    p.add_vector(v)
+
+p.parallelize(<span class="keyword">True</span>)        # 多核并行，默认是<span class="keyword">False</span>
+# build an <span class="keyword">index</span> <span class="keyword">of</span> <span class="number">128</span> trees <span class="keyword">and</span> save <span class="keyword">to</span> a file
+p.build(<span class="number">128</span>)    # <span class="number">64</span> <span class="keyword">is</span> <span class="keyword">default</span>
+</code></pre><p>build之后调用save函数保存生成的索引，会生成两个文件<em>.idx保存索引树和</em>.idx.npy保存数据库向量矩阵，这个向量矩阵可以保存成内存文件或者mmap文件，根据如下注释选取保存类型。这两个文件要放在同一个目录下面，加载模型的时候才不会出错。</p>
+<pre><code># save the index as an in-memory file if the raw dataset is small or medium size
+# later panns will <span class="operator"><span class="keyword">load</span> the entire .npy <span class="keyword">file</span> <span class="keyword">in</span> <span class="keyword">to</span> the <span class="keyword">physical</span> <span class="keyword">memory</span>
+<span class="keyword">p</span>.<span class="keyword">save</span>(<span class="string">'test.idx'</span>, mmap=<span class="literal">False</span>)
+
+# <span class="keyword">save</span> the <span class="keyword">index</span> <span class="keyword">as</span> mmap <span class="keyword">file</span> <span class="keyword">if</span> the <span class="keyword">raw</span> dataset <span class="keyword">is</span> huge
+# usually, your OS will handle the dynamic loading
+<span class="keyword">p</span>.<span class="keyword">save</span>(<span class="string">'test.idx'</span>, mmap=<span class="literal">True</span>)</span>
+</code></pre><p>加载模型，查询索引，返回最近邻的前10个查询结果</p>
+<pre><code>p1 = <span class="function"><span class="title">PannsIndex</span><span class="params">(metric=<span class="string">'euclidean'</span>)</span></span>
+p1.<span class="function"><span class="title">load</span><span class="params">(<span class="string">'test.idx'</span>)</span></span>
+v1 = <span class="function"><span class="title">a_new_vector</span><span class="params">(<span class="number">100</span>)</span></span>
+n = p1.<span class="function"><span class="title">query</span><span class="params">(v1, <span class="number">10</span>)</span></span>
+</code></pre><h1 id="Annoy">Annoy</h1><p><a href="https://github.com/spotify/annoy" target="_blank" rel="external">https://github.com/spotify/annoy</a>这是一个用C++编写的python打包的最近邻搜索算法包，应该是目前性能最好的算法包。</p>
+<h3 id="安装-1">安装</h3><pre><code>pip <span class="keyword">install</span> annoy
+</code></pre><h3 id="实例">实例</h3><p>tbd</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cimw0gbt4000p6ofhuokjz88s" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nnsearch/">nnsearch</a></li></ul>
+
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/04/07/data-visualization/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">数据可视化</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-  
-    </div></section>
-  
+
 </section>
         
           <aside id="sidebar">
