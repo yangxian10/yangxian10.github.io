@@ -442,6 +442,7 @@ list_file.close()
 <h2 id="更改YOLO模型参数">更改YOLO模型参数</h2><p>对<code>cfg/yolo.cfg</code>的配置文件进行调整</p>
 <pre><code>subdivisions=<span class="number">2</span> <span class="preprocessor"># 原来为<span class="number">64</span>，改小可以提高训练速度，同时增加显存使用</span>
 output= <span class="number">735</span> <span class="preprocessor"># 最后connected层，原来值为<span class="number">1470</span></span>
+classes = <span class="number">5</span> <span class="preprocessor"># detection层，这里设置为<span class="number">5</span></span>
 </code></pre><p>这个参数的确定由公式<code>output = S x S x (5*B+C)</code>，其中S=7，B=2, C=5（5是我实验使用的类别数）。</p>
 <p>改写<code>src/data.c</code>中的<code>fill_truth_region</code>函数，确定图像和标签数据的加载位置</p>
 <pre><code>//    char *labelpath = find_replace<span class="list">(<span class="keyword">path</span>, <span class="string">"images"</span>, <span class="string">"labels"</span>)</span><span class="comment">;</span>
@@ -473,8 +474,8 @@ image voc_labels[<span class="number">5</span>];
 </code></pre><p>改好之后重新编译代码，下载预训练好的模型参数文件，并开始训练</p>
 <pre><code>make
 wget http:<span class="comment">//pjreddie.com/media/files/extraction.conv.weights</span>
-./darknet yolo train cfg/yolo<span class="class">.cfg</span> extraction<span class="class">.conv</span><span class="class">.weights</span>
-</code></pre><p>在results文件夹下面就好生成训练好的模型文件，当迭代40000次后，会输出最终模型文件yolo_final.weights。这个过程用GPU大概需要3天时间，消耗显存6个G。</p>
+./darknet -<span class="tag">i</span> <span class="number">2</span> yolo train cfg/yolo<span class="class">.cfg</span> extraction<span class="class">.conv</span><span class="class">.weights</span>
+</code></pre><p>在results文件夹下面就好生成训练好的模型文件，当迭代40000次后，会输出最终模型文件yolo_final.weights。这个过程用GPU大概需要3天时间，消耗显存6个G。（-i参数表示使用第二块GPU）</p>
 <h1 id="YOLO检测">YOLO检测</h1><pre><code><span class="comment"># 检测单张图片</span>
 ./darknet yolo <span class="built_in">test</span> cfg/yolo.cfg results/yolo_final.weights &lt;image&gt;
 <span class="comment"># 检测多张图片</span>
