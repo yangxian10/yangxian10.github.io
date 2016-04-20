@@ -3,17 +3,18 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Tag: nnsearch | 杨现的个人博客</title>
+  <title>tensorflow学习（一）安装配置 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="迭代的是人，递归的是神">
-<meta property="og:type" content="website">
-<meta property="og:title" content="杨现的个人博客">
-<meta property="og:url" content="http://yoursite.com/tags/nnsearch/index.html">
+  <meta name="description" content="tensorflow是google开源的深度学习平台，由于其性能比较差，一开始我是拒绝的，不过由于google强大的影响力和执行力，版本迭代更新很快，现在性能已经很快了，而且最新的版本也支持了分布式。而且tensorflow的中文文档也是所有开源框架里最完善的，所以近期抽空学习一下。还是先从安装搞起。虽然其有比较完善的官方文档https://www.tensorflow.org/以及其中文版本ht">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tensorflow学习（一）安装配置">
+<meta property="og:url" content="http://yoursite.com/2016/04/20/tensorflow-install/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="迭代的是人，递归的是神">
+<meta property="og:description" content="tensorflow是google开源的深度学习平台，由于其性能比较差，一开始我是拒绝的，不过由于google强大的影响力和执行力，版本迭代更新很快，现在性能已经很快了，而且最新的版本也支持了分布式。而且tensorflow的中文文档也是所有开源框架里最完善的，所以近期抽空学习一下。还是先从安装搞起。虽然其有比较完善的官方文档https://www.tensorflow.org/以及其中文版本ht">
+<meta property="og:updated_time" content="2016-04-20T12:47:16.403Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="杨现的个人博客">
-<meta name="twitter:description" content="迭代的是人，递归的是神">
+<meta name="twitter:title" content="tensorflow学习（一）安装配置">
+<meta name="twitter:description" content="tensorflow是google开源的深度学习平台，由于其性能比较差，一开始我是拒绝的，不过由于google强大的影响力和执行力，版本迭代更新很快，现在性能已经很快了，而且最新的版本也支持了分布式。而且tensorflow的中文文档也是所有开源框架里最完善的，所以近期抽空学习一下。还是先从安装搞起。虽然其有比较完善的官方文档https://www.tensorflow.org/以及其中文版本ht">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -63,39 +64,87 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/04/11/panns-nnsearch/" class="archive-article-date">
-  <time datetime="2016-04-11T13:01:36.000Z" itemprop="datePublished">4月 11</time>
+        <section id="main"><article id="post-tensorflow-install" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/20/tensorflow-install/" class="article-date">
+  <time datetime="2016-04-20T12:46:00.000Z" itemprop="datePublished">2016-04-20</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/04/11/panns-nnsearch/">Python高维数据最近邻快速检索库</a>
+    <h1 class="article-title" itemprop="name">
+      tensorflow学习（一）安装配置
     </h1>
   
 
-    </header>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>tensorflow是google开源的深度学习平台，由于其性能比较差，一开始我是拒绝的，不过由于google强大的影响力和执行力，版本迭代更新很快，现在性能已经很快了，而且最新的版本也支持了分布式。而且tensorflow的中文文档也是所有开源框架里最完善的，所以近期抽空学习一下。还是先从安装搞起。<br>虽然其有比较完善的官方文档<a href="https://www.tensorflow.org/" target="_blank" rel="external">https://www.tensorflow.org/</a>以及其中文版本<a href="http://wiki.jikexueyuan.com/project/tensorflow-zh/" target="_blank" rel="external">http://wiki.jikexueyuan.com/project/tensorflow-zh/</a>，但使用的时候还是发现存在一些坑，还是记录一下学习过程中遇到的问题。<br>tensorflow支持pip、virtualenv、Docker三种安装方式。我这里只尝试了最简单方便的pip安装。</p>
+<h2 id="安装环境">安装环境</h2><p>我的电脑是centOS 7.0，k40双卡</p>
+<h2 id="CUDA和cudnn">CUDA和cudnn</h2><p>参考之前教程，安装CUDA和cudnn。我这里的CUDA版本是7.0，cudnn版本是v3。<br>再安装six和protobuf到对应版本，tensorflow要求’six &gt;= 1.10.0, protobuf &gt;= 3.0.0b2’，网上下载对应的whl包，执行</p>
+<pre><code><span class="tag">pip</span> <span class="tag">install</span> <span class="tag">six-1</span><span class="class">.10</span><span class="class">.0-py2</span><span class="class">.py3-none-any</span><span class="class">.whl</span>
+<span class="tag">pip</span> <span class="tag">install</span> <span class="tag">protobuf</span>
+</code></pre><h2 id="pip安装tensorflow">pip安装tensorflow</h2><p>根据官方教程，应该执行如下命令</p>
+<pre><code><span class="comment"># 仅使用 CPU 的版本</span>
+pip install <span class="symbol">https:</span>/<span class="regexp">/storage.googleapis.com/tensorflow</span><span class="regexp">/linux/cpu</span><span class="regexp">/tensorflow-0.7.1-cp27-none-linux_x86_64.whl
+# 开启 GPU 支持的版本 (安装该版本的前提是已经安装了 CUDA sdk)
+pip install https:/</span><span class="regexp">/storage.googleapis.com/tensorflow</span><span class="regexp">/linux/gpu</span><span class="regexp">/tensorflow-0.7.1-cp27-none-linux_x86_64.whl</span>
+</code></pre><p>但是由于GFW原因，上述命令可能会超时失败，于是寻找其他whl包的位置。<br>在官方的github上很容易找到其对应的安装版本。<a href="https://github.com/tensorflow/tensorflow" target="_blank" rel="external">https://github.com/tensorflow/tensorflow</a>，我这里使用的版本是python2的GPU版本。</p>
+<pre><code># 开启 GPU 支持的版本 (安装该版本的前提是已经安装了 CUDA sdk)
+pip <span class="operator"><span class="keyword">install</span> <span class="keyword">http</span>://ci.tensorflow.org/<span class="keyword">view</span>/Nightly/job/nigntly-matrix-linux-gpu/TF_BUILD_CONTAINER_TYPE=GPU,TF_BUILD_IS_OPT=OPT,TF_BUILD_IS_PIP=PIP,TF_BUILD_PYTHON_VERSION=PYTHON2,label=gpu-<span class="keyword">slave</span>/lastSuccessfulBuild/artifact/pip_test/whl/tensorflow-<span class="number">0.7</span><span class="number">.1</span>-cp27-<span class="keyword">none</span>-linux_x86_64.whl</span>
+</code></pre><p>安装成功。<br>但是在<code>import tensorflow</code>的时候会报错说ImportError: libcudart.so.7.5: cannot open shared object file: No such file or directory，可恶，我明明装的是CUDA7.0，竟然报错找不到7.5，解决这个问题也很简单，只需要把7.0做个软链接弄个名7.5骗过tensorflow就行，代码如下：</p>
+<pre><code>sudo ln -s <span class="regexp">/usr/</span>local<span class="regexp">/cuda/</span>lib64<span class="regexp">/libcudart.so.7.0 /u</span>sr<span class="regexp">/local/</span>cuda<span class="regexp">/lib64/</span>libcudart.so.<span class="number">7.5</span>
+sudo ln -s <span class="regexp">/usr/</span>local<span class="regexp">/cuda/</span>lib64<span class="regexp">/libcublas.so.7.0 /u</span>sr<span class="regexp">/local/</span>cuda<span class="regexp">/lib64/</span>libcublas.so.<span class="number">7.5</span>
+</code></pre><h2 id="运行tensorflow">运行tensorflow</h2><p>在python终端执行如下代码：</p>
+<pre><code>import tensorflow as tf
+hello = tf.<span class="function"><span class="title">constant</span><span class="params">(<span class="string">'Hello, TensorFlow!'</span>)</span></span>
+sess = tf.<span class="function"><span class="title">Session</span><span class="params">()</span></span>
+print sess.<span class="function"><span class="title">run</span><span class="params">(hello)</span></span>
+<span class="tag">a</span> = tf.<span class="function"><span class="title">constant</span><span class="params">(<span class="number">10</span>)</span></span>
+<span class="tag">b</span> = tf.<span class="function"><span class="title">constant</span><span class="params">(<span class="number">32</span>)</span></span>
+print sess.<span class="function"><span class="title">run</span><span class="params">(a+b)</span></span>
+</code></pre><p>顺利运行表明tensorflow安装完成。</p>
+<h2 id="源码路径以及示例">源码路径以及示例</h2><p>由于我的python是anaconda版本，所以tensorflow会安装在’$HOME/anaconda/lib/python2.7/site-packages/tensorflow’。<br>运行第一个示例，如下：</p>
+<pre><code>cd <span class="variable">$HOME</span>/anaconda/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">tensorflow</span></span>
+python ./models/image/mnist/convolutional.py
+</code></pre><p>程序会下载mnist数据集，迭代训练，显示当前loss、学习率以及误差。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cin8utt18000gvcfhn5x8rml3" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/04/11/panns-nnsearch/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Python高维数据最近邻快速检索库</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-  
-    </div></section>
-  
+
 </section>
         
           <aside id="sidebar">

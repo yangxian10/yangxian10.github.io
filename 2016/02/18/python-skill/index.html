@@ -5,31 +5,31 @@
   
   <title>python技巧总结 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="random随机数模块random.random用于生成[0, 1.0)的随机浮点数
-random.uniform(a, b)生成[a, b]的随机浮点数
-random.randint(a, b)生成[a, b]的随机整数
-random.choice(sequence)从sequence中随机得到一个元素
-random.shuffle(x[, random])用于将列表x元素打乱顺序
-random">
+  <meta name="description" content="查看运行时间用ipython的run命令做profiling，找出耗时语句
+run -p xxx.py
+ipynb文件ipynb文件是用浏览器演示python交互的优良插件，可以提供运行代码，插图，文章说明，插入公式等多种功能。只需在含有ipynb文件的的父目录位置执行
+ipython notebook
+即可生成shell服务器端，浏览器作为客户端展示出来。
+内存优化及时释放内存。大数组使用完之后">
 <meta property="og:type" content="article">
 <meta property="og:title" content="python技巧总结">
 <meta property="og:url" content="http://yoursite.com/2016/02/18/python-skill/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="random随机数模块random.random用于生成[0, 1.0)的随机浮点数
-random.uniform(a, b)生成[a, b]的随机浮点数
-random.randint(a, b)生成[a, b]的随机整数
-random.choice(sequence)从sequence中随机得到一个元素
-random.shuffle(x[, random])用于将列表x元素打乱顺序
-random">
-<meta property="og:updated_time" content="2016-02-18T13:23:19.307Z">
+<meta property="og:description" content="查看运行时间用ipython的run命令做profiling，找出耗时语句
+run -p xxx.py
+ipynb文件ipynb文件是用浏览器演示python交互的优良插件，可以提供运行代码，插图，文章说明，插入公式等多种功能。只需在含有ipynb文件的的父目录位置执行
+ipython notebook
+即可生成shell服务器端，浏览器作为客户端展示出来。
+内存优化及时释放内存。大数组使用完之后">
+<meta property="og:updated_time" content="2016-04-20T12:44:55.922Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="python技巧总结">
-<meta name="twitter:description" content="random随机数模块random.random用于生成[0, 1.0)的随机浮点数
-random.uniform(a, b)生成[a, b]的随机浮点数
-random.randint(a, b)生成[a, b]的随机整数
-random.choice(sequence)从sequence中随机得到一个元素
-random.shuffle(x[, random])用于将列表x元素打乱顺序
-random">
+<meta name="twitter:description" content="查看运行时间用ipython的run命令做profiling，找出耗时语句
+run -p xxx.py
+ipynb文件ipynb文件是用浏览器演示python交互的优良插件，可以提供运行代码，插图，文章说明，插入公式等多种功能。只需在含有ipynb文件的的父目录位置执行
+ipython notebook
+即可生成shell服务器端，浏览器作为客户端展示出来。
+内存优化及时释放内存。大数组使用完之后">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -105,7 +105,17 @@ random">
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="random随机数模块">random随机数模块</h2><h3 id="random-random">random.random</h3><p>用于生成[0, 1.0)的随机浮点数</p>
+        <h2 id="查看运行时间">查看运行时间</h2><p>用ipython的run命令做profiling，找出耗时语句</p>
+<pre><code><span class="built_in">run</span> <span class="bash">-p xxx.py</span>
+</code></pre><h2 id="ipynb文件">ipynb文件</h2><p>ipynb文件是用浏览器演示python交互的优良插件，可以提供运行代码，插图，文章说明，插入公式等多种功能。<br>只需在含有ipynb文件的的父目录位置执行</p>
+<pre><code><span class="title">ipython</span> notebook
+</code></pre><p>即可生成shell服务器端，浏览器作为客户端展示出来。</p>
+<h2 id="内存优化">内存优化</h2><p>及时释放内存。大数组使用完之后，手动del释放array。注意所有对数组的引用都del之后，数组才会被del。这些引用包括A[2:]这样的view。<br>尽量重用内存，比如：</p>
+<pre><code>A = <span class="keyword">B </span>+ C # <span class="keyword">B </span>is neverused later
+</code></pre><p>可以改写成</p>
+<pre><code><span class="constant">B</span> += C
+<span class="constant">A</span> = B
+</code></pre><h2 id="random随机数模块">random随机数模块</h2><h3 id="random-random">random.random</h3><p>用于生成[0, 1.0)的随机浮点数</p>
 <h3 id="random-uniform(a,_b)">random.uniform(a, b)</h3><p>生成[a, b]的随机浮点数</p>
 <h3 id="random-randint(a,_b)">random.randint(a, b)</h3><p>生成[a, b]的随机整数</p>
 <h3 id="random-choice(sequence)">random.choice(sequence)</h3><p>从sequence中随机得到一个元素</p>
@@ -115,7 +125,7 @@ random">
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cimw0gbso000l6ofhcuko6liz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cin8utt18000pvcfhbn8r986d" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -154,7 +164,7 @@ random">
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">9</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">10</span></li></ul>
     </div>
   </div>
 
@@ -163,7 +173,7 @@ random">
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">4</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">4</span></li></ul>
     </div>
   </div>
 
@@ -172,7 +182,7 @@ random">
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
+      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 10px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
     </div>
   </div>
 
@@ -181,7 +191,7 @@ random">
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -191,6 +201,10 @@ random">
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/04/20/tensorflow-install/">tensorflow学习（一）安装配置</a>
+          </li>
         
           <li>
             <a href="/2016/04/11/panns-nnsearch/">Python高维数据最近邻快速检索库</a>
@@ -206,10 +220,6 @@ random">
         
           <li>
             <a href="/2016/03/25/darknet-yolo/">darknet学习（一）YOLO目标检测</a>
-          </li>
-        
-          <li>
-            <a href="/2016/03/23/caffe-add-layer/">caffe学习（六）创建自己的模型</a>
           </li>
         
       </ul>

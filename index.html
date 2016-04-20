@@ -65,6 +65,77 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-tensorflow-install" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/20/tensorflow-install/" class="article-date">
+  <time datetime="2016-04-20T12:46:00.000Z" itemprop="datePublished">2016-04-20</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/04/20/tensorflow-install/">tensorflow学习（一）安装配置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>tensorflow是google开源的深度学习平台，由于其性能比较差，一开始我是拒绝的，不过由于google强大的影响力和执行力，版本迭代更新很快，现在性能已经很快了，而且最新的版本也支持了分布式。而且tensorflow的中文文档也是所有开源框架里最完善的，所以近期抽空学习一下。还是先从安装搞起。<br>虽然其有比较完善的官方文档<a href="https://www.tensorflow.org/" target="_blank" rel="external">https://www.tensorflow.org/</a>以及其中文版本<a href="http://wiki.jikexueyuan.com/project/tensorflow-zh/" target="_blank" rel="external">http://wiki.jikexueyuan.com/project/tensorflow-zh/</a>，但使用的时候还是发现存在一些坑，还是记录一下学习过程中遇到的问题。<br>tensorflow支持pip、virtualenv、Docker三种安装方式。我这里只尝试了最简单方便的pip安装。</p>
+<h2 id="安装环境">安装环境</h2><p>我的电脑是centOS 7.0，k40双卡</p>
+<h2 id="CUDA和cudnn">CUDA和cudnn</h2><p>参考之前教程，安装CUDA和cudnn。我这里的CUDA版本是7.0，cudnn版本是v3。<br>再安装six和protobuf到对应版本，tensorflow要求’six &gt;= 1.10.0, protobuf &gt;= 3.0.0b2’，网上下载对应的whl包，执行</p>
+<pre><code><span class="tag">pip</span> <span class="tag">install</span> <span class="tag">six-1</span><span class="class">.10</span><span class="class">.0-py2</span><span class="class">.py3-none-any</span><span class="class">.whl</span>
+<span class="tag">pip</span> <span class="tag">install</span> <span class="tag">protobuf</span>
+</code></pre><h2 id="pip安装tensorflow">pip安装tensorflow</h2><p>根据官方教程，应该执行如下命令</p>
+<pre><code><span class="comment"># 仅使用 CPU 的版本</span>
+pip install <span class="symbol">https:</span>/<span class="regexp">/storage.googleapis.com/tensorflow</span><span class="regexp">/linux/cpu</span><span class="regexp">/tensorflow-0.7.1-cp27-none-linux_x86_64.whl
+# 开启 GPU 支持的版本 (安装该版本的前提是已经安装了 CUDA sdk)
+pip install https:/</span><span class="regexp">/storage.googleapis.com/tensorflow</span><span class="regexp">/linux/gpu</span><span class="regexp">/tensorflow-0.7.1-cp27-none-linux_x86_64.whl</span>
+</code></pre><p>但是由于GFW原因，上述命令可能会超时失败，于是寻找其他whl包的位置。<br>在官方的github上很容易找到其对应的安装版本。<a href="https://github.com/tensorflow/tensorflow" target="_blank" rel="external">https://github.com/tensorflow/tensorflow</a>，我这里使用的版本是python2的GPU版本。</p>
+<pre><code># 开启 GPU 支持的版本 (安装该版本的前提是已经安装了 CUDA sdk)
+pip <span class="operator"><span class="keyword">install</span> <span class="keyword">http</span>://ci.tensorflow.org/<span class="keyword">view</span>/Nightly/job/nigntly-matrix-linux-gpu/TF_BUILD_CONTAINER_TYPE=GPU,TF_BUILD_IS_OPT=OPT,TF_BUILD_IS_PIP=PIP,TF_BUILD_PYTHON_VERSION=PYTHON2,label=gpu-<span class="keyword">slave</span>/lastSuccessfulBuild/artifact/pip_test/whl/tensorflow-<span class="number">0.7</span><span class="number">.1</span>-cp27-<span class="keyword">none</span>-linux_x86_64.whl</span>
+</code></pre><p>安装成功。<br>但是在<code>import tensorflow</code>的时候会报错说ImportError: libcudart.so.7.5: cannot open shared object file: No such file or directory，可恶，我明明装的是CUDA7.0，竟然报错找不到7.5，解决这个问题也很简单，只需要把7.0做个软链接弄个名7.5骗过tensorflow就行，代码如下：</p>
+<pre><code>sudo ln -s <span class="regexp">/usr/</span>local<span class="regexp">/cuda/</span>lib64<span class="regexp">/libcudart.so.7.0 /u</span>sr<span class="regexp">/local/</span>cuda<span class="regexp">/lib64/</span>libcudart.so.<span class="number">7.5</span>
+sudo ln -s <span class="regexp">/usr/</span>local<span class="regexp">/cuda/</span>lib64<span class="regexp">/libcublas.so.7.0 /u</span>sr<span class="regexp">/local/</span>cuda<span class="regexp">/lib64/</span>libcublas.so.<span class="number">7.5</span>
+</code></pre><h2 id="运行tensorflow">运行tensorflow</h2><p>在python终端执行如下代码：</p>
+<pre><code>import tensorflow as tf
+hello = tf.<span class="function"><span class="title">constant</span><span class="params">(<span class="string">'Hello, TensorFlow!'</span>)</span></span>
+sess = tf.<span class="function"><span class="title">Session</span><span class="params">()</span></span>
+print sess.<span class="function"><span class="title">run</span><span class="params">(hello)</span></span>
+<span class="tag">a</span> = tf.<span class="function"><span class="title">constant</span><span class="params">(<span class="number">10</span>)</span></span>
+<span class="tag">b</span> = tf.<span class="function"><span class="title">constant</span><span class="params">(<span class="number">32</span>)</span></span>
+print sess.<span class="function"><span class="title">run</span><span class="params">(a+b)</span></span>
+</code></pre><p>顺利运行表明tensorflow安装完成。</p>
+<h2 id="源码路径以及示例">源码路径以及示例</h2><p>由于我的python是anaconda版本，所以tensorflow会安装在’$HOME/anaconda/lib/python2.7/site-packages/tensorflow’。<br>运行第一个示例，如下：</p>
+<pre><code>cd <span class="variable">$HOME</span>/anaconda/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">tensorflow</span></span>
+python ./models/image/mnist/convolutional.py
+</code></pre><p>程序会下载mnist数据集，迭代训练，显示当前loss、学习率以及误差。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cin8utt18000gvcfhn5x8rml3" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-panns-nnsearch" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/04/11/panns-nnsearch/" class="article-date">
@@ -126,7 +197,7 @@ n = p1.<span class="function"><span class="title">query</span><span class="param
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cimw0gbt4000p6ofhuokjz88s" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cin8utt1n000tvcfhkmehjbrt" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nnsearch/">nnsearch</a></li></ul>
@@ -195,7 +266,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cimw0gbtz001m6ofh4zbj5717" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cin8utt2i001qvcfhdc9ynadj" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/visualization/">visualization</a></li></ul>
@@ -238,7 +309,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cimw0gbtz001a6ofhc0odh6ad" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cin8utt23001evcfhhhtq64w7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -512,7 +583,7 @@ wget http:<span class="comment">//pjreddie.com/media/files/extraction.conv.weigh
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="cimw0gbtz001q6ofh91x7e4ra" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="cin8utt2i001uvcfh5sqg5hjo" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/darknet/">darknet</a></li></ul>
@@ -617,7 +688,7 @@ layer {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cimw0gbuv002a6ofh91f9jjpq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cin8utt3e002evcfh1i203io6" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -800,7 +871,7 @@ awk <span class="string">'{print vara}'</span> vara=$<span class="keyword">var</
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cimw0gbtk00116ofhtyirl8is" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cin8utt230015vcfhbxkvn1ce" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell/">shell</a></li></ul>
@@ -860,7 +931,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cimw0gbso000g6ofhgaancsfn" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cin8utt18000kvcfhgjyds4hh" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
@@ -917,7 +988,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cimw0gbt4000x6ofhrnbbbmm3" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cin8utt1n0011vcfh6zf5rmf6" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
@@ -955,7 +1026,17 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="random随机数模块">random随机数模块</h2><h3 id="random-random">random.random</h3><p>用于生成[0, 1.0)的随机浮点数</p>
+        <h2 id="查看运行时间">查看运行时间</h2><p>用ipython的run命令做profiling，找出耗时语句</p>
+<pre><code><span class="built_in">run</span> <span class="bash">-p xxx.py</span>
+</code></pre><h2 id="ipynb文件">ipynb文件</h2><p>ipynb文件是用浏览器演示python交互的优良插件，可以提供运行代码，插图，文章说明，插入公式等多种功能。<br>只需在含有ipynb文件的的父目录位置执行</p>
+<pre><code><span class="title">ipython</span> notebook
+</code></pre><p>即可生成shell服务器端，浏览器作为客户端展示出来。</p>
+<h2 id="内存优化">内存优化</h2><p>及时释放内存。大数组使用完之后，手动del释放array。注意所有对数组的引用都del之后，数组才会被del。这些引用包括A[2:]这样的view。<br>尽量重用内存，比如：</p>
+<pre><code>A = <span class="keyword">B </span>+ C # <span class="keyword">B </span>is neverused later
+</code></pre><p>可以改写成</p>
+<pre><code><span class="constant">B</span> += C
+<span class="constant">A</span> = B
+</code></pre><h2 id="random随机数模块">random随机数模块</h2><h3 id="random-random">random.random</h3><p>用于生成[0, 1.0)的随机浮点数</p>
 <h3 id="random-uniform(a,_b)">random.uniform(a, b)</h3><p>生成[a, b]的随机浮点数</p>
 <h3 id="random-randint(a,_b)">random.randint(a, b)</h3><p>生成[a, b]的随机整数</p>
 <h3 id="random-choice(sequence)">random.choice(sequence)</h3><p>从sequence中随机得到一个元素</p>
@@ -965,94 +1046,10 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cimw0gbso000l6ofhcuko6liz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cin8utt18000pvcfhbn8r986d" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-linux-c-skill" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/01/18/linux-c-skill/" class="article-date">
-  <time datetime="2016-01-18T14:07:18.000Z" itemprop="datePublished">2016-01-18</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/01/18/linux-c-skill/">Linux c/c++ 技巧总结</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="遍历目录内文件">遍历目录内文件</h2><p>Linux下的dirent.h头文件是专门为了获取文件夹目录内容而设计的结构体。使用示例如下：</p>
-<pre><code><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;dirent.h&gt;</span></span>
-<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span>
-<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span>
-<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span>
-
-<span class="function"><span class="keyword">void</span> <span class="title">List</span><span class="params">(<span class="keyword">char</span>* path, <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt;&amp; files)</span>
-</span>{
-    <span class="keyword">struct</span> dirent* ent = <span class="literal">NULL</span>;
-    DIR* pDir;
-    <span class="keyword">char</span> dir[<span class="number">512</span>];
-    <span class="keyword">struct</span> stat statbuf;  
-    <span class="keyword">if</span> ( (pDir=opendir(path))==<span class="literal">NULL</span> )
-    {
-    <span class="built_in">fprintf</span>( <span class="built_in">stderr</span>, <span class="string">"Cannot open directory:%s\n"</span>, path );
-        <span class="keyword">return</span>;
-    }
-    <span class="keyword">while</span>( (ent=readdir(pDir)) != <span class="literal">NULL</span> )
-    {
-        <span class="comment">//得到读取文件的绝对路径名</span>
-        <span class="built_in">snprintf</span>(dir, <span class="number">512</span>, <span class="string">"%s/%s"</span>, path, ent-&gt;d_name);   
-        <span class="comment">//得到文件信息</span>
-        lstat(dir, &amp;statbuf);
-        <span class="comment">//判断是目录还是文件</span>
-        <span class="keyword">if</span> ( S_ISDIR(statbuf.st_mode) )
-        {
-            <span class="comment">//排除当前目录和上级目录</span>
-            <span class="keyword">if</span> (<span class="built_in">strcmp</span>(<span class="string">"."</span>,ent-&gt;d_name) == <span class="number">0</span> || <span class="built_in">strcmp</span>( <span class="string">".."</span>,ent-&gt;d_name) == <span class="number">0</span>) 
-                <span class="keyword">continue</span>;
-            <span class="comment">//如果是子目录,递归调用函数本身,实现子目录中文件遍历</span>
-            <span class="built_in">printf</span>( <span class="string">"子目录:%s/\n"</span>, ent-&gt;d_name );
-            <span class="comment">//递归调用,遍历子目录中文件</span>
-            <span class="comment">//List(dir);</span>
-        }
-        <span class="keyword">else</span>
-        {
-            <span class="built_in">printf</span>( <span class="string">"文件:%s\n"</span>, ent-&gt;d_name );
-            files.push_back(pathName.assign(path).append(<span class="string">"/"</span>).append(ent-&gt;d_name));
-        }       
-    }
-    closedir(pDir);
-}
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cimw0gbtk00156ofhqsh9lzit" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
 
     </footer>
   </div>
@@ -1074,7 +1071,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">9</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">10</span></li></ul>
     </div>
   </div>
 
@@ -1083,7 +1080,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">4</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">4</span></li></ul>
     </div>
   </div>
 
@@ -1092,7 +1089,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
+      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 10px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
     </div>
   </div>
 
@@ -1101,7 +1098,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -1111,6 +1108,10 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/04/20/tensorflow-install/">tensorflow学习（一）安装配置</a>
+          </li>
         
           <li>
             <a href="/2016/04/11/panns-nnsearch/">Python高维数据最近邻快速检索库</a>
@@ -1126,10 +1127,6 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
         
           <li>
             <a href="/2016/03/25/darknet-yolo/">darknet学习（一）YOLO目标检测</a>
-          </li>
-        
-          <li>
-            <a href="/2016/03/23/caffe-add-layer/">caffe学习（六）创建自己的模型</a>
           </li>
         
       </ul>
