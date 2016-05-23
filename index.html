@@ -65,6 +65,87 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-tensorflow-tensorboard" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/23/tensorflow-tensorboard/" class="article-date">
+  <time datetime="2016-05-23T14:30:31.000Z" itemprop="datePublished">2016-05-23</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/05/23/tensorflow-tensorboard/">tensorflow学习（三）TensorBoard可视化</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>利用TensorBoard可以更好的了解深度学习训练过程以及参数的变化。思想是将tensorflow中的图的节点通过summary操作汇总到一起，再通过SummaryWriter写进protobuf，最后通过TensorBoard展示可视化结果。</p>
+<h2 id="Summary操作">Summary操作</h2><pre><code>tf.<span class="function"><span class="title">scalar_summary</span><span class="params">(tags, values, collections=None, name=None)</span></span>
+tf.<span class="function"><span class="title">image_summary</span><span class="params">(tag, tensor, max_images=None, collections=None, name=None)</span></span>
+tf.<span class="function"><span class="title">histogram_summary</span><span class="params">(tag, values, collections=None, name=None)</span></span>
+tf<span class="class">.nn</span><span class="class">.zero_fraction</span>(value, name=None)
+tf.<span class="function"><span class="title">merge_summary</span><span class="params">(inputs, collections=None, name=None)</span></span>
+tf.<span class="function"><span class="title">merge_all_summaries</span><span class="params">(key=<span class="string">'summaries'</span>)</span></span>
+</code></pre><p>其中<code>scalar_summary</code>显示任意一个向量的数据，比如学习率或者loss。<br>其中<code>image_summary</code>可以显示节点中的4维的ndarray的数据。<br>其中<code>histogram_summary</code>用来显示多个数据的分布情况<br>以上创建的节点通过<code>merge_all_summaries</code>进行汇总合并。</p>
+<h2 id="SummaryWriter类">SummaryWriter类</h2><p>通过合并汇总后的protobuf对象传递给<code>tf.train.SummaryWriter</code>。其参数<code>logdir</code>指定事件存储路径，<code>GraphDef</code>参数控制显示的图像。并通过session.run和SummaryWriter.add_summary<br>写入。</p>
+<h2 id="Demo">Demo</h2><p>这里我们用一个loss accuracy做一个summary的TensorBoard的demo，代码如下：</p>
+<pre><code><span class="preprocessor"># normal step</span>
+...
+init = tf.initialize_all_variables()
+
+tf.scalar_summary(<span class="string">'loss'</span>, cost)
+tf.scalar_summary(<span class="string">'accuracy'</span>, accuracy)
+merged_summary_op = tf.merge_all_summaries()
+
+<span class="keyword">with</span> tf.Seesion() as sess:
+    sess.<span class="built_in">run</span>(init)
+
+    summary_writer = tf.train.SummaryWriter(<span class="string">'/tmp/logs'</span>, graph_def=sess.graph_def)
+
+    <span class="keyword">while</span> <span class="keyword">step</span> * batch_size &lt; training_iters:
+        batch_xs, batch_ys = mnist.train.next_batch(batch_size)
+        sess.<span class="built_in">run</span>(optimizer, feed_dict={x: batch_xs, y: batch_ys, keep_prob: dropout})
+        <span class="keyword">if</span> <span class="keyword">step</span> % display_step == <span class="number">0</span>:
+            acc = sess.<span class="built_in">run</span>(accuracy, feed_dict={x: batch_xs, y: batch_ys, keep_prob: <span class="number">1.</span>})
+            loss = sess.<span class="built_in">run</span>(cost, feed_dict={x: batch_xs, y: batch_ys, keep_prob: <span class="number">1.</span>})
+
+            summary_str = sess.<span class="built_in">run</span>(merged_summary_op, feed_dict={x: batch_xs, y: batch_ys, keep_prob: <span class="number">1.</span>})
+            summary_writer.add_summary(summary_str, <span class="keyword">step</span>)
+
+        <span class="keyword">step</span> += <span class="number">1</span>
+</code></pre><h2 id="启动TensorBoard">启动TensorBoard</h2><p>执行命令：</p>
+<pre><code>python tensorflow<span class="regexp">/tensorboard/</span>tensorboard.py --logdir=<span class="regexp">/tmp/</span>logs
+</code></pre><p>或者直接执行</p>
+<pre><code>tensorboard <span class="comment">--logdir=/tmp/logs</span>
+</code></pre><p>然后通过浏览器打开<code>localhost:6006</code>，出来可视化界面后，就简单直观了，enjoy it！</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="ciok4nfpa000gg4fhlc14vvq5" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-tensorflow-data" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/05/19/tensorflow-data/" class="article-date">
@@ -179,7 +260,7 @@ y_ = tf.<span class="function"><span class="title">placeholder</span><span class
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cioeaqm3w000k6sfhg668gqtm" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="ciok4nfpa000ng4fh0ox064o4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -250,7 +331,7 @@ python ./models/image/mnist/convolutional.py
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cioeaqm3w000g6sfhxx1a1bll" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="ciok4nfpa000kg4fhkwc2s3k6" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -323,7 +404,7 @@ n = p1.<span class="function"><span class="title">query</span><span class="param
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cioeaqm4i000w6sfhnd3cyipn" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="ciok4nfpp000zg4fh6jdto1xn" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nnsearch/">nnsearch</a></li></ul>
@@ -392,7 +473,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cioeaqm5t001t6sfhbatoz5gp" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="ciok4nfr0001wg4fhp3nse6zb" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/visualization/">visualization</a></li></ul>
@@ -435,7 +516,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cioeaqm5d001h6sfh07vw0qxy" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="ciok4nfql001kg4fh6eccmxg9" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -709,7 +790,7 @@ wget http:<span class="comment">//pjreddie.com/media/files/extraction.conv.weigh
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="cioeaqm5t001x6sfhti6p7nqq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="ciok4nfr00020g4fhzqervzej" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/darknet/">darknet</a></li></ul>
@@ -814,7 +895,7 @@ layer {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cioeaqm68002h6sfhcxxoizmx" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="ciok4nfrm002kg4fh76uzx3xz" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -997,7 +1078,7 @@ awk <span class="string">'{print vara}'</span> vara=$<span class="keyword">var</
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cioeaqm4x00186sfhfac8gipc" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="ciok4nfql001bg4fhvvbmoj7c" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell/">shell</a></li></ul>
@@ -1057,67 +1138,10 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cioeaqm4f000n6sfhpmy75oov" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="ciok4nfpp000qg4fhh41hnrk9" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-ml-skill" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/02/18/ml-skill/" class="article-date">
-  <time datetime="2016-02-18T13:23:36.000Z" itemprop="datePublished">2016-02-18</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/02/18/ml-skill/">机器学习技巧总结</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="SVM_vs_Logistic_Regression">SVM vs Logistic Regression</h3><ol>
-<li>逻辑回归和线性核SVM本质上其实没啥区别；</li>
-<li>特征数大于样本数或者二者数量相当时，逻辑回归或者线性核SVM会有比较好的效果；</li>
-<li>特征数较少，样本数一般多时，高斯核SVM会有比较好的效果；</li>
-<li>特征少，样本特别多时，构建更多的特征，然后用逻辑回归或者线性核SVM</li>
-</ol>
-<h3 id="调参技巧">调参技巧</h3><p>解决测试误差较大的办法</p>
-<ol>
-<li>增加训练样本 -&gt; 降低方差</li>
-<li>减少特征数量 -&gt; 降低方差</li>
-<li>增加新特征 -&gt; 降低偏差</li>
-<li>现有特征多项式组合(x1^2, x2^2, x1*x2等等) -&gt; 降低偏差</li>
-<li>降低正则λ -&gt; 降低偏差</li>
-<li>增加正则λ -&gt; 降低方差</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cioeaqm4x00146sfh7tz2puxv" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
 
     </footer>
   </div>
@@ -1139,7 +1163,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">11</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">12</span></li></ul>
     </div>
   </div>
 
@@ -1148,7 +1172,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">4</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">4</span></li></ul>
     </div>
   </div>
 
@@ -1166,7 +1190,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -1176,6 +1200,10 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/05/23/tensorflow-tensorboard/">tensorflow学习（三）TensorBoard可视化</a>
+          </li>
         
           <li>
             <a href="/2016/05/19/tensorflow-data/">tensorflow学习（二）数据接口</a>
@@ -1191,10 +1219,6 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
         
           <li>
             <a href="/2016/04/07/data-visualization/">数据可视化</a>
-          </li>
-        
-          <li>
-            <a href="/2016/03/30/good-site/">good_site</a>
           </li>
         
       </ul>

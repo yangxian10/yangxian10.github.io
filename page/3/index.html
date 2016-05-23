@@ -65,6 +65,264 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-caffe-setup2" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/08/18/caffe-setup2/" class="article-date">
+  <time datetime="2015-08-18T15:22:33.000Z" itemprop="datePublished">2015-08-18</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/08/18/caffe-setup2/">caffe学习（三）caffe + centOS 7 + CUDA 7配置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这次全程记录centOS 7 的配置安装过程</p>
+<h2 id="开发环境">开发环境</h2><p>虽然它这么好用，安装它可不是一个省心的事，最好的参考资料还是官网安装资料<a href="http://caffe.berkeleyvision.org/installation.html" target="_blank" rel="external">http://caffe.berkeleyvision.org/installation.html</a>，配置之前先查看一下自己的软硬件环境</p>
+<h3 id="dns配置">dns配置</h3><p>google之，不多介绍，注意centos 7的dns设置与之前的版本不同</p>
+<h3 id="查看显卡">查看显卡</h3><p>我们的显卡是K40（没显卡也能玩caffe）,可以看到是4个k40m显卡。。。。我口水直流(<em>@ο@</em>) </p>
+<pre><code>lspci <span class="string">|grep -i nvidia</span>
+</code></pre><h3 id="查看linux版本">查看linux版本</h3><p>Linux服务器版本是centOS 7，查看服务器系统版本命令</p>
+<pre><code>cat <span class="regexp">/etc/</span>redhat-release
+</code></pre><h3 id="安装python">安装python</h3><p>python2.7升级到Anaconda版本<a href="https://3230d63b5fc54e62148e-c95ac804525aac4b6dba79b00b39d1d3.ssl.cf1.rackcdn.com/Anaconda-2.3.0-Linux-x86_64.sh" target="_blank" rel="external">Anaconda-2.3.0-Linux-x86_64.sh</a>下载后直接运行即可，numpy,scipy,scikit-learn等相关软件就都配置好了。记得生效一下环境变量<code>source ~/.bashrc</code>。Anaconda直接把python升级到2.7版本，同时安装好了所有相关依赖包，简直完美啊，解决了python多版本共存的问题，同时一键安装python和相关插件，并且配置好了相关环境变量，同时还是64位版本的python，强烈推荐。</p>
+<h3 id="安装cmake">安装cmake</h3><p>再把cmake升级到2.8.12版本，centos 7 的yum只能升级到2.8.11版本</p>
+<pre><code><span class="preprocessor"># 先安装依赖</span>
+yum install gcc
+yum install gcc-c++
+<span class="preprocessor"># 下载安装包</span>
+tar xvf cmake-<span class="number">2.8</span><span class="number">.12</span><span class="number">.1</span>.tar.gz
+cd cmake-<span class="number">2.8</span><span class="number">.12</span><span class="number">.1</span>/
+./configure
+make
+make install
+vim /etc/profile
+<span class="preprocessor">###########[profile末尾添加]</span>
+PATH=/usr/local/cmake/bin:$PATH
+<span class="keyword">export</span> PATH
+<span class="preprocessor">#############关闭文件</span>
+source /etc/profile
+<span class="preprocessor">########查看是否安装好</span>
+cmake --version
+</code></pre><h2 id="安装CUDA和MKL">安装CUDA和MKL</h2><p>这两个商用软件安装相对容易</p>
+<h3 id="CUDA_7">CUDA 7</h3><p>下载CUDA 7<a href="https://developer.nvidia.com/cuda-downloads" target="_blank" rel="external">https://developer.nvidia.com/cuda-downloads</a></p>
+<pre><code>yum install kernel-devel
+init <span class="number">3</span>         <span class="comment"># 关闭GUI</span>
+./cuda_7.<span class="number">0.28_</span>linux.run
+init <span class="number">5</span>         <span class="comment"># 开启GUI</span>
+vim /etc/profile
+<span class="comment">#############[profile]</span>
+export <span class="constant">PATH</span>=<span class="variable">$PATH</span><span class="symbol">:/usr/local/cuda-</span><span class="number">7.0</span>/bin
+export <span class="constant">LD_LIBRARY_PATH</span>=<span class="variable">$LD_LIBRARY_PATH</span><span class="symbol">:/usr/local/cuda-</span><span class="number">7.0</span>/lib64
+<span class="comment">#############[close profile]</span>
+source /etc/profile
+</code></pre><p>PS:目前我只在CentOS 7.0配置成功，在7.1和7.2版本会出现如下错误导致CUDA安装失败这里记录一下网上的解决方案：显卡驱动安装不成功，解决方法，先卸载系统已载入的显卡相关模块，同时指定kernel-source-path的路径，如下</p>
+<pre><code>lsmod |grep nouveau <span class="preprocessor"># 发现存在相关模块</span>
+modprobe -r nouveau <span class="preprocessor"># 卸载相关模块</span>
+./cuda_7<span class="number">.0</span><span class="number">.28</span>_linux.run --kernel-source-path=<span class="string">"/usr/src/kernels/03.10.0-xxxxxx"</span>
+</code></pre><p>根据caffe的官方最新提示，CUDA和显卡驱动最好分开安装，不然CUDA自带的显卡驱动不是最近版本，可能使用的时候会出问题，先装显卡驱动，去官网下载<a href="http://www.nvidia.com/download/driverResults.aspx/92135/en-us" target="_blank" rel="external">http://www.nvidia.com/download/driverResults.aspx/92135/en-us</a></p>
+<pre><code>vim /<span class="class"><span class="keyword">lib</span>/<span class="title">modprobe</span>.<span class="title">d</span>/<span class="title">dist</span>-<span class="title">blacklist</span>.<span class="title">conf</span></span>
+<span class="comment">########################[change]</span>
+<span class="comment">#blacklist nvidiafb #注释掉nvidiafb，否则cuda安装报错nvidia.ko</span>
+<span class="comment">########################[close]</span>
+vim /etc/modprobe.d/blacklist-nouveau.conf
+<span class="comment">########################[added]</span>
+blacklist nouveau
+options nouveau modeset=<span class="number">0</span>
+<span class="comment">########################[close]</span>
+dracut --force
+mv /boot/initramfs-<span class="variable">$(</span>uname -r).img /boot/initramfs-<span class="variable">$(</span>uname -r).img.bak
+dracut /boot/initramfs-<span class="variable">$(</span>uname -r).img <span class="variable">$(</span>uname -r)
+</code></pre><p>init 3和init 5在最新的centOS里并不生效，取而代之的是graphical.target(5)和multi-user.target(3)。</p>
+<pre><code>systemctl <span class="keyword">get</span>-default <span class="comment">#查看运行级别</span>
+systemctl <span class="keyword">set</span>-default multi-user.target <span class="comment">#切换为文本模式</span>
+reboot
+./NVIDIA-XXXX.<span class="command">run</span> <span class="comment">--kernel-source-path=/usr/src/kernels/内核号 -k $(uname -r) #最后面的-k参数是可以解决bug: unable to load the kernel module 'nvidia.ko'</span>
+</code></pre><p>接下来，验证CUDA是否安装好</p>
+<pre><code>nvcc -V     <span class="comment"># 验证nvidia-CUDA-Toolkit是否安装好</span>
+<span class="built_in">cd</span> ~/NVIDIA_CUDA-<span class="number">7.0</span>_Samples
+make
+<span class="built_in">cd</span> bin/x86_64/linux/release
+./deviceQuery
+</code></pre><p>从输出的信息就可以判断是否安装好CUDA</p>
+<h3 id="intel_MKL">intel MKL</h3><p>下载intel MKL，解压后执行</p>
+<pre><code>tar xzvf parallel_studio_xe_2015.tgz
+cd parallel_studio_xe_2015
+./install.sh
+<span class="comment"># 偷偷记录一下自己的序列号SGZG-6NRGK57H</span>
+vim /etc/ld.so.conf.d/intel_mkl.conf
+<span class="comment">###############[intel_mkl.conf]</span>
+/opt/intel/mkl/<span class="class"><span class="keyword">lib</span>/<span class="title">intel64</span></span>
+<span class="comment">###############[close intel_mkl.conf]</span>
+ldconfig
+vim /etc/profile
+<span class="comment">############[profile]</span>
+export <span class="constant">LD_LIBRARY_PATH</span>=<span class="variable">$LD_LIBRARY_PATH</span><span class="symbol">:/opt/intel/mkl/lib</span> 
+<span class="comment"># 或者直接把/opt/intel/mkl/lib copy到/usr/local/lib</span>
+<span class="comment">############[close profile]</span>
+source /etc/profile
+</code></pre><h2 id="依赖库安装">依赖库安装</h2><h3 id="Install_protobuf">Install protobuf</h3><p>protobuf是谷歌开发的一种实现内存外存交换的协议接口，在这个统一的通讯协议下不同开发者可以使用自己喜欢的方式进行模型参数的管理。<br>上网下载protobuf2.6.1版本, anaconda的python对应的依赖包要求protobuf是2.6.1版本，弄错了是不行的。解压后，</p>
+<pre><code>yum install autoconf automake libtool
+tar xzvf protobuf-2.6.1.tar.gz
+cd protobuf-2.6.1
+<span class="keyword">.</span>/autogen.sh
+<span class="keyword">.</span>/configure
+make
+make<span class="instruction"> check
+</span>make install
+</code></pre><p>或者直接<code>pip install protobuf</code>，发现版本刚好也是2.6.1</p>
+<h3 id="Install_boost">Install boost</h3><p>anaconda没有包含boost，anaconda要求的boost版本为1.57</p>
+<pre><code># download <span class="keyword">boost_1_57_0.tar.bz2
+</span><span class="label">tar</span> xvf <span class="keyword">boost_1_57_0.tar.bz2
+</span><span class="label">cd</span> <span class="keyword">boost_1_57_0
+</span>./<span class="keyword">bootstrap.sh
+</span>./<span class="keyword">b2
+</span>./<span class="keyword">b2 </span>install
+</code></pre><h3 id="Install_leveldb">Install leveldb</h3><pre><code>pip install leveldb
+<span class="preprocessor"># git clone https://github.com/google/leveldb.git</span>
+<span class="preprocessor"># cd leveldb/</span>
+<span class="preprocessor"># make</span>
+<span class="preprocessor"># cp -d out-shared/libleveldb* /usr/lib/</span>
+<span class="preprocessor"># cp -r include/leveldb/ /usr/local/include</span>
+</code></pre><h3 id="Install_snappy">Install snappy</h3><p><code>yum install snappy</code>发现centos7 已经给安装好了</p>
+<h3 id="Install_lmdb">Install lmdb</h3><pre><code>pip <span class="keyword">install</span> lmdb
+</code></pre><h3 id="Install_hdf5">Install hdf5</h3><p>下载hdf5</p>
+<pre><code>tar xvf hdf5-1.8.5-patch1.tar
+cd hdf5-1.8.5-patch.tar
+<span class="keyword">.</span>/configure --prefix=/opt/hdf5
+make
+make<span class="instruction"> check
+</span>make install
+make<span class="instruction"> check-install
+</span>vim /etc/profile
+<span class="comment">############[profile]</span>
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/hdf5/lib
+<span class="comment"># 或者直接把/opt/hdf5/lib copy到/usr/local/lib</span>
+<span class="comment">############[close profile]</span>
+source /etc/profile
+</code></pre><h3 id="其他依赖库">其他依赖库</h3><p>其他依赖库按照官网说法，先试了一遍</p>
+<pre><code>yum <span class="keyword">install</span> snappy-devel opencv-devel boost-devel
+yum <span class="keyword">install</span> python-devel
+yum <span class="keyword">install</span> protobuf-devel leveldb-devel hdf5-devel <span class="comment"># 这几个包不行</span>
+yum <span class="keyword">install</span> gflags-devel glog-devel lmdb-devel <span class="comment"># 这几个包也不行</span>
+</code></pre><p>关于gflags, glog, lmdb的解决方案，官网给出了</p>
+<pre><code># glog
+wget http<span class="variable">s:</span>//google-glog.googlecode.<span class="keyword">com</span>/<span class="keyword">files</span>/glog-<span class="number">0.3</span>.<span class="number">3</span>.tar.gz
+tar zxvf glog-<span class="number">0.3</span>.<span class="number">3</span>.tar.gz
+<span class="keyword">cd</span> glog-<span class="number">0.3</span>.<span class="number">3</span>
+./configure
+<span class="keyword">make</span> &amp;&amp; <span class="keyword">make</span> install
+# gflags
+wget http<span class="variable">s:</span>//github.<span class="keyword">com</span>/schuhschuh/gflags/archive/master.zip
+unzip master.zip
+<span class="keyword">cd</span> gflags-master
+<span class="built_in">mkdir</span> build &amp;&amp; <span class="keyword">cd</span> build
+export CXXFLAGS=<span class="string">"-fPIC"</span> &amp;&amp; cmake .. &amp;&amp; <span class="keyword">make</span> VERBOSE=<span class="number">1</span>
+<span class="keyword">make</span> &amp;&amp; <span class="keyword">make</span> install
+# lmdb
+git clone http<span class="variable">s:</span>//github.<span class="keyword">com</span>/LMDB/lmdb
+<span class="keyword">cd</span> lmdb/libraries/liblmdb
+<span class="keyword">make</span> &amp;&amp; <span class="keyword">make</span> install
+</code></pre><p>补充一下，上面的配置有可能编译caffe的时候出现如下报错：<code>error while loading shared libraries: libgflag.so.0</code>，要在gflag的cmake的时候使用如下参数</p>
+<pre><code>cmake -DCMAKE_INSTALL_PREFIX=/usr/<span class="keyword">local</span> -DBUILD_SHARED_LIBS=<span class="keyword">ON</span> -DGFLAGS_NAMESPACE=google -<span class="keyword">G</span><span class="string">"Unix Makefiles"</span> ../
+</code></pre><p>如果报错为<code>error while loading shared libraries: libglog.so.0</code>，则要增加如下设置</p>
+<pre><code>cat /etc/ld<span class="class">.so</span><span class="class">.conf</span>  
+echo <span class="string">"/usr/local/lib"</span> &gt;&gt; /etc/ld<span class="class">.so</span><span class="class">.conf</span>
+ldconfig
+</code></pre><p>但是有几个包是不行的，<code>protobuf-devel</code>, <code>leveldb-devel</code>, <code>hdf5-devel</code>找不到<br>刚才已经下载protobuf, leveldb, hdf5, 暂时先不管这几个devel了</p>
+<h2 id="安装OpenCV">安装OpenCV</h2><p>安装了这么多年OpenCV，头一次遇到这么大坑，先尝试了大家推荐的shell一键安装</p>
+<pre><code>git clone http<span class="variable">s:</span>//github.<span class="keyword">com</span>/jayrambhia/Install-OpenCV
+<span class="keyword">cd</span> Install-OpenCV-master/RedHat
+./opencv_latest.<span class="keyword">sh</span>
+</code></pre><p>要注意downloading ippicv_linux_20140513.tgz的时候耗时很久，要耐心等待。<br>但是在编译caffe的时候还是报错，回来重新安装opencv2.4.11</p>
+<pre><code>cd ~/opencv
+mkdir <span class="operator"><span class="keyword">release</span>
+cd <span class="keyword">release</span>
+cmake -<span class="keyword">D</span> CMAKE_BUILD_TYPE=<span class="keyword">RELEASE</span> -<span class="keyword">D</span> CMAKE_INSTALL_PREFIX=/usr/<span class="keyword">local</span> -<span class="keyword">D</span> CUDA_GENERATION=Kepler ..
+make
+sudo make <span class="keyword">install</span></span>
+</code></pre><p>执行python模块</p>
+<pre><code>yum <span class="keyword">install</span> opencv-python
+</code></pre><p>测试python下import cv2检测是否安装成功（自带的python已经配置好opencv，anaconda不能import cv2）,解决办法如下:</p>
+<pre><code>cp /usr/local/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">cv2</span>.<span class="title">so</span> /<span class="title">root</span>/<span class="title">anaconda</span>/<span class="title">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span></span>
+cp /usr/local/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">cv</span>.<span class="title">py</span> /<span class="title">root</span>/<span class="title">anaconda</span>/<span class="title">lib</span>/<span class="title">python2</span>.7/</span>
+</code></pre><h2 id="安装caffe">安装caffe</h2><p>进入到caffe的工作目录</p>
+<pre><code>git clone <span class="symbol">https:</span>/<span class="regexp">/github.com/</span><span class="constant">BVLC</span>/caffe
+cd caffe
+cp <span class="constant">Makefile</span>.config.example <span class="constant">Makefile</span>.config
+vim <span class="constant">Makefile</span>.config
+<span class="comment">###############[Makefile.config]</span>
+<span class="constant">BLAS</span> <span class="symbol">:</span>= mkl
+
+<span class="constant">PYTHON_INCLUDE</span> <span class="symbol">:</span>= <span class="regexp">/root/anaconda</span><span class="regexp">/include/python</span>2.<span class="number">7</span> \
+    /root/anaconda/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">numpy</span>/<span class="title">core</span>/<span class="title">include</span>/ \</span>
+<span class="constant">PYTHON_LIB</span> <span class="symbol">:</span>= <span class="regexp">/root/anaconda</span><span class="regexp">/pkgs/python</span>-<span class="number">2.7</span>.<span class="number">10</span>-<span class="number">0</span>/<span class="class"><span class="keyword">lib</span></span>
+<span class="constant">INCLUDE_DIRS</span> <span class="symbol">:</span>= <span class="variable">$(</span><span class="constant">PYTHON_INCLUDE</span>) /usr/local/<span class="keyword">include</span> \
+        /opt/hdf5/<span class="keyword">include</span> \
+        /opt/intel/mkl/<span class="keyword">include</span> \
+<span class="constant">LIBRARY_DIRS</span> <span class="symbol">:</span>= <span class="variable">$(</span><span class="constant">PYTHON_LIB</span>) /usr/local/<span class="class"><span class="keyword">lib</span> /<span class="title">usr</span>/<span class="title">lib</span> \</span>
+        /opt/hdf5/<span class="class"><span class="keyword">lib</span> \</span>
+        /opt/intel/mkl/<span class="class"><span class="keyword">lib</span> \</span>
+<span class="comment">###############[close Makefile.config]</span>
+make all -j8
+make test -j8
+make runtest -j8
+</code></pre><p>-j8选项可以提高编译速度，不是必须的，如果在runtest时候一片绿色，没报错，恭喜，说明caffe已经配置好了，可以愉快的使用了。<br>实测solverTest会fail，由于是Test模块，先不理会，估计是caffe的代码版本没统一，不影响使用</p>
+<h2 id="测试MNIST">测试MNIST</h2><p>进入到caffe根目录下，执行如下操作</p>
+<pre><code>./<span class="keyword">data</span>/mnist/get_mnist.sh               <span class="comment"># 下载minst数据库</span>
+./examples/mnist/create_mnist.sh        <span class="comment"># 把数据转成lmdb格式</span>
+./examples/mnist/train_lenet.sh         <span class="comment"># 训练mnist</span>
+</code></pre><p>从输出结果看到，test集上得到99.2%的正确率，还是很不错的。</p>
+<h2 id="其他说明">其他说明</h2><h3 id="pycaffe配置">pycaffe配置</h3><pre><code><span class="built_in">make</span> pycaffe
+</code></pre><p>编译成功了，简直酸爽。<br>最后配置一下环境变量,~/.bashrc添加</p>
+<pre><code>export PYTHONPATH=/xxxxxxxxx/caffe/python:<span class="variable">$PYTHONPATH</span>
+</code></pre><p>python环境下</p>
+<pre><code><span class="preprocessor"><span class="keyword">import</span> caffe</span>
+</code></pre><p>检测caffe-python是否配置好</p>
+<h3 id="cuDNN">cuDNN</h3><pre><code>tar xzvf cudnn-<span class="number">7.0</span>-linux-x64-v3.<span class="number">0</span>-rc.tgz
+cd cuda
+cp <span class="keyword">include</span>/* <span class="regexp">/usr/local</span><span class="regexp">/cuda/include</span>
+cp -d lib64/* <span class="regexp">/usr/local</span><span class="regexp">/cuda/lib</span>64        <span class="comment"># -d 保留link file的属性</span>
+</code></pre><p>在caffe根目录的<code>Makefile.config</code>中把<code>USE_CUDNN := 1</code>的屏蔽取消，然后<code>make all</code>即可。</p>
+<h2 id="Linux多用户管理">Linux多用户管理</h2><p>为了创建一个用户组，并把工作成员都加到这个组，并提升用户sudo权限，提升权限的时候记住最前面的%非常有用，加上才能对组生效，最后设置组内成员能够相互访问彼此目录</p>
+<pre><code>groupadd imgergroup
+useradd -g imgergroup imger1
+passwd imger1
+vim /etc/sudoers
+<span class="comment">######</span><span class="comment">######</span><span class="comment">######</span><span class="comment">####[sudoers]
+%imgergroup       ALL=(ALL)       ALL
+###</span><span class="comment">######</span><span class="comment">######</span><span class="comment">######</span><span class="comment">#[close]</span>
+cd /home
+chmod -R +r *
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="ciok4nfr00024g4fhbcm9c3xn" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-caffe-dataprepare" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2015/08/15/caffe-dataprepare/" class="article-date">
@@ -131,7 +389,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cioeaqm68002e6sfhbax7k8i3" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="ciok4nfrm002hg4fhi8ohskub" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -255,7 +513,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cioeaqm5t00256sfhhb0l5731" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="ciok4nfrj0028g4fht47c8f7m" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -369,7 +627,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cioeaqm3g00056sfho2pvdj5m" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="ciok4nfo80005g4fhdg9px5ih" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -429,7 +687,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cioeaqm3w000d6sfhuaom5ig0" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="ciok4nfpa000dg4fh9wduyb73" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -490,7 +748,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cioeaqm3w000a6sfhoy9w43cw" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="ciok4nfou000ag4fhs9233qbb" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -537,7 +795,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="cioeaqm5d001g6sfh5bfz6b92" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="ciok4nfql001jg4fhhkw8mnsg" class="article-share-link">Share</a>
       
       
     </footer>
@@ -560,7 +818,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">11</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">12</span></li></ul>
     </div>
   </div>
 
@@ -569,7 +827,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">4</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">4</span></li></ul>
     </div>
   </div>
 
@@ -587,7 +845,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -597,6 +855,10 @@ ldconfig
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/05/23/tensorflow-tensorboard/">tensorflow学习（三）TensorBoard可视化</a>
+          </li>
         
           <li>
             <a href="/2016/05/19/tensorflow-data/">tensorflow学习（二）数据接口</a>
@@ -612,10 +874,6 @@ ldconfig
         
           <li>
             <a href="/2016/04/07/data-visualization/">数据可视化</a>
-          </li>
-        
-          <li>
-            <a href="/2016/03/30/good-site/">good_site</a>
           </li>
         
       </ul>
