@@ -327,7 +327,17 @@ print sess.<span class="function"><span class="title">run</span><span class="par
 <pre><code>cd <span class="variable">$HOME</span>/anaconda/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">tensorflow</span></span>
 python ./models/image/mnist/convolutional.py
 </code></pre><p>程序会下载mnist数据集，迭代训练，显示当前loss、学习率以及误差。</p>
-
+<h2 id="GLIBC的版本问题解决方案">GLIBC的版本问题解决方案</h2><p>在CentOS/RHEL 6的操作系统中，GLIBC的版本可能不满足tensorflow的要求，在<code>import tensorflow</code>的时候会报错</p>
+<pre><code>ImportError: /lib64/libc.<span class="keyword">so</span>.6: <span class="keyword">version</span> `GLIBC_2.15' not found (required <span class="keyword">by</span> /home/15072585/anaconda/lib/python2.7/site-packages/tensorflow/python/_pywrap_tensorflow.<span class="keyword">so</span>)
+</code></pre><p>通过命令查看<code>/lib64/libc.so.6</code>的GLIBC版本：</p>
+<pre><code>strings <span class="regexp">/lib64/</span>libc.so.<span class="number">6</span> |<span class="keyword">grep</span> GLIBC
+</code></pre><p>可以看到其只支持到2.12，不能支持高版本。</p>
+<h3 id="GLIBC版本升级注意事项">GLIBC版本升级注意事项</h3><p>注意GLIBC这是一个根本的库，不能轻易升级。非要升级的话，首先查看当前的libc的指向</p>
+<pre><code>ll /lib64/libc<span class="class">.so</span>.<span class="number">6</span>
+</code></pre><p>获取高级版本的libc.so，比如/lib64/libc-2.15.so，这个步骤非常繁琐，编译生成很麻烦。我是通过从另外高级版本的机器copy过来使用的，所以没有生成，过程隐去。<br>接下来就是将软链接指向新的libc，实际操作注意rm原来的链接之后，系统的大部分命令都无法使用了，要用<code>LD_PRELOAD=/lib64/libc-2.15.so</code>指定所使用的libc才能运行shell命令。代码如下：</p>
+<pre><code>rm -rf /lib64/libc.so.<span class="number">6</span>
+LD_PRELOAD=<span class="regexp">/lib64/libc</span>-<span class="number">2.15</span>.so ln -<span class="regexp">s/lib64/libc-2.15.so  lib64/libc</span>.so.<span class="number">6</span>
+</code></pre>
       
     </div>
     <footer class="article-footer">
