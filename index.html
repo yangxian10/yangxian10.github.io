@@ -331,8 +331,18 @@ python ./models/image/mnist/convolutional.py
 <pre><code>ImportError: /lib64/libc.<span class="keyword">so</span>.6: <span class="keyword">version</span> `GLIBC_2.15' not found (required <span class="keyword">by</span> /home/15072585/anaconda/lib/python2.7/site-packages/tensorflow/python/_pywrap_tensorflow.<span class="keyword">so</span>)
 </code></pre><p>通过命令查看<code>/lib64/libc.so.6</code>的GLIBC版本：</p>
 <pre><code>strings <span class="regexp">/lib64/</span>libc.so.<span class="number">6</span> |<span class="keyword">grep</span> GLIBC
-</code></pre><p>可以看到其只支持到2.12，不能支持高版本。</p>
-<h3 id="GLIBC版本升级注意事项">GLIBC版本升级注意事项</h3><p>注意GLIBC这是一个根本的库，不能轻易升级。非要升级的话，首先查看当前的libc的指向</p>
+</code></pre><p>可以看到其只支持到2.12，不能支持高版本。解决方案：</p>
+<pre><code>mkdir ~/my_libc_env
+cd ~/my_libc_env
+wget http:<span class="comment">//launchpadlibrarian.net/137699828/libc6_2.17-0ubuntu5_amd64.deb</span>
+wget http:<span class="comment">//launchpadlibrarian.net/137699829/libc6-dev_2.17-0ubuntu5_amd64.deb</span>
+wget ftp:<span class="comment">//rpmfind.net/linux/sourceforge/m/ma/magicspecs/apt/3.0/x86_64/RPMS.lib/libstdc++-4.8.2-7mgc30.x86_64.rpm</span>
+ar p libc6_2<span class="number">.17</span>-<span class="number">0u</span>buntu5_amd64.deb data.tar.gz | tar zx
+ar p libc6-dev_2<span class="number">.17</span>-<span class="number">0u</span>buntu5_amd64.deb data.tar.gz | tar zx
+rpm2cpio libstdc++-<span class="number">4.8</span><span class="number">.2</span>-<span class="number">7</span>mgc30.x86_64.rpm| cpio -idmv
+</code></pre><p>以后想执行支持tensorflow的python版本的时候需要执行命令：</p>
+<pre><code><span class="constant">LD_LIBRARY_PATH</span>=<span class="string">"$HOME/my_libc_env/lib/x86_64-linux-gnu/:$HOME/my_libc_env/usr/lib64/"</span> <span class="variable">$HOME</span>/my_libc_env/<span class="class"><span class="keyword">lib</span>/<span class="title">x86_64</span>-<span class="title">linux</span>-<span class="title">gnu</span>/<span class="title">ld</span>-2.17.<span class="title">so</span> `<span class="title">which</span> <span class="title">python</span>`</span>
+</code></pre><h3 id="GLIBC版本升级注意事项">GLIBC版本升级注意事项</h3><p>注意GLIBC这是一个根本的库，不能轻易升级。非要升级的话，首先查看当前的libc的指向</p>
 <pre><code>ll /lib64/libc<span class="class">.so</span>.<span class="number">6</span>
 </code></pre><p>获取高级版本的libc.so，比如/lib64/libc-2.15.so，这个步骤非常繁琐，编译生成很麻烦。我是通过从另外高级版本的机器copy过来使用的，所以没有生成，过程隐去。<br>接下来就是将软链接指向新的libc，实际操作注意rm原来的链接之后，系统的大部分命令都无法使用了，要用<code>LD_PRELOAD=/lib64/libc-2.15.so</code>指定所使用的libc才能运行shell命令。代码如下：</p>
 <pre><code>rm -rf /lib64/libc.so.<span class="number">6</span>
