@@ -15,7 +15,7 @@ mnist =">
 <meta property="og:description" content="网上的教程、官方的资料大多关注的都是如何使用模型，对于数据源的说明都比较简单。基本资料都是用的MNIST数据集做的实验。
 供给数据概述tensorflow的模型数据读取还是非常友好的，最适合大量的数据的变量操作的形式应该是feed机制，利用tf.placeholder()为操作的变量创建占位符，在run()或eval()的时候调用参数，将变量x和其真实标签y_传入模型。代码如下：
 mnist =">
-<meta property="og:updated_time" content="2016-05-19T12:51:25.855Z">
+<meta property="og:updated_time" content="2016-05-31T13:18:57.660Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="tensorflow学习（二）数据接口">
 <meta name="twitter:description" content="网上的教程、官方的资料大多关注的都是如何使用模型，对于数据源的说明都比较简单。基本资料都是用的MNIST数据集做的实验。
@@ -176,7 +176,7 @@ y_ = tf.<span class="function"><span class="title">placeholder</span><span class
         filename_queue = tf.train.string_input_producer([filename], num_epochs=num_epochs)
         image, label = read_and_decode(filename_queue)
 
-        <span class="keyword">return</span> images, sparse_labels
+        <span class="keyword">return</span> image, label
 </code></pre><h2 id="批处理">批处理</h2><p>TBD</p>
 <h2 id="创建线程并使用QueueRunner对象来预取">创建线程并使用QueueRunner对象来预取</h2><p>TBD</p>
 <h2 id="参考资料">参考资料</h2><p><a href="http://wiki.jikexueyuan.com/project/tensorflow-zh/how_tos/reading_data.html" target="_blank" rel="external">http://wiki.jikexueyuan.com/project/tensorflow-zh/how_tos/reading_data.html</a></p>

@@ -17,7 +17,7 @@
 权重初始化def weight_variable(shape):
     initial = tf.truncated_normal(shape, dtype=tf.float32, stddev=0.1)
     return tf.Variable(initial)">
-<meta property="og:updated_time" content="2016-05-28T09:16:37.067Z">
+<meta property="og:updated_time" content="2016-05-31T13:20:31.280Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="tensorflow学习（四）自己创建CNN网络">
 <meta name="twitter:description" content="之前已经介绍过数据的加载和可视化的问题，这次该研究模型了。CNN网络应该是深度学习的一个经典了，话不多说，直接介绍核心模块。
@@ -176,7 +176,6 @@ acc = sess.<span class="function"><span class="title">run</span><span class="par
 mnist = input_data.read_data_sets(<span class="string">'MNIST_data'</span>, one_hot=<span class="keyword">True</span>)
 
 <span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf
-
 <span class="comment"># Parameters</span>
 learning_rate = <span class="number">0.001</span>
 training_iters = <span class="number">200000</span>
@@ -228,7 +227,7 @@ keep_prob = tf.placeholder(tf.float32) <span class="comment"># dropout (keep pro
     pool2 = max_pool(conv2, k=<span class="number">2</span>, name=<span class="string">'pool2'</span>)
     norm2 = norm(pool2, lsize=<span class="number">4</span>, name=<span class="string">'norm2'</span>)
 
-    pool2_flat = tf.reshape(pool2, [-<span class="number">1</span>, _weights[<span class="string">'wd1'</span>].get_shape().as_list()[<span class="number">0</span>]])
+    pool2_flat = tf.reshape(norm2, [-<span class="number">1</span>, _weights[<span class="string">'wd1'</span>].get_shape().as_list()[<span class="number">0</span>]])
     fc1 = tf.nn.relu(tf.matmul(pool2_flat, _weights[<span class="string">'wd1'</span>]) + _biases[<span class="string">'bd1'</span>])
     fc1_drop = tf.nn.dropout(fc1, _dropout)
 
@@ -241,9 +240,9 @@ keep_prob = tf.placeholder(tf.float32) <span class="comment"># dropout (keep pro
 weights = {
     <span class="string">'wc1'</span>: weight_variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">64</span>]),
     <span class="string">'wc2'</span>: weight_variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">64</span>, <span class="number">128</span>]),
-    <span class="string">'wd1'</span>: weight_variable([<span class="number">4</span>*<span class="number">4</span>*<span class="number">128</span>, <span class="number">1024</span>]),
+    <span class="string">'wd1'</span>: weight_variable([<span class="number">7</span>*<span class="number">7</span>*<span class="number">128</span>, <span class="number">1024</span>]),
     <span class="string">'wd2'</span>: weight_variable([<span class="number">1024</span>, <span class="number">1024</span>]),
-    <span class="string">'out'</span>: weight_variable([<span class="number">1024</span>, n_classes])
+    <span class="string">'out'</span>: weight_variable([<span class="number">1024</span>, <span class="number">10</span>])
 }
 biases = {
     <span class="string">'bc1'</span>: bias_variable([<span class="number">64</span>]),

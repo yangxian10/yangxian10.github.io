@@ -168,7 +168,6 @@ acc = sess.<span class="function"><span class="title">run</span><span class="par
 mnist = input_data.read_data_sets(<span class="string">'MNIST_data'</span>, one_hot=<span class="keyword">True</span>)
 
 <span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf
-
 <span class="comment"># Parameters</span>
 learning_rate = <span class="number">0.001</span>
 training_iters = <span class="number">200000</span>
@@ -220,7 +219,7 @@ keep_prob = tf.placeholder(tf.float32) <span class="comment"># dropout (keep pro
     pool2 = max_pool(conv2, k=<span class="number">2</span>, name=<span class="string">'pool2'</span>)
     norm2 = norm(pool2, lsize=<span class="number">4</span>, name=<span class="string">'norm2'</span>)
 
-    pool2_flat = tf.reshape(pool2, [-<span class="number">1</span>, _weights[<span class="string">'wd1'</span>].get_shape().as_list()[<span class="number">0</span>]])
+    pool2_flat = tf.reshape(norm2, [-<span class="number">1</span>, _weights[<span class="string">'wd1'</span>].get_shape().as_list()[<span class="number">0</span>]])
     fc1 = tf.nn.relu(tf.matmul(pool2_flat, _weights[<span class="string">'wd1'</span>]) + _biases[<span class="string">'bd1'</span>])
     fc1_drop = tf.nn.dropout(fc1, _dropout)
 
@@ -233,9 +232,9 @@ keep_prob = tf.placeholder(tf.float32) <span class="comment"># dropout (keep pro
 weights = {
     <span class="string">'wc1'</span>: weight_variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">64</span>]),
     <span class="string">'wc2'</span>: weight_variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">64</span>, <span class="number">128</span>]),
-    <span class="string">'wd1'</span>: weight_variable([<span class="number">4</span>*<span class="number">4</span>*<span class="number">128</span>, <span class="number">1024</span>]),
+    <span class="string">'wd1'</span>: weight_variable([<span class="number">7</span>*<span class="number">7</span>*<span class="number">128</span>, <span class="number">1024</span>]),
     <span class="string">'wd2'</span>: weight_variable([<span class="number">1024</span>, <span class="number">1024</span>]),
-    <span class="string">'out'</span>: weight_variable([<span class="number">1024</span>, n_classes])
+    <span class="string">'out'</span>: weight_variable([<span class="number">1024</span>, <span class="number">10</span>])
 }
 biases = {
     <span class="string">'bc1'</span>: bias_variable([<span class="number">64</span>]),
@@ -480,7 +479,7 @@ y_ = tf.<span class="function"><span class="title">placeholder</span><span class
         filename_queue = tf.train.string_input_producer([filename], num_epochs=num_epochs)
         image, label = read_and_decode(filename_queue)
 
-        <span class="keyword">return</span> images, sparse_labels
+        <span class="keyword">return</span> image, label
 </code></pre><h2 id="批处理">批处理</h2><p>TBD</p>
 <h2 id="创建线程并使用QueueRunner对象来预取">创建线程并使用QueueRunner对象来预取</h2><p>TBD</p>
 <h2 id="参考资料">参考资料</h2><p><a href="http://wiki.jikexueyuan.com/project/tensorflow-zh/how_tos/reading_data.html" target="_blank" rel="external">http://wiki.jikexueyuan.com/project/tensorflow-zh/how_tos/reading_data.html</a></p>
