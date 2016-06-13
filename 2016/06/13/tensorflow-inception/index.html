@@ -3,21 +3,39 @@
 <head>
   <meta charset="utf-8">
   
-  <title>深度学习调参技巧笔记 | 杨现的个人博客</title>
+  <title>tensorflow学习（六）CNN网络Inception | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="cnn技巧南大有个哥们写了一个技巧集合，很不错，推荐给大家http://lamda.nju.edu.cn/weixs/project/CNNTricks/CNNTricks.html
-网络训练技巧1：准备数据：务必保证有大量、高质量并且带有干净标签的数据，没有如此的数据，学习是不可能的2：预处理：这个不多说，就是0均值和1方差化3：minibatch：建议值128,1最好，但是效率不高，但是千万不">
+  <meta name="description" content="这次我们来上手一个大型网络,googLeNet。这篇讲一下Inception v3网络的训练和测试以及数据集的加载。
+数据准备将图片按照类别放入不同的文件夹下。格式如下：
+data_dir/train/label_0/a.jpg
+data_dir/train/label_0/b.jpg
+...
+data_dir/train/label_1/f.jpg
+...
+data_dir/validation">
 <meta property="og:type" content="article">
-<meta property="og:title" content="深度学习调参技巧笔记">
-<meta property="og:url" content="http://yoursite.com/2015/12/06/adusting-parameter/index.html">
+<meta property="og:title" content="tensorflow学习（六）CNN网络Inception">
+<meta property="og:url" content="http://yoursite.com/2016/06/13/tensorflow-inception/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="cnn技巧南大有个哥们写了一个技巧集合，很不错，推荐给大家http://lamda.nju.edu.cn/weixs/project/CNNTricks/CNNTricks.html
-网络训练技巧1：准备数据：务必保证有大量、高质量并且带有干净标签的数据，没有如此的数据，学习是不可能的2：预处理：这个不多说，就是0均值和1方差化3：minibatch：建议值128,1最好，但是效率不高，但是千万不">
-<meta property="og:updated_time" content="2016-05-05T13:23:35.003Z">
+<meta property="og:description" content="这次我们来上手一个大型网络,googLeNet。这篇讲一下Inception v3网络的训练和测试以及数据集的加载。
+数据准备将图片按照类别放入不同的文件夹下。格式如下：
+data_dir/train/label_0/a.jpg
+data_dir/train/label_0/b.jpg
+...
+data_dir/train/label_1/f.jpg
+...
+data_dir/validation">
+<meta property="og:updated_time" content="2016-06-13T11:57:39.928Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="深度学习调参技巧笔记">
-<meta name="twitter:description" content="cnn技巧南大有个哥们写了一个技巧集合，很不错，推荐给大家http://lamda.nju.edu.cn/weixs/project/CNNTricks/CNNTricks.html
-网络训练技巧1：准备数据：务必保证有大量、高质量并且带有干净标签的数据，没有如此的数据，学习是不可能的2：预处理：这个不多说，就是0均值和1方差化3：minibatch：建议值128,1最好，但是效率不高，但是千万不">
+<meta name="twitter:title" content="tensorflow学习（六）CNN网络Inception">
+<meta name="twitter:description" content="这次我们来上手一个大型网络,googLeNet。这篇讲一下Inception v3网络的训练和测试以及数据集的加载。
+数据准备将图片按照类别放入不同的文件夹下。格式如下：
+data_dir/train/label_0/a.jpg
+data_dir/train/label_0/b.jpg
+...
+data_dir/train/label_1/f.jpg
+...
+data_dir/validation">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -67,10 +85,10 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-adusting-parameter" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-tensorflow-inception" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2015/12/06/adusting-parameter/" class="article-date">
-  <time datetime="2015-12-06T02:17:08.000Z" itemprop="datePublished">2015-12-06</time>
+    <a href="/2016/06/13/tensorflow-inception/" class="article-date">
+  <time datetime="2016-06-13T11:57:11.000Z" itemprop="datePublished">2016-06-13</time>
 </a>
     
   <div class="article-category">
@@ -85,7 +103,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      深度学习调参技巧笔记
+      tensorflow学习（六）CNN网络Inception
     </h1>
   
 
@@ -93,16 +111,38 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="cnn技巧">cnn技巧</h2><p>南大有个哥们写了一个技巧集合，很不错，推荐给大家<a href="http://lamda.nju.edu.cn/weixs/project/CNNTricks/CNNTricks.html" target="_blank" rel="external">http://lamda.nju.edu.cn/weixs/project/CNNTricks/CNNTricks.html</a></p>
-<h2 id="网络训练技巧">网络训练技巧</h2><p>1：准备数据：务必保证有大量、高质量并且带有干净标签的数据，没有如此的数据，学习是不可能的<br>2：预处理：这个不多说，就是0均值和1方差化<br>3：minibatch：建议值128,1最好，但是效率不高，但是千万不要用过大的数值，否则很容易过拟合<br>4：梯度归一化：其实就是计算出来梯度之后，要除以minibatch的数量。这个不多解释<br>5：下面主要集中说下学习率<br>5.1：总的来说是用一个一般的学习率开始，然后逐渐的减小它<br>5.2：一个建议值是0.1，适用于很多NN的问题，一般倾向于小一点。<br>5.3：一个对于调度学习率的建议：如果在验证集上性能不再增加就让学习率除以2或者5，然后继续，学习率会一直变得很小，到最后就可以停止训练了。<br>5.4：很多人用的一个设计学习率的原则就是监测一个比率（每次更新梯度的norm除以当前weight的norm），如果这个比率在10-3附近，如果小于这个值，学习会很慢，如果大于这个值，那么学习很不稳定，由此会带来失败。<br>6：使用验证集，可以知道什么时候开始降低学习率，和什么时候停止训练。<br>7：关于对weight初始化的选择的一些建议：<br>7.1：如果你很懒，直接用0.02*randn(num_params)来初始化，当然别的值你也可以去尝试<br>7.2：如果上面那个不太好使，那么久依次初始化每一个weight矩阵用<code>init_scale / sqrt(layer_width) * randn</code>,init_scale可以被设置为0.1或者1<br>7.3：初始化参数对结果的影响至关重要，要引起重视。<br>7.4：在深度网络中，随机初始化权重，使用SGD的话一般处理的都不好，这是因为初始化的权重太小了。这种情况下对于浅层网络有效，但是当足够深的时候就不行了，因为weight更新的时候，是靠很多weight相乘的，越乘越小，有点类似梯度消失的意思<br>8：如果训练RNN或者LSTM，务必保证gradient的norm被约束在15或者5（前提还是要先归一化gradient），这一点在RNN和LSTM中很重要。<br>9：检查下梯度，如果是你自己计算的梯度。<br>10：如果使用LSTM来解决长时依赖的问题，记得初始化bias的时候要大一点<br>12：尽可能想办法多的扩增训练数据，如果使用的是图像数据，不妨对图像做一点扭转啊之类的，来扩充数据训练集合。<br>13：使用dropout<br>14：评价最终结果的时候，多做几次，然后平均一下他们的结果。</p>
+        <p>这次我们来上手一个大型网络,googLeNet。这篇讲一下Inception v3网络的训练和测试以及数据集的加载。</p>
+<h2 id="数据准备">数据准备</h2><p>将图片按照类别放入不同的文件夹下。格式如下：</p>
+<pre><code>data_dir/train/label_0/<span class="tag">a</span><span class="class">.jpg</span>
+data_dir/train/label_0/<span class="tag">b</span><span class="class">.jpg</span>
+...
+data_dir/train/label_1/f<span class="class">.jpg</span>
+...
+data_dir/validation/label_0/c<span class="class">.jpg</span>
+data_dir/validation/label_0/d<span class="class">.jpg</span>
+...
+data_dir/labels.txt
+</code></pre><p>同时将所有label的类别整理成一个txt放在data_dir/labels.txt文件中，行数代表该类别对应的整数值，从0开始计数，其文本内容如下：</p>
+<pre><code>label_0
+label_1
+label_2
+...
+label_n
+</code></pre><h3 id="转化成为TFRecord格式">转化成为TFRecord格式</h3><p>首先通过<code>_find_iamge_files</code>函数得到全量图片的文件名、标签、标签文本信息的对应关系，并打乱排序。然后按线程数将全量文件分块，分别执行<code>_process_image_files_batch</code>。将数据按分块分别写入对应的TFRecordWriter。这个操作的代码我整理保存在了<a href="https://github.com/yangxian10/tensorflow_code/blob/master/build_image_tfrecord_data.py" target="_blank" rel="external">build_image_tfrecord_data.py</a>。其中两个重要的参数，一个是进程数量的控制参数<code>num_threads</code>和Record数据分块的参数<code>num_shards</code>。我这里有个不同，原来代码是读文件之后直接压入Record，我是用OpenCV解码之后，将解码后数据变成string压入Record。代码调用格式如下：</p>
+<pre><code>python build_image_tfrecord_data.py \
+  -<span class="ruby">-train_directory=mydata/train \
+</span>  -<span class="ruby">-validation_directory=mydata/validation \
+</span>  -<span class="ruby">-output_directory=mydata/tf_record \
+</span>  -<span class="ruby">-labels_file=mydata/labels.txt</span>
+</code></pre><h2 id="网络模型">网络模型</h2><h2 id="单机训练">单机训练</h2><h2 id="分布式训练">分布式训练</h2><h2 id="测试评估">测试评估</h2><h3 id="参考文献">参考文献</h3><p><a href="https://github.com/tensorflow/models/tree/master/inception" target="_blank" rel="external">https://github.com/tensorflow/models/tree/master/inception</a><br><a href="http://arxiv.org/abs/1512.00567" target="_blank" rel="external">http://arxiv.org/abs/1512.00567</a></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cipdytubs00006wfh6o0i6fqy" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cipdytudc000n6wfhtayuh962" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tricks/">tricks</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
 
     </footer>
   </div>
@@ -110,19 +150,10 @@
     
 <nav id="article-nav">
   
-    <a href="/2016/01/12/book-list/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          书单
-        
-      </div>
-    </a>
   
-  
-    <a href="/2015/11/05/dataset-cv/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2016/06/13/tensorflow-captcha/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">Computer Vision DataSet资源列表</div>
+      <div class="article-nav-title">tensorflow学习（五）基于CNN的验证码识别</div>
     </a>
   
 </nav>
