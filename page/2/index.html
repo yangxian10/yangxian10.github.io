@@ -65,6 +65,189 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-linux-shell-skill" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/03/19/linux-shell-skill/" class="article-date">
+  <time datetime="2016-03-19T05:24:25.000Z" itemprop="datePublished">2016-03-19</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/study/">study</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/19/linux-shell-skill/">linux shell技巧总结</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="匹配特殊字符空格">匹配特殊字符空格</h3><pre><code>find . -<span class="property">name</span> <span class="string">"*[[:space:]]*"</span>
+</code></pre><h3 id="找到指定文件并删除">找到指定文件并删除</h3><pre><code>find . -<span class="property">name</span> <span class="string">"abc*"</span> -exec rm {} \;
+</code></pre><h2 id="大文件分割与合并">大文件分割与合并</h2><p>把aaa.tar.gz分割，每卷5G，然后合并</p>
+<pre><code><span class="tag">split</span> <span class="tag">-b</span> 5000<span class="tag">m</span> <span class="tag">aaa</span><span class="class">.tar</span><span class="class">.gz</span> <span class="tag">aaa_part</span><span class="class">.tar</span><span class="class">.gz</span>.
+<span class="tag">cat</span> <span class="tag">aaa_part</span><span class="class">.tar</span><span class="class">.gz</span>.* &gt; <span class="tag">aaa</span><span class="class">.tar</span><span class="class">.gz</span>
+</code></pre><p>大文件夹aaa分卷压缩与合并解压</p>
+<pre><code>tar czvf - aaa <span class="string">| split -b 5000m - aaa_part.tar.gz.</span>
+cat aaa_part.tar.gz.* <span class="string">| tar xz</span>
+</code></pre><h2 id="find_文件查找">find 文件查找</h2><p>查找txt和pdf文件</p>
+<pre><code>find . ( -<span class="property">name</span> <span class="string">"*.txt"</span> -o -<span class="property">name</span> <span class="string">"*.pdf"</span> ) -print
+</code></pre><p>正则方式查找.txt和pdf，<code>-iregex</code>: 忽略大小写的正则</p>
+<pre><code><span class="keyword">find</span> . -regex  <span class="string">".*(.txt|.pdf)$"</span>
+</code></pre><p>否定参数，查找所有非txt文本</p>
+<pre><code><span class="keyword">find</span> . ! -name <span class="string">"*.txt"</span> -<span class="keyword">print</span>
+</code></pre><p>指定搜索深度，打印出当前目录的文件（深度为1）</p>
+<pre><code><span class="built_in">find</span> . -maxdepth <span class="number">1</span> -<span class="built_in">type</span> f
+</code></pre><p>按类型搜索：-type f 文件 / l 符号链接 / d 目录</p>
+<pre><code>find . -<span class="keyword">type</span> <span class="keyword">d</span> -<span class="keyword">print</span>  <span class="comment">//只列出所有目录</span>
+</code></pre><p>按时间搜索：<br>  -atime 访问时间 (单位是天，分钟单位则是-amin，以下类似）<br>  -mtime 修改时间（内容被修改）<br>  -ctime 变化时间（元数据或权限变化）<br>最近7天被访问过的所有文件：</p>
+<pre><code><span class="built_in">find</span> . -atime <span class="number">7</span> -<span class="built_in">type</span> f -<span class="built_in">print</span>
+</code></pre><p>按大小搜索：w字 k M G，寻找大于2k的文件</p>
+<pre><code><span class="built_in">find</span> . -<span class="built_in">type</span> f -size +<span class="number">2</span>k
+</code></pre><p>按权限查找：</p>
+<pre><code><span class="built_in">find</span> . -<span class="built_in">type</span> f -perm <span class="number">644</span> -<span class="built_in">print</span> //找具有可执行权限的所有文件
+</code></pre><p>按用户查找：</p>
+<pre><code><span class="built_in">find</span> . -<span class="built_in">type</span> f -user weber -<span class="built_in">print</span>// 找用户weber所拥有的文件
+</code></pre><h3 id="找到后的后续动作">找到后的后续动作</h3><p>删除：删除当前目录下所有的swp文件：</p>
+<pre><code><span class="keyword">find</span> . -<span class="built_in">type</span> <span class="keyword">f</span> -name <span class="string">"*.swp"</span> -<span class="built_in">delete</span>
+</code></pre><p>执行动作（强大的exec）</p>
+<pre><code><span class="title">find</span> . -<span class="typedef"><span class="keyword">type</span> f -user root -exec chown weber <span class="container">{}</span> ; //将当前目录下的所有权变更为weber</span>
+</code></pre><p>注：{}是一个特殊的字符串，对于每一个匹配的文件，{}会被替换成相应的文件名；<br>eg：将找到的文件全都copy到另一个目录：</p>
+<pre><code><span class="title">find</span> . -<span class="typedef"><span class="keyword">type</span> f -mtime +10 -name "*.txt" -exec cp <span class="container">{}</span> <span class="type">OLD</span> ;</span>
+</code></pre><p>结合多个命令<br>tips: 如果需要后续执行多个命令，可以将多个命令写成一个脚本。然后 -exec 调用时执行脚本即可；</p>
+<pre><code><span class="deletion">-exec ./commands.sh {} \;</span>
+</code></pre><h3 id="-print的定界符">-print的定界符</h3><p>默认使用’\n’作为文件的定界符；<br>-print0 使用”作为文件的定界符，这样就可以搜索包含空格的文件；</p>
+<h2 id="grep_文本搜索">grep 文本搜索</h2><p>常用参数<br>-o 只输出匹配的文本行<br>-v 只输出没有匹配的文本行<br>-c 统计文件中包含文本的次数</p>
+<pre><code><span class="keyword">grep</span> -c <span class="string">"text"</span> filename
+</code></pre><p>-n 打印匹配的行号<br>-i 搜索时忽略大小写<br>-l 只打印文件名<br>在多级目录中对文本递归搜索(程序员搜代码的最爱）：</p>
+<pre><code><span class="keyword">grep</span> <span class="string">"class"</span> . -R -n
+</code></pre><p>匹配多个模式</p>
+<pre><code>grep -<span class="keyword">e</span> <span class="string">"class"</span> -<span class="keyword">e</span> <span class="string">"vitural"</span> <span class="keyword">file</span>
+</code></pre><p>grep输出以作为结尾符的文件名：（-z）</p>
+<pre><code>grep <span class="string">"test"</span> file<span class="keyword">*</span> -lZ|<span class="string"> xargs -0 rm</span>
+</code></pre><h2 id="xargs_命令行参数转换">xargs 命令行参数转换</h2><p>xargs 能够将输入数据转化为特定命令的命令行参数；这样，可以配合很多命令来组合使用。比如grep，比如find；</p>
+<p>将多行输出转化为单行输出</p>
+<pre><code><span class="keyword">cat</span> <span class="keyword">file</span>.txt| xargs
+</code></pre><p>将单行转化为多行输出，-n：指定每行显示的字段数</p>
+<pre><code><span class="keyword">cat</span> single.txt | xargs -<span class="keyword">n</span> 3
+</code></pre><h3 id="xargs参数说明">xargs参数说明</h3><p>-d 定义定界符 （默认为空格 多行的定界符为 n）<br>-n 指定输出为多行<br>-I {} 指定替换字符串，这个字符串在xargs扩展时会被替换掉,用于待执行的命令需要多个参数时。eg：</p>
+<pre><code>cat <span class="built_in">file</span>.txt | xargs -I {} ./<span class="command"><span class="keyword">command</span>.<span class="title">sh</span> -<span class="title">p</span> {} -<span class="title">1</span></span>
+</code></pre><p>-0：指定为输入定界符，eg：统计程序行数</p>
+<pre><code>find <span class="built_in">source</span>_dir/ -type f -name <span class="string">"*.cpp"</span> -print0 |xargs -<span class="number">0</span> wc <span class="operator">-l</span>
+</code></pre><h2 id="sort_排序">sort 排序</h2><p>字段说明：<br>-n 按数字进行排序 VS -d 按字典序进行排序<br>-r 逆序排序<br>-k N 指定按第N列排序<br>eg：</p>
+<pre><code><span class="title">sort</span> -nrk <span class="number">1</span> <span class="typedef"><span class="keyword">data</span>.txt</span>
+<span class="title">sort</span> -bd <span class="typedef"><span class="keyword">data</span> // 忽略像空格之类的前导空白字符</span>
+</code></pre><h2 id="uniq_消除重复行">uniq 消除重复行</h2><p>消除重复行</p>
+<pre><code>sort unsort.txt <span class="string">| uniq</span>
+</code></pre><p>统计各行在文件中出现的次数</p>
+<pre><code><span class="built_in">sort</span> unsort.txt | uniq -<span class="built_in">c</span>
+</code></pre><p>找出重复行，可指定每行中需要比较的重复内容：-s 开始位置 -w 比较字符数</p>
+<pre><code><span class="keyword">sort</span> unsort.txt | uniq -<span class="literal">d</span>
+</code></pre><h2 id="用tr进行转换">用tr进行转换</h2><p>通用用法</p>
+<pre><code><span class="keyword">echo</span> <span class="number">12345</span> | <span class="built_in">tr</span> <span class="string">'0-9'</span> <span class="string">'9876543210'</span> //加解密转换，替换对应字符
+<span class="keyword">cat</span> text| <span class="built_in">tr</span> <span class="string">'t'</span> <span class="string">' '</span>  //制表符转空格
+</code></pre><p>tr删除字符</p>
+<pre><code><span class="keyword">cat</span> <span class="keyword">file</span> | tr -<span class="keyword">d</span> '0-9' <span class="comment">// 删除所有数字</span>
+</code></pre><p>-c 求补集</p>
+<pre><code><span class="keyword">cat</span> <span class="keyword">file</span> | tr -c '0-9' <span class="comment">//获取文件中所有数字</span>
+<span class="keyword">cat</span> <span class="keyword">file</span> | tr -<span class="keyword">d</span> -c '0-9 <span class="keyword">n</span>'  <span class="comment">//删除非数字数据</span>
+</code></pre><p>tr压缩字符<br>tr -s 压缩文本中出现的重复字符；最常用于压缩多余的空格</p>
+<pre><code><span class="keyword">cat</span> <span class="keyword">file</span> | <span class="built_in">tr</span> -<span class="keyword">s</span> <span class="string">' '</span>
+</code></pre><p>字符类<br>tr中可用各种字符类：<br>alnum：字母和数字<br>alpha：字母<br>digit：数字<br>space：空白字符<br>lower：小写<br>upper：大写<br>cntrl：控制（非可打印）字符<br>print：可打印字符<br>使用方法：tr [:class:] [:class:]</p>
+<pre><code>eg: <span class="tag">tr</span> <span class="string">'[:lower:]'</span> <span class="string">'[:upper:]'</span>
+</code></pre><h2 id="cut_按列切分文本">cut 按列切分文本</h2><p>截取文件的第2列和第4列：</p>
+<pre><code><span class="label">cut</span> -<span class="literal">f2</span>,<span class="number">4</span> filename
+</code></pre><p>去文件除第3列的所有列：</p>
+<pre><code>cut -f3 <span class="comment">--complement filename</span>
+</code></pre><p>-d 指定定界符：</p>
+<pre><code>cat <span class="operator">-f</span>2 <span class="operator">-d</span><span class="string">";"</span> filename
+</code></pre><p>cut 取的范围<br>N- 第N个字段到结尾<br>-M 第1个字段为M<br>N-M N到M个字段</p>
+<ul>
+<li><p>cut 取的单位<br>-b 以字节为单位<br>-c 以字符为单位<br>-f 以字段为单位（使用定界符）<br>eg:</p>
+<p>  cut -c1-5 file //打印第一到5个字符<br>  cut -c-2 file  //打印前2个字符</p>
+</li>
+</ul>
+<h2 id="wc_统计行和字符的工具">wc 统计行和字符的工具</h2><pre><code>wc -<span class="keyword">l</span> <span class="keyword">file</span> <span class="comment">// 统计行数</span>
+wc -w <span class="keyword">file</span> <span class="comment">// 统计单词数</span>
+wc -c <span class="keyword">file</span> <span class="comment">// 统计字符数</span>
+</code></pre><h2 id="sed_文本替换利器">sed 文本替换利器</h2><p>首处替换</p>
+<pre><code>seg <span class="string">'s/text/replace_text/'</span> <span class="keyword">file</span>   <span class="comment">//替换每一行的第一处匹配的text</span>
+</code></pre><p>全局替换</p>
+<pre><code>seg 's/<span class="type">text</span>/replace_text/g' <span class="type">file</span>
+</code></pre><p>默认替换后，输出替换后的内容，如果需要直接替换原文件,使用-i：</p>
+<pre><code>seg -<span class="tag">i</span> <span class="string">'s/text/repalce_text/g'</span> file
+</code></pre><p>移除空白行：</p>
+<pre><code>sed <span class="string">'/^$/d'</span> <span class="keyword">file</span>
+</code></pre><p>变量转换，已匹配的字符串通过标记&amp;来引用</p>
+<pre><code>echo this <span class="keyword">is</span> en example | seg 's/\w+/<span class="comment">[&amp;]</span>/g'
+$&gt;<span class="comment">[this]</span>  <span class="comment">[is]</span> <span class="comment">[en]</span> <span class="comment">[example]</span>
+</code></pre><p>子串匹配标记<br>第一个匹配的括号内容使用标记1来引用</p>
+<pre><code><span class="title">sed</span> <span class="string">'s/hello([0-9])/1/'</span>
+</code></pre><p>双引号求值，sed通常用单引号来引用；也可使用双引号，使用双引号后，双引号会对表达式求值：</p>
+<pre><code><span class="title">sed</span> <span class="string">'s/<span class="variable">$var</span>/HLLOE/'</span>
+</code></pre><p>当使用双引号时，我们可以在sed样式和替换字符串中指定变量；</p>
+<pre><code>p=patten
+r=replaced
+<span class="built_in">echo</span> <span class="string">"line con a patten"</span> | sed <span class="string">"s/<span class="variable">$p</span>/<span class="variable">$r</span>/g"</span>
+$&gt;line con a replaced
+</code></pre><h2 id="awk_数据流处理工具">awk 数据流处理工具</h2><p>awk脚本结构<br>awk ‘BEGIN{ statements } statements2 END{ statements }’</p>
+<ul>
+<li>工作方式</li>
+</ul>
+<ol>
+<li>执行begin中语句块；</li>
+<li>从文件或stdin中读入一行，然后执行statements2，重复这个过程，直到文件全部被读取完毕；</li>
+<li>执行end语句块；</li>
+</ol>
+<h3 id="print_打印当前行">print 打印当前行</h3><p>使用不带参数的print时，会打印当前行;</p>
+<pre><code>echo -<span class="keyword">e</span> <span class="string">"line1nline2"</span> | awk 'BEGIN{<span class="keyword">print</span> <span class="string">"start"</span>} {<span class="keyword">print</span> } END{ <span class="keyword">print</span> <span class="string">"End"</span> }'
+</code></pre><p>print 以逗号分割时，参数以空格定界;</p>
+<pre><code>echo <span class="string">| awk ' {var1 = "</span>v1<span class="string">" ; var2 = "</span>V2<span class="string">"; var3="</span>v3<span class="string">"; </span>
+print var1, var2 , var3; }'
+$&gt;v1 V2 v3
+</code></pre><p>使用-拼接符的方式;</p>
+<pre><code>echo <span class="string">| awk ' {var1 = "</span>v1<span class="string">" ; var2 = "</span>V2<span class="string">"; var3="</span>v3<span class="string">"; </span>
+print var1<span class="string">"-"</span>var2<span class="string">"-"</span>var3; }'
+$&gt;v1-V2-v3
+</code></pre><h3 id="特殊变量：NR_NF_$0_$1_$2">特殊变量：NR NF $0 $1 $2</h3><p>NR:表示记录数量，在执行过程中对应当前行号；<br>NF:表示字段数量，在执行过程总对应当前行的字段数；<br>$0:这个变量包含执行过程中当前行的文本内容；<br>$1:第一个字段的文本内容；<br>$2:第二个字段的文本内容；</p>
+<pre><code>echo -<span class="keyword">e</span> <span class="string">"line1 f2 f3n line2 n line 3"</span> | awk '{<span class="keyword">print</span> NR<span class="string">":"</span><span class="label">$0</span><span class="string">"-"</span><span class="label">$1</span><span class="string">"-"</span><span class="label">$2}</span>'
+</code></pre><p>打印每一行的第二和第三个字段：</p>
+<pre><code><span class="title">awk</span> <span class="string">'{print <span class="variable">$2</span>, <span class="variable">$3</span>}'</span> file
+</code></pre><p>统计文件的行数：</p>
+<pre><code>awk <span class="string">' END {print NR}'</span> <span class="keyword">file</span>
+</code></pre><p>累加每一行的第一个字段：</p>
+<pre><code>echo -<span class="keyword">e</span> <span class="string">"1n 2n 3n 4n"</span> | awk 'BEGIN{num = 0 ;
+<span class="keyword">print</span> <span class="string">"begin"</span>;} {<span class="keyword">sum</span> += <span class="label">$1</span>;} END {<span class="keyword">print</span> <span class="string">"=="</span>; <span class="keyword">print</span> <span class="keyword">sum</span> }'
+</code></pre><h3 id="传递外部变量">传递外部变量</h3><pre><code><span class="keyword">var</span>=<span class="number">1000</span>
+echo | awk <span class="string">'{print vara}'</span> vara=$<span class="keyword">var</span> 
+<span class="preprocessor">#  输入来自stdin</span>
+awk <span class="string">'{print vara}'</span> vara=$<span class="keyword">var</span> file 
+<span class="preprocessor"># 输入来自文件</span>
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cipdyovla001htgfh7mre3qtt" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell/">shell</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-spark-learn" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/02/23/spark-learn/" class="article-date">
@@ -113,7 +296,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cioqy166l000tg8fhc6jm9wyh" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cipdyovkk000wtgfh6155oidq" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
@@ -170,7 +353,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cioqy1671001ag8fhr4jhrdn5" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cipdyovl5001dtgfhw2ggaeo6" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
@@ -228,7 +411,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cioqy166l000yg8fhna7m99b6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cipdyovkk0011tgfhhi1aaanx" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -312,7 +495,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cioqy167n001ig8fhk3nwdrbc" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cipdyovld001ltgfh4ve6x0ge" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
@@ -360,7 +543,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cioqy169l002qg8fhvx9p5vfv" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cipdyovmv002ttgfh9hcn16t6" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/source/">source</a></li></ul>
@@ -404,7 +587,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cioqy15zz0000g8fhfgjh0z6l" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cipdyovhs0000tgfh7yi7pt08" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tricks/">tricks</a></li></ul>
@@ -460,7 +643,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cioqy1683001vg8fh5anva5kw" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cipdyovlk001ytgfhf00q2rgd" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dataset/">dataset</a></li></ul>
@@ -576,7 +759,7 @@ detector = dlib.get_frontal_face_detector()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cioqy167z001qg8fhuwmtkp73" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cipdyovlk001ttgfhj9as1l3q" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/face/">face</a></li></ul>
@@ -637,75 +820,10 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cioqy16710016g8fhnwq0p7jy" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cipdyovkz0019tgfh8ks8pbji" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mxnet/">mxnet</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-caffe-fine-tuning" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/09/15/caffe-fine-tuning/" class="article-date">
-  <time datetime="2015-09-15T14:10:22.000Z" itemprop="datePublished">2015-09-15</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/09/15/caffe-fine-tuning/">caffe学习（五）fine-tuning已有模型到新数据</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="概述">概述</h2><p>最近试了一个新的数据集，由于每一类别训练数据较少，算法无法收敛。于是尝试使用fine-tuning，利用已有训练模型权重参数适应到新的数据集。</p>
-<p>由于我们新的分类器与之前的分类器都采用googLeNet的框架，只是在最后一层由3000个类别增加到60000类，所以需要更改最后一层的参数，把原来的<code>loss3/classifier</code>层改成新名字<code>loss3/classifier/fn</code>，这样由于在原来的模型中找不到这层的名字，这层在训练的时候会用随机变量赋初始值重新训练。</p>
-<p>由于原来模型已经收敛，在fine-tuning时候要把<code>base_lr</code>更新学习率降低，同时增加<code>blobs_lr</code>在新的层上，让其他层的参数在新数据来的时候慢点更新，同时让新的层快速学习。同时<code>stepsize</code>参数也适当减少，从而让学习率下降的更快一些。</p>
-<h2 id="具体步骤">具体步骤</h2><h3 id="数据准备">数据准备</h3><p>这个没啥好说的，将新的训练数据分为train和valuation集，然后转换成lmdb格式，然后得到其均值文件，准备完毕。</p>
-<h3 id="train_val-prototxt">train_val.prototxt</h3><ul>
-<li>data-layer里的train和test均值文件和训练数据源要设置正确</li>
-<li>loss1/classifier-layer层的name改为<code>loss1/classifier/fn</code>，top参数<code>loss1/classifier/fn</code>，lr_mult参数乘10倍，由原来的1和2改为10和20，num_output改为60000</li>
-<li>loss1/loss的softmax层的bottom参数改为<code>loss1/classifier/fn</code></li>
-<li>loss1/top-1的accuracy层的bottom参数改为<code>loss1/classifier/fn</code></li>
-<li>loss1/top-5的accuracy层的bottom参数改为<code>loss1/classifier/fn</code></li>
-<li>上述4个步骤的参数修改同时也要应用到loss2和loss3层中</li>
-</ul>
-<h3 id="solver-prototxt">solver.prototxt</h3><ul>
-<li>将<code>test_initialization</code>这句屏蔽掉</li>
-<li>gamma改为0.1</li>
-<li>weight_decay改为0.0005</li>
-<li>base_lr参数降低10倍，改为0.001，这个改动最为重要</li>
-</ul>
-<h3 id="deploy-prototxt">deploy.prototxt</h3><ul>
-<li>loss3/classifier-layer层的name改为<code>loss1/classifier/fn</code>，top参数<code>loss1/classifier/fn</code>，lr_mult参数乘10倍，由原来的1和2改为10和20，num_output改为60000</li>
-<li>prob的softmax层的bottom参数改为<code>loss1/classifier/fn</code></li>
-</ul>
-<h3 id="调用接口">调用接口</h3><pre><code>../../build/tools/caffe train --solver=solver<span class="class">.prototxt</span> -weights sku3081_googlenet_quick_iter_900000<span class="class">.caffemodel</span> -gpu <span class="number">2</span>
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cioqy168y002hg8fhiyuzu4du" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
 
     </footer>
   </div>
@@ -727,7 +845,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">13</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">14</span></li></ul>
     </div>
   </div>
 
@@ -736,7 +854,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">4</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">4</span></li></ul>
     </div>
   </div>
 
@@ -745,7 +863,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 15px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
+      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 16.67px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 13.33px;">生活</a>
     </div>
   </div>
 
@@ -754,7 +872,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -764,6 +882,10 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/06/13/tensorflow-captcha/">tensorflow学习（五）基于CNN的验证码识别</a>
+          </li>
         
           <li>
             <a href="/2016/05/28/tensorflow-cnn/">tensorflow学习（四）自己创建CNN网络</a>
@@ -779,10 +901,6 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
         
           <li>
             <a href="/2016/04/20/tensorflow-install/">tensorflow学习（一）安装配置</a>
-          </li>
-        
-          <li>
-            <a href="/2016/04/11/panns-nnsearch/">Python高维数据最近邻快速检索库</a>
           </li>
         
       </ul>
