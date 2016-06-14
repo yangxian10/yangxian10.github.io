@@ -3,17 +3,24 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2016/1 | 杨现的个人博客</title>
+  <title>tensorflow学习（七）caffe模型训练结果转换为tensorflow格式 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="迭代的是人，递归的是神">
-<meta property="og:type" content="website">
-<meta property="og:title" content="杨现的个人博客">
-<meta property="og:url" content="http://yoursite.com/archives/2016/01/index.html">
+  <meta name="description" content="tensorflow官方认定的转换工具为https://github.com/ethereon/caffe-tensorflow。我们尝试一下转换一个caffe训练的图像识别模型
+caffe-tensorflow安装git clone https://github.com/ethereon/caffe-tensorflow
+生成模型训练代码利用convert.py可以将caffe网络定义的depl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tensorflow学习（七）caffe模型训练结果转换为tensorflow格式">
+<meta property="og:url" content="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="迭代的是人，递归的是神">
+<meta property="og:description" content="tensorflow官方认定的转换工具为https://github.com/ethereon/caffe-tensorflow。我们尝试一下转换一个caffe训练的图像识别模型
+caffe-tensorflow安装git clone https://github.com/ethereon/caffe-tensorflow
+生成模型训练代码利用convert.py可以将caffe网络定义的depl">
+<meta property="og:updated_time" content="2016-06-14T13:29:30.798Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="杨现的个人博客">
-<meta name="twitter:description" content="迭代的是人，递归的是神">
+<meta name="twitter:title" content="tensorflow学习（七）caffe模型训练结果转换为tensorflow格式">
+<meta name="twitter:description" content="tensorflow官方认定的转换工具为https://github.com/ethereon/caffe-tensorflow。我们尝试一下转换一个caffe训练的图像识别模型
+caffe-tensorflow安装git clone https://github.com/ethereon/caffe-tensorflow
+生成模型训练代码利用convert.py可以将caffe网络定义的depl">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -63,58 +70,70 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/01/18/linux-c-skill/" class="archive-article-date">
-  <time datetime="2016-01-18T14:07:18.000Z" itemprop="datePublished">1月 18</time>
+        <section id="main"><article id="post-tensorflow-caffe2tensorflow" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/14/tensorflow-caffe2tensorflow/" class="article-date">
+  <time datetime="2016-06-14T13:28:21.000Z" itemprop="datePublished">2016-06-14</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/01/18/linux-c-skill/">Linux c/c++ 技巧总结</a>
+    <h1 class="article-title" itemprop="name">
+      tensorflow学习（七）caffe模型训练结果转换为tensorflow格式
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2016/01/12/book-list/" class="archive-article-date">
-  <time datetime="2016-01-12T13:07:43.000Z" itemprop="datePublished">1月 12</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/01/12/book-list/">书单</a>
-    </h1>
-  
+        <p>tensorflow官方认定的转换工具为<a href="https://github.com/ethereon/caffe-tensorflow" target="_blank" rel="external">https://github.com/ethereon/caffe-tensorflow</a>。我们尝试一下转换一个caffe训练的图像识别模型</p>
+<h2 id="caffe-tensorflow安装">caffe-tensorflow安装</h2><pre><code>git clone <span class="string">https:</span><span class="comment">//github.com/ethereon/caffe-tensorflow</span>
+</code></pre><h2 id="生成模型训练代码">生成模型训练代码</h2><p>利用<code>convert.py</code>可以将caffe网络定义的deploy.prototxt文件转换为tensorflow的python实现，不过这种转换之后的模型代码还需要import kaffe模块，虽然<code>kaffe.tensorflow.Network</code>没有其他依赖，可以单独加载到新代码中即可使用，方便移植，我还是更倾向于转换之后参考这个代码重新写一份。调用方式如下：</p>
+<pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --code-output-path=./myNetTensorflow.py
+</code></pre><h2 id="转换训练好的模型">转换训练好的模型</h2><p>也可以将caffemodel的weights和biases参数读取出来转换为npy的格式，并通过<code>numpy.load()</code>读取数据。转换数据的脚本如下：</p>
+<pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --caffemodel=./mynet<span class="class">.caffemodel</span> --data-output-path=./myNetTensorflow.npy
+</code></pre><h2 id="注意事项">注意事项</h2><ul>
+<li><p>caffe的模型应该是较新的版本，才能转换</p>
+</li>
+<li><p>并不是所有的caffe模型都能转换为tensorflow，比如caffe的padding支持很多方式，tensorflow目前只支持<code>SAME</code>和<code>VALID</code></p>
+</li>
+</ul>
 
-    </header>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cipfhk2ga000zmwfh8a22nmjk" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/06/13/tensorflow-inception/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">tensorflow学习（六）CNN网络Inception</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-  
-    </div></section>
-  
+
 </section>
         
           <aside id="sidebar">
