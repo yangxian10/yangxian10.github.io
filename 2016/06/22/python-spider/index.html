@@ -3,18 +3,30 @@
 <head>
   <meta charset="utf-8">
   
-  <title>good_site | 杨现的个人博客</title>
+  <title>python爬虫入门笔记 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="在线简历生成网站https://cvmkr.com/翻墙路由器的原理与实现http://drops.wooyun.org/papers/10177">
+  <meta name="description" content="写在前面爬虫其实内容的爬取不是最为困难的地方，真正难点在于如何混在群众之中不被发现。由于我在爬虫界还处于幼儿园水平，所以简单写几个脚本爬点美女图片还勉强，想跟亚一爬谈笑风生就不指望了。
+urllib基础html抓取import urllib2
+
+request = urllib2.Request(&quot;http://www.baidu.com&quot;)
+response = urllib2.urlopen(">
 <meta property="og:type" content="article">
-<meta property="og:title" content="good_site">
-<meta property="og:url" content="http://yoursite.com/2016/03/30/good-site/index.html">
+<meta property="og:title" content="python爬虫入门笔记">
+<meta property="og:url" content="http://yoursite.com/2016/06/22/python-spider/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="在线简历生成网站https://cvmkr.com/翻墙路由器的原理与实现http://drops.wooyun.org/papers/10177">
-<meta property="og:updated_time" content="2016-03-30T11:52:53.330Z">
+<meta property="og:description" content="写在前面爬虫其实内容的爬取不是最为困难的地方，真正难点在于如何混在群众之中不被发现。由于我在爬虫界还处于幼儿园水平，所以简单写几个脚本爬点美女图片还勉强，想跟亚一爬谈笑风生就不指望了。
+urllib基础html抓取import urllib2
+
+request = urllib2.Request(&quot;http://www.baidu.com&quot;)
+response = urllib2.urlopen(">
+<meta property="og:updated_time" content="2016-06-22T13:03:52.056Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="good_site">
-<meta name="twitter:description" content="在线简历生成网站https://cvmkr.com/翻墙路由器的原理与实现http://drops.wooyun.org/papers/10177">
+<meta name="twitter:title" content="python爬虫入门笔记">
+<meta name="twitter:description" content="写在前面爬虫其实内容的爬取不是最为困难的地方，真正难点在于如何混在群众之中不被发现。由于我在爬虫界还处于幼儿园水平，所以简单写几个脚本爬点美女图片还勉强，想跟亚一爬谈笑风生就不指望了。
+urllib基础html抓取import urllib2
+
+request = urllib2.Request(&quot;http://www.baidu.com&quot;)
+response = urllib2.urlopen(">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -64,14 +76,14 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-good-site" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-python-spider" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/03/30/good-site/" class="article-date">
-  <time datetime="2016-03-30T11:18:48.000Z" itemprop="datePublished">2016-03-30</time>
+    <a href="/2016/06/22/python-spider/" class="article-date">
+  <time datetime="2016-06-22T13:02:36.000Z" itemprop="datePublished">2016-06-22</time>
 </a>
     
   <div class="article-category">
-    <a class="article-category-link" href="/categories/life/">life</a>
+    <a class="article-category-link" href="/categories/study/">study</a>
   </div>
 
   </div>
@@ -82,7 +94,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      good_site
+      python爬虫入门笔记
     </h1>
   
 
@@ -90,15 +102,66 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>在线简历生成网站<a href="https://cvmkr.com/" target="_blank" rel="external">https://cvmkr.com/</a><br>翻墙路由器的原理与实现<a href="http://drops.wooyun.org/papers/10177" target="_blank" rel="external">http://drops.wooyun.org/papers/10177</a></p>
+        <h1 id="写在前面">写在前面</h1><p>爬虫其实内容的爬取不是最为困难的地方，真正难点在于如何混在群众之中不被发现。由于我在爬虫界还处于幼儿园水平，所以简单写几个脚本爬点美女图片还勉强，想跟亚一爬谈笑风生就不指望了。</p>
+<h1 id="urllib基础">urllib基础</h1><h3 id="html抓取">html抓取</h3><pre><code>import urllib2
+
+request = urllib2.<span class="function"><span class="title">Request</span><span class="params">(<span class="string">"http://www.baidu.com"</span>)</span></span>
+response = urllib2.<span class="function"><span class="title">urlopen</span><span class="params">(request)</span></span>
+data = response.<span class="function"><span class="title">read</span><span class="params">()</span></span>
+</code></pre><p>data就得到了百度主页的html信息。</p>
+<h3 id="html解析">html解析</h3><p>主要就是用<code>re</code>模块来正则匹配</p>
+<pre><code>import re
+
+#返回pattern对象
+re.<span class="function"><span class="title">compile</span><span class="params">(string[,flag])</span></span>  
+#以下为匹配所用函数
+re.<span class="function"><span class="title">match</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">search</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">split</span><span class="params">(pattern, string[, maxsplit])</span></span>
+re.<span class="function"><span class="title">findall</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">finditer</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">sub</span><span class="params">(pattern, repl, string[, count])</span></span>
+re.<span class="function"><span class="title">subn</span><span class="params">(pattern, repl, string[, count])</span></span>
+</code></pre><p>比较常用的findall，用列表的形式返回全部能匹配的子串。</p>
+<h1 id="反爬伪装">反爬伪装</h1><p>现在主流的反爬策略基本基于三个层面：</p>
+<ul>
+<li>IP层，同一ip访问过多会被封杀</li>
+<li>HTTP协议层，判断是否真实的浏览器行为</li>
+<li>行为层，判断是否真实用户行为<br>上述的程序通常在<code>response.read()</code>的时候会报错10054、10060之类的错误。</li>
+</ul>
+<h3 id="伪装浏览器Header">伪装浏览器Header</h3><p>用chrome打开浏览器，调试模式，然后打开Network模块，选择其中一个页面，打开Headers页面，其中最后的agent就是请求的身份，不填写身份的话，很容易被反爬策略封杀掉。</p>
+<pre><code>user_agent = <span class="comment">'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'</span>
+headers = {<span class="comment">'User-Agent' : user_agent}</span>
+#    <span class="built_in">request</span> = urllib2.<span class="built_in">Request</span>(url, headers)
+<span class="built_in">request</span> = urllib2.<span class="built_in">Request</span>(url)
+<span class="built_in">request</span>.add_header(<span class="comment">'User-Agent', user_agent)</span>
+<span class="built_in">response</span> = urllib2.urlopen(<span class="built_in">request</span>)
+page = <span class="built_in">response</span>.read()
+</code></pre><p>除此之外，有些反爬策略还有反盗链的设计，需要在headers中传入referer</p>
+<pre><code>request.<span class="function"><span class="title">add_header</span><span class="params">(<span class="string">'Referer'</span>, <span class="string">'http://www.taobao.com'</span>)</span></span>
+</code></pre><h3 id="proxy代理设置">proxy代理设置</h3><p>如果ip访问次数过多也会被封杀，采用代理服务器的方法来定期更换代理。</p>
+<pre><code>enable_proxy = True
+proxy_handler = urllib2.<span class="function"><span class="title">ProxyHandler</span><span class="params">({<span class="string">"http"</span> : <span class="string">'http://192.168.0.1:8080'</span>})</span></span>
+null_proxy_handler = urllib2.<span class="function"><span class="title">ProxyHandler</span><span class="params">({})</span></span>
+<span class="keyword">if</span> enable_proxy:
+    opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(proxy_handler)</span></span>
+<span class="keyword">else</span>:
+    opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(null_proxy_handler)</span></span>
+urllib2.<span class="function"><span class="title">install_opener</span><span class="params">(opener)</span></span>
+</code></pre><h3 id="超时设置Timeout">超时设置Timeout</h3><p>在urlopen的时候可以通过设置timeout参数解决网站相应过慢造成的影响。</p>
+<pre><code>response = urllib2.<span class="function"><span class="title">urlopen</span><span class="params">(<span class="string">'http://www.baidu.com'</span>, timeout=<span class="number">10</span>)</span></span>
+</code></pre><h1 id="简易图片爬虫">简易图片爬虫</h1><p>关键的就是解析的时候匹配图片内容，得到了图片链接的话，用wget或者其他模块都能保存图片</p>
+<pre><code>patternImg = re.<span class="function"><span class="title">compile</span><span class="params">(<span class="string">'&lt;img.*?src="(.*?)"'</span>,re.S)</span></span>
+images = re.<span class="function"><span class="title">findall</span><span class="params">(patternImg, url_data)</span></span>
+</code></pre><h1 id="参考资料与推荐文章">参考资料与推荐文章</h1><p><a href="http://cuiqingcai.com/" target="_blank" rel="external">http://cuiqingcai.com/</a><br><a href="http://mp.weixin.qq.com/s?__biz=MjM5ODIzNDQ3Mw==&amp;mid=402180172&amp;idx=1&amp;sn=1db24327a15cea8fab6907069fbaabbf&amp;scene=0#wechat_redirect" target="_blank" rel="external">数据时代的反爬虫绝技</a></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cipqw5o4i001zakfh0i2apq46" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cipqw5o3m0017akfh66ckwivw" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
 
     </footer>
   </div>
@@ -106,19 +169,10 @@
     
 <nav id="article-nav">
   
-    <a href="/2016/04/07/data-visualization/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          数据可视化
-        
-      </div>
-    </a>
   
-  
-    <a href="/2016/03/25/darknet-yolo/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2016/06/14/tensorflow-caffe2tensorflow/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">darknet学习（一）YOLO目标检测</div>
+      <div class="article-nav-title">tensorflow学习（七）caffe模型训练结果转换为tensorflow格式</div>
     </a>
   
 </nav>
