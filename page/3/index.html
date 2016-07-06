@@ -65,6 +65,51 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-adusting-parameter" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/12/06/adusting-parameter/" class="article-date">
+  <time datetime="2015-12-06T02:17:08.000Z" itemprop="datePublished">2015-12-06</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/12/06/adusting-parameter/">深度学习调参技巧笔记</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="cnn技巧">cnn技巧</h2><p>南大有个哥们写了一个技巧集合，很不错，推荐给大家<a href="http://lamda.nju.edu.cn/weixs/project/CNNTricks/CNNTricks.html" target="_blank" rel="external">http://lamda.nju.edu.cn/weixs/project/CNNTricks/CNNTricks.html</a></p>
+<h2 id="网络训练技巧">网络训练技巧</h2><p>1：准备数据：务必保证有大量、高质量并且带有干净标签的数据，没有如此的数据，学习是不可能的<br>2：预处理：这个不多说，就是0均值和1方差化<br>3：minibatch：建议值128,1最好，但是效率不高，但是千万不要用过大的数值，否则很容易过拟合<br>4：梯度归一化：其实就是计算出来梯度之后，要除以minibatch的数量。这个不多解释<br>5：下面主要集中说下学习率<br>5.1：总的来说是用一个一般的学习率开始，然后逐渐的减小它<br>5.2：一个建议值是0.1，适用于很多NN的问题，一般倾向于小一点。<br>5.3：一个对于调度学习率的建议：如果在验证集上性能不再增加就让学习率除以2或者5，然后继续，学习率会一直变得很小，到最后就可以停止训练了。<br>5.4：很多人用的一个设计学习率的原则就是监测一个比率（每次更新梯度的norm除以当前weight的norm），如果这个比率在10-3附近，如果小于这个值，学习会很慢，如果大于这个值，那么学习很不稳定，由此会带来失败。<br>6：使用验证集，可以知道什么时候开始降低学习率，和什么时候停止训练。<br>7：关于对weight初始化的选择的一些建议：<br>7.1：如果你很懒，直接用0.02*randn(num_params)来初始化，当然别的值你也可以去尝试<br>7.2：如果上面那个不太好使，那么久依次初始化每一个weight矩阵用<code>init_scale / sqrt(layer_width) * randn</code>,init_scale可以被设置为0.1或者1<br>7.3：初始化参数对结果的影响至关重要，要引起重视。<br>7.4：在深度网络中，随机初始化权重，使用SGD的话一般处理的都不好，这是因为初始化的权重太小了。这种情况下对于浅层网络有效，但是当足够深的时候就不行了，因为weight更新的时候，是靠很多weight相乘的，越乘越小，有点类似梯度消失的意思<br>8：如果训练RNN或者LSTM，务必保证gradient的norm被约束在15或者5（前提还是要先归一化gradient），这一点在RNN和LSTM中很重要。<br>9：检查下梯度，如果是你自己计算的梯度。<br>10：如果使用LSTM来解决长时依赖的问题，记得初始化bias的时候要大一点<br>12：尽可能想办法多的扩增训练数据，如果使用的是图像数据，不妨对图像做一点扭转啊之类的，来扩充数据训练集合。<br>13：使用dropout。大的网络使用dropout，小网络使用dropout训练很慢，而且不容易收敛<br>14：评价最终结果的时候，多做几次，然后平均一下他们的结果。</p>
+<h2 id="参考资料">参考资料</h2><p><a href="https://www.zhihu.com/question/41631631" target="_blank" rel="external">知乎：你有哪些deep learning（rnn、cnn）调参的经验？</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="ciqau700i0000pofhekm3vxc0" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tricks/">tricks</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-dataset-cv" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2015/11/05/dataset-cv/" class="article-date">
@@ -100,7 +145,8 @@
 <h3 id="植物图像库">植物图像库</h3><p><a href="http://www.plantphoto.cn/" target="_blank" rel="external">http://www.plantphoto.cn/</a><br>收录图片208万幅，1.86万种</p>
 <h1 id="人脸">人脸</h1><h3 id="CelebA:_Large-scale_CelebFaces_Attributes_(CelebA)_Dataset">CelebA: Large-scale CelebFaces Attributes (CelebA) Dataset</h3><p><a href="http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html" target="_blank" rel="external">http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html</a><br>香港中文大学组2015年搞的一个最新的目前最大的人脸集，包含10177个人，202599张人脸图片，而且每张图片有5个关键点标注信息以及40个2值属性，属性包括是否带眼睛，是否在笑，是否带帽子，是不是卷发，是否年轻，性别等等，是非常珍贵的人脸数据。</p>
 <h3 id="WIDER_FACE:_A_Face_Detection_Benchmark">WIDER FACE: A Face Detection Benchmark</h3><p><a href="http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/" target="_blank" rel="external">http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/</a><br>香港中文大学再放大招，2015年11月又推出人脸检测标注数据库，包含32203张图片，393703张人脸。其中50%的测试数据集并没有公开标注信息。</p>
-<h1 id="汽车">汽车</h1><h3 id="CompCars:_The_comprehensive_cars_dataset">CompCars: The comprehensive cars dataset</h3><p><a href="http://mmlab.ie.cuhk.edu.hk/datasets/comp_cars/index.html" target="_blank" rel="external">http://mmlab.ie.cuhk.edu.hk/datasets/comp_cars/index.html</a></p>
+<h1 id="汽车">汽车</h1><h3 id="KITTI_Vision_Benchmark">KITTI Vision Benchmark</h3><p><a href="http://www.cvlibs.net/datasets/kitti/index.php" target="_blank" rel="external">http://www.cvlibs.net/datasets/kitti/index.php</a><br>这个就厉害了，包括车载环境的机动车、非机动车、行人以及车道等多方面的标注信息。用于专业的车辆辅助驾驶的检测算法测评。</p>
+<h3 id="CompCars:_The_comprehensive_cars_dataset">CompCars: The comprehensive cars dataset</h3><p><a href="http://mmlab.ie.cuhk.edu.hk/datasets/comp_cars/index.html" target="_blank" rel="external">http://mmlab.ie.cuhk.edu.hk/datasets/comp_cars/index.html</a></p>
 <h1 id="图像知识图谱">图像知识图谱</h1><h3 id="Visual_Genome">Visual Genome</h3><p><a href="https://visualgenome.org/" target="_blank" rel="external">https://visualgenome.org/</a><br>100K+图像，400万区域描述，170万图像问答，210万物体，180万的属性和关系，所有都映射到Wordnet Synsets</p>
 <h1 id="OCR">OCR</h1><h3 id="COCO-TEXT">COCO-TEXT</h3><p><a href="http://vision.cornell.edu/se3/coco-text/" target="_blank" rel="external">http://vision.cornell.edu/se3/coco-text/</a><br>该数据库含63686张图像，123589个文本区域及标注（位置、手写/印刷等属性、语言、可辨识性、文本）</p>
 <h1 id="视频">视频</h1><h3 id="ActivityNet">ActivityNet</h3><p><a href="http://activity-net.org/" target="_blank" rel="external">http://activity-net.org/</a><br>人类活动理解建模，200个类和2万个训练/调试/测试视频</p>
@@ -109,7 +155,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cipqw5o4x0027akfhc561qs24" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="ciqau70f8002apofhp6qndzes" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dataset/">dataset</a></li></ul>
@@ -225,7 +271,7 @@ detector = dlib.get_frontal_face_detector()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cipqw5o4i0022akfhlpblakre" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="ciqau70f30025pofh3e12h1zh" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/face/">face</a></li></ul>
@@ -286,7 +332,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cipqw5o42001iakfhridzwkic" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="ciqau70e3001ipofh41i7dbvg" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mxnet/">mxnet</a></li></ul>
@@ -351,7 +397,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cipqw5o5j002takfhffc62acs" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="ciqau70g1002wpofhaug69wt6" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -423,7 +469,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cipqw5o5j002qakfh6nexjw1e" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="ciqau70fy002tpofheb38m4xp" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -681,7 +727,7 @@ chmod -R +r *
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cipqw5o4x002jakfhjik0oswn" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="ciqau70fp002mpofhwu9mei39" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -759,7 +805,7 @@ chmod -R +r *
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cipqw5o5j002wakfha2dwo2ob" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="ciqau70g6002zpofhgqjxktde" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -883,7 +929,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cipqw5o5f002nakfh3ab567wa" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="ciqau70fu002qpofhwc031rqj" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -997,67 +1043,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cipqw5o2q0005akfhyssmsaaj" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-三万元搞定两室两厅装修攻略" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/04/04/三万元搞定两室两厅装修攻略/" class="article-date">
-  <time datetime="2015-04-04T00:37:28.000Z" itemprop="datePublished">2015-04-04</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/life/">life</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/04/三万元搞定两室两厅装修攻略/">三万元搞定两室两厅装修攻略</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="三万元搞定两室两厅装修攻略">三万元搞定两室两厅装修攻略</h1><p>客厅作为家庭的门面，可是马虎不得，宁可卧室不装，客厅也不能落下。三万元就轻松搞定，简洁大方的客厅装修，足以提升你的居住档次！</p>
-<h2 id="省钱攻略">省钱攻略</h2><h3 id="省钱一">省钱一</h3><p>装房子有人说首要是设计，一定要找装修公司，实际不然的，现在淘宝等网站上有很多有关装修的图片，你可以自己对比，进行选择再稍加改动就可以用了，效果未必比装修公司的差。所以一开始，是选择装修公司还是自己找装修工游击队呢？我建议是如果你太忙就选公司，如果你每天还有些挤出来的时间，就选没有公司的装修包工头，俗称装修游击队，因为这样省钱，可以算的，装修公司在承揽到工程后，如果是大公司他有固定的工人，但价钱肯定贵，如果小公司，他养不起那么多固定的工人，当他承揽到工程时是临时找装修工的，他们从中收取管理费、材料回扣、图纸设计费等，而这些你完全可以自己做，不就省钱了，我家装修时是我从前到后负责管理，找了一个别人介绍的包工头。再说包工头，包工头最好是木工，因为装修里最有难度和技术的就是木工的活，有他在，他可以参与其中替你把关。在开工前谈好工钱情况，一般是按件收的，如处理墙面时一平方的单价、木工做一个电视背景墙多少钱等等，这样一目了然，最后形成文字打印双方签字，形成合同。</p>
-<p>装修开始前，需要材料，建议自己在给包工头包工程的时候，声明包工不包料，因为材料里利润也很大，让他给你开好材料单子，你自己去跑市场，而且尽量在一家大一点的建材店，为了能将所有的材料配齐，这样也是比多家店买划算，买材料的时候不要带装修工人去，因为他们有行规：只要有工人跟着就会给他们回扣，而回扣就是你自己的腰包里的钱。至于材料的好坏，我不建议买太好的，根据自己的情况，适中就可以了。而且先了解材料的价格，这就多跑几家货比三家后你自然就清楚了。对于卫生间、厨房阳台的瓷砖，在购买时建议不要买得花色过于分散，因为种类越多，浪费越大，浪费的可是钱啊！材料备好后，就开始施工了，首先先改造水电线路，建议水电的管线等材料尽量要品牌的、好的，因为是要埋在墙里或地里的，维修很麻烦，所以一次到位。</p>
-<h3 id="省钱三">省钱三</h3><p>装修时少不了油漆，在建材市场里油漆的利润还是比较大的，要尽量在一家买，可以砍价。另外油漆的种类很多，我建议不要买他们的所谓高档货，没有必要，不要被卖家的介绍给忽悠了，什么可以擦洗几万次什么的，谁闲得没有事做天天擦。中档就很好了，只要是在国家质量检验局能查到的就可以，我用的是什么还是不在这里写了有做广告的嫌疑，有兴趣的可以直接旺我好了。而且一定要砍价。油漆可以省很多钱的。告诉大家可能不信，我家处理的墙面大概230平方，木工用的木器漆记不大清楚了，合起来一共只花了2600元</p>
-<h3 id="省钱四">省钱四</h3><p>厨房的橱柜建议让木工做柜体架子，自己到橱柜店订门，做出来既好看耐用又省钱，卖得整体橱柜，质量好的太贵、便宜的不耐用质量差。</p>
-<h3 id="省钱五">省钱五</h3><p>最后装的是地板，我家是直接到厂家订货，用的是竹地板，江西产的，至于牌子还是不能在这写，有需要旺我就好了。我家里有人认识厂老板105/平方含运费。如果你是偏南方的建议用竹地板，它与复合地板、实木地板相比最耐用、最好打理、最环保、较经济的，复合板中胶的含量较高，而胶中的有害物质较多，不利于挥发，对身体不好，当然，其他地板中也有胶，只不过要少一些。而实木地板价位较高而且不易打理。当然若用地板砖就另当别论了。</p>
-<h3 id="省钱六">省钱六</h3><p>装修中用到的有些东西可以淘宝淘的，如水龙头、洗菜盆、花洒、墙贴、壁纸、小摆件等</p>
-<h3 id="省钱七">省钱七</h3><p>最后一个建议：尽量借着过节的时机去订装修的用品，如卫生间的卫生洁具、厨房橱柜、厨具、灯具、室内门等用具，这样会有很高的折扣的，比如五一、十一、元旦、春节等大型节日，(<em>^__^</em>) 嘻嘻……</p>
-<h2 id="装修攻略">装修攻略</h2><p>春季是家庭装修比较好的时节，但是春季装修要特别注意防潮、防水等细节，初次装修的业主不妨先看看业内人士整理的春季装修攻略。</p>
-<h3 id="攻略1：装修公司的选择">攻略1：装修公司的选择</h3><p>选择装修公司是装修房子的重中之重，选择装修公司时要查三证，看他们有无承担家居装饰的资质证书，有无营业执照，有无装饰行业协会会员证。另外，针对个别有资质的公司往往把工程转包给“游击装修队”的做法，消费者还应考察装修人员的办公地点等。</p>
-<h3 id="攻略2：了解家装程序">攻略2：了解家装程序</h3><p>家庭装修工程可概括为结构工程、装修工程、装饰工程和安装工程四个类别，具体工序应当是：</p>
-<p>首先由瓦工对基层进行处理，清理顶、墙、地面，达到施工技术要求，同时进行电，水线路改造。基层处理达标后，木工进行吊顶作业，吊顶构造完工后，开始进行细木工作业，如制作木制暖气罩、门窗框套、木护墙等。当细木工装饰构造完成，并已涂刷一遍面漆进行保护后，才进行墙、顶面的装修工作。</p>
-<p>在进行墙面装饰时，应预留空调等电器安装孔洞及线路。地面装修应在墙面施工完成后进行，开始地板、石材、地砖等铺装，并安装踢脚板，铺装后应进行地面装修的养护。地面养护期后，再进行细木工装饰的油漆饰面作业，完工后装饰工程基本告一段落，再将配套电器、设施、家具等安装安放好，工程才算最后结束。</p>
-<h3 id="攻略3：如何科学防潮">攻略3：如何科学防潮</h3><p>家庭装修当中，木质材料使用比重较大，而木制品受气候影响较大，有热胀冷缩的特点。气候的干湿情况会影响木质材料的含水率，春季气候条件适宜将木质的含水率控制在 13%以内。木材含水率如果超过这个比例，其热胀冷缩的变化就很明显，从而影响施工质量。</p>
-<p>在选购木料时，一定要购买经过干燥处理的木料。因为这种木料可以直接用于居室的装修，减少了中间环节，就减少了木料受潮的机会。木料买回后放置两三天再进行必要的防潮处理。</p>
-<h3 id="攻略4：环保装饰装修">攻略4：环保装饰装修</h3><p>消费者对家庭装修环保问题的关注度日益上升。而要避免装修造成室内污染，尽量选择简洁的装修风格，选用环保的装修材料，并在装修合同中约定环保条款，以免装修过后出现污染而缺少投诉和诉讼时所需要的依据。</p>
-<p>合同不仅要注明所用乳胶漆、油漆的品牌名称，还要把是否会造成空气污染或者是否会产生有害气体超标等问题作为一个重要内容写入，以此来要求装修公司保证使用高质量的装修材料，保护消费者合法权益不受侵害。</p>
-<p>房子装修完毕后，可请室内环境监测的权威部门进行检测，了解空气中甲醛等有害物质是否超标，及早采取有效措施。另外需要注意的是，刚装修完毕的居室不宜马上入住。由于各种有害气体的释放量很高，立即入住会对身体造成伤害，所以要通风一段时间，以加快有害气体的释放扩散，降低室内有害气体浓度。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cipqw5o2r000dakfhmt8z965s" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="ciqau70ad0005pofhepkvondy" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -1082,7 +1068,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">16</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">16</span></li></ul>
     </div>
   </div>
 
@@ -1091,7 +1077,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">4</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
     </div>
   </div>
 
@@ -1109,7 +1095,7 @@ ldconfig
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -1119,6 +1105,10 @@ ldconfig
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/07/06/guides-japan/">日本攻略</a>
+          </li>
         
           <li>
             <a href="/2016/06/22/python-spider/">python爬虫入门笔记</a>
@@ -1134,10 +1124,6 @@ ldconfig
         
           <li>
             <a href="/2016/06/13/tensorflow-captcha/">tensorflow学习（五）基于CNN的验证码识别</a>
-          </li>
-        
-          <li>
-            <a href="/2016/05/28/tensorflow-cnn/">tensorflow学习（四）自己创建CNN网络</a>
           </li>
         
       </ul>
