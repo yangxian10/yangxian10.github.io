@@ -17,7 +17,7 @@
 权重初始化def weight_variable(shape):
     initial = tf.truncated_normal(shape, dtype=tf.float32, stddev=0.1)
     return tf.Variable(initial)">
-<meta property="og:updated_time" content="2016-07-13T14:21:07.977Z">
+<meta property="og:updated_time" content="2016-07-19T13:03:01.463Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="tensorflow学习（四）自己创建CNN网络">
 <meta name="twitter:description" content="之前已经介绍过数据的加载和可视化的问题，这次该研究模型了。CNN网络应该是深度学习的一个经典了，话不多说，直接介绍核心模块。
@@ -135,8 +135,9 @@ conv1 = <span class="function"><span class="title">conv2d</span><span class="par
 <pre><code><span class="preprocessor"># padding = <span class="string">'VALID'</span></span>
 new_height = new_width = (W – F + <span class="number">1</span>) / S (结果向上取整)
 <span class="preprocessor"># padding = <span class="string">'SAME'</span></span>
-pad_needed_height = (new_height – <span class="number">1</span>)  × S + F - W (结果向上取整，并在四周添加像素)
-</code></pre><h2 id="池化">池化</h2><p>池化分为均值池化<code>tf.nn.avg_pool</code>和max池化<code>tf.nn.max_pool</code>。这里的池化用简单传统的2x2大小的模板做max pooling。</p>
+pad_needed_height = (new_height – <span class="number">1</span>) × S + F - W (结果向上取整，并在四周添加像素)
+</code></pre><p>当new_height为奇数的时候，在顶部贴两个像素，在底部贴3个像素，而caffe和cuDNN是在两边各贴两个像素。这点不同，导致用caffe训练的模型转tensorflow的时候要慎用‘SAME’模式，切记！</p>
+<h2 id="池化">池化</h2><p>池化分为均值池化<code>tf.nn.avg_pool</code>和max池化<code>tf.nn.max_pool</code>。这里的池化用简单传统的2x2大小的模板做max pooling。</p>
 <pre><code><span class="function"><span class="keyword">def</span> <span class="title">max_pool</span><span class="params">(x, k, name)</span>:</span>
     <span class="keyword">return</span> tf.nn.max_pool(x, ksize=[<span class="number">1</span>, k, k, <span class="number">1</span>], strides=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>, name=name)
 

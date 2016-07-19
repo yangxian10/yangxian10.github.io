@@ -15,7 +15,7 @@ mnist =">
 <meta property="og:description" content="网上的教程、官方的资料大多关注的都是如何使用模型，对于数据源的说明都比较简单。基本资料都是用的MNIST数据集做的实验。
 供给数据概述tensorflow的模型数据读取还是非常友好的，最适合大量的数据的变量操作的形式应该是feed机制，利用tf.placeholder()为操作的变量创建占位符，在run()或eval()的时候调用参数，将变量x和其真实标签y_传入模型。代码如下：
 mnist =">
-<meta property="og:updated_time" content="2016-07-13T14:28:36.403Z">
+<meta property="og:updated_time" content="2016-07-19T13:01:37.239Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="tensorflow学习（二）数据接口">
 <meta name="twitter:description" content="网上的教程、官方的资料大多关注的都是如何使用模型，对于数据源的说明都比较简单。基本资料都是用的MNIST数据集做的实验。
@@ -119,7 +119,8 @@ y_ = tf.<span class="function"><span class="title">placeholder</span><span class
     <span class="comment">#    of size (H x W x 1) in grayscale.</span>
     img = skimage.img_as_float(skimage.io.imread(file_name, as_grey=<span class="keyword">False</span>)).astype(np.float32)
     img = img*<span class="number">2.0</span> - <span class="number">1.0</span>
-    img_resize = tf.image.resize(img, <span class="number">448</span>, <span class="number">448</span>)
+    img_resize = skimage.transform.resize(img, (width, height, <span class="number">3</span>))
+    img_resize = img_resize[:, :, (<span class="number">2</span>,<span class="number">1</span>,<span class="number">0</span>)]
     <span class="keyword">return</span> img_resize
 </code></pre><h3 id="csv文件">csv文件</h3><p>使用<code>tf.TextLineReader</code>读取文件的一行内容，然后通过<code>tf.decode_csv</code>来解析这一行内容并将其转为张量列表</p>
 <h3 id="二进制文件读取固定长度">二进制文件读取固定长度</h3><p>从二进制文件中读取固定长度纪录， 可以使用<code>tf.FixedLengthRecordReader</code>的<code>tf.decode_raw</code>操作。<code>decode_raw</code>操作可以讲一个字符串转换为一个uint8的张量。例程中的cifar-10的数据集的读入就是通过这个方式。</p>

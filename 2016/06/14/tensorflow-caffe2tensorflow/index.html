@@ -15,7 +15,7 @@ caffe-tensorflow安装git clone https://github.com/ethereon/caffe-tensorflow
 <meta property="og:description" content="tensorflow官方认定的转换工具为https://github.com/ethereon/caffe-tensorflow。我们尝试一下转换一个caffe训练的图像识别模型
 caffe-tensorflow安装git clone https://github.com/ethereon/caffe-tensorflow
 生成模型训练代码利用convert.py可以将caffe网络定义的depl">
-<meta property="og:updated_time" content="2016-06-14T13:29:30.798Z">
+<meta property="og:updated_time" content="2016-07-19T13:01:47.182Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="tensorflow学习（七）caffe模型训练结果转换为tensorflow格式">
 <meta name="twitter:description" content="tensorflow官方认定的转换工具为https://github.com/ethereon/caffe-tensorflow。我们尝试一下转换一个caffe训练的图像识别模型
@@ -102,6 +102,9 @@ caffe-tensorflow安装git clone https://github.com/ethereon/caffe-tensorflow
 <pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --code-output-path=./myNetTensorflow.py
 </code></pre><h2 id="转换训练好的模型">转换训练好的模型</h2><p>也可以将caffemodel的weights和biases参数读取出来转换为npy的格式，并通过<code>numpy.load()</code>读取数据。转换数据的脚本如下：</p>
 <pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --caffemodel=./mynet<span class="class">.caffemodel</span> --data-output-path=./myNetTensorflow.npy
+</code></pre><p>由于转换过来的npy数据的类型比奇怪，是0-d array，要将其取出来需要如下读取方式</p>
+<pre><code>params = np.load()
+params = params[<span class="link_label">None</span>][<span class="link_reference">0</span>]
 </code></pre><h2 id="注意事项">注意事项</h2><ul>
 <li><p>caffe的模型应该是较新的版本，才能转换</p>
 </li>

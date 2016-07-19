@@ -301,6 +301,9 @@ images = re.<span class="function"><span class="title">findall</span><span class
 <pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --code-output-path=./myNetTensorflow.py
 </code></pre><h2 id="转换训练好的模型">转换训练好的模型</h2><p>也可以将caffemodel的weights和biases参数读取出来转换为npy的格式，并通过<code>numpy.load()</code>读取数据。转换数据的脚本如下：</p>
 <pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --caffemodel=./mynet<span class="class">.caffemodel</span> --data-output-path=./myNetTensorflow.npy
+</code></pre><p>由于转换过来的npy数据的类型比奇怪，是0-d array，要将其取出来需要如下读取方式</p>
+<pre><code>params = np.load()
+params = params[<span class="link_label">None</span>][<span class="link_reference">0</span>]
 </code></pre><h2 id="注意事项">注意事项</h2><ul>
 <li><p>caffe的模型应该是较新的版本，才能转换</p>
 </li>
@@ -718,8 +721,9 @@ conv1 = <span class="function"><span class="title">conv2d</span><span class="par
 <pre><code><span class="preprocessor"># padding = <span class="string">'VALID'</span></span>
 new_height = new_width = (W – F + <span class="number">1</span>) / S (结果向上取整)
 <span class="preprocessor"># padding = <span class="string">'SAME'</span></span>
-pad_needed_height = (new_height – <span class="number">1</span>)  × S + F - W (结果向上取整，并在四周添加像素)
-</code></pre><h2 id="池化">池化</h2><p>池化分为均值池化<code>tf.nn.avg_pool</code>和max池化<code>tf.nn.max_pool</code>。这里的池化用简单传统的2x2大小的模板做max pooling。</p>
+pad_needed_height = (new_height – <span class="number">1</span>) × S + F - W (结果向上取整，并在四周添加像素)
+</code></pre><p>当new_height为奇数的时候，在顶部贴两个像素，在底部贴3个像素，而caffe和cuDNN是在两边各贴两个像素。这点不同，导致用caffe训练的模型转tensorflow的时候要慎用‘SAME’模式，切记！</p>
+<h2 id="池化">池化</h2><p>池化分为均值池化<code>tf.nn.avg_pool</code>和max池化<code>tf.nn.max_pool</code>。这里的池化用简单传统的2x2大小的模板做max pooling。</p>
 <pre><code><span class="function"><span class="keyword">def</span> <span class="title">max_pool</span><span class="params">(x, k, name)</span>:</span>
     <span class="keyword">return</span> tf.nn.max_pool(x, ksize=[<span class="number">1</span>, k, k, <span class="number">1</span>], strides=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>, name=name)
 
@@ -1020,7 +1024,8 @@ y_ = tf.<span class="function"><span class="title">placeholder</span><span class
     <span class="comment">#    of size (H x W x 1) in grayscale.</span>
     img = skimage.img_as_float(skimage.io.imread(file_name, as_grey=<span class="keyword">False</span>)).astype(np.float32)
     img = img*<span class="number">2.0</span> - <span class="number">1.0</span>
-    img_resize = tf.image.resize(img, <span class="number">448</span>, <span class="number">448</span>)
+    img_resize = skimage.transform.resize(img, (width, height, <span class="number">3</span>))
+    img_resize = img_resize[:, :, (<span class="number">2</span>,<span class="number">1</span>,<span class="number">0</span>)]
     <span class="keyword">return</span> img_resize
 </code></pre><h3 id="csv文件">csv文件</h3><p>使用<code>tf.TextLineReader</code>读取文件的一行内容，然后通过<code>tf.decode_csv</code>来解析这一行内容并将其转为张量列表</p>
 <h3 id="二进制文件读取固定长度">二进制文件读取固定长度</h3><p>从二进制文件中读取固定长度纪录， 可以使用<code>tf.FixedLengthRecordReader</code>的<code>tf.decode_raw</code>操作。<code>decode_raw</code>操作可以讲一个字符串转换为一个uint8的张量。例程中的cifar-10的数据集的读入就是通过这个方式。</p>
