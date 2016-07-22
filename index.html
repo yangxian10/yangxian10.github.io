@@ -350,8 +350,8 @@ images = re.<span class="function"><span class="title">findall</span><span class
 </code></pre><h2 id="转换训练好的模型">转换训练好的模型</h2><p>也可以将caffemodel的weights和biases参数读取出来转换为npy的格式，并通过<code>numpy.load()</code>读取数据。转换数据的脚本如下：</p>
 <pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --caffemodel=./mynet<span class="class">.caffemodel</span> --data-output-path=./myNetTensorflow.npy
 </code></pre><p>由于转换过来的npy数据的类型比奇怪，是0-d array，要将其取出来需要如下读取方式</p>
-<pre><code>params = np.load()
-params = params[<span class="link_label">None</span>][<span class="link_reference">0</span>]
+<pre><code>params = np.<span class="function"><span class="title">load</span><span class="params">()</span></span>
+params = params.<span class="function"><span class="title">item</span><span class="params">()</span></span>
 </code></pre><h2 id="注意事项">注意事项</h2><ul>
 <li><p>caffe的模型应该是较新的版本，才能转换</p>
 </li>
