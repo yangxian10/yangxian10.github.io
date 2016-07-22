@@ -3,17 +3,24 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives | 杨现的个人博客</title>
+  <title>tensorflow学习（八）模型资源 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="迭代的是人，递归的是神">
-<meta property="og:type" content="website">
-<meta property="og:title" content="杨现的个人博客">
-<meta property="og:url" content="http://yoursite.com/archives/page/4/index.html">
+  <meta name="description" content="网上有众多基于tensorflow实现的各种网络，这里整理梳理一下
+VGG-16https://github.com/ry/tensorflow-vgg16这是一个基于caffe转换过来的预训练好的vgg16的模型，参数文件可以通过torrent下载，模型的结构详见vgg16.py，这个网络没有训练的代码，不够nice
+ResNethttps://github.com/ry/tensorflow-">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tensorflow学习（八）模型资源">
+<meta property="og:url" content="http://yoursite.com/2016/07/22/tensorflow-modelresource/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="迭代的是人，递归的是神">
+<meta property="og:description" content="网上有众多基于tensorflow实现的各种网络，这里整理梳理一下
+VGG-16https://github.com/ry/tensorflow-vgg16这是一个基于caffe转换过来的预训练好的vgg16的模型，参数文件可以通过torrent下载，模型的结构详见vgg16.py，这个网络没有训练的代码，不够nice
+ResNethttps://github.com/ry/tensorflow-">
+<meta property="og:updated_time" content="2016-07-22T16:00:21.922Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="杨现的个人博客">
-<meta name="twitter:description" content="迭代的是人，递归的是神">
+<meta name="twitter:title" content="tensorflow学习（八）模型资源">
+<meta name="twitter:description" content="网上有众多基于tensorflow实现的各种网络，这里整理梳理一下
+VGG-16https://github.com/ry/tensorflow-vgg16这是一个基于caffe转换过来的预训练好的vgg16的模型，参数文件可以通过torrent下载，模型的结构详见vgg16.py，这个网络没有训练的代码，不够nice
+ResNethttps://github.com/ry/tensorflow-">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -63,115 +70,64 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2015" class="archive-year">2015</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/08/01/caffe-setup/" class="archive-article-date">
-  <time datetime="2015-08-01T10:56:27.000Z" itemprop="datePublished">8月 1</time>
+        <section id="main"><article id="post-tensorflow-modelresource" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/07/22/tensorflow-modelresource/" class="article-date">
+  <time datetime="2016-07-22T15:59:03.000Z" itemprop="datePublished">2016-07-22</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/08/01/caffe-setup/">caffe学习（一）caffe + centOS 6.5 + CUDA 6.5配置</a>
+    <h1 class="article-title" itemprop="name">
+      tensorflow学习（八）模型资源
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/04/12/单反拍摄入门/" class="archive-article-date">
-  <time datetime="2015-04-12T13:06:30.000Z" itemprop="datePublished">4月 12</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/12/单反拍摄入门/">单反拍摄入门</a>
-    </h1>
-  
+        <p>网上有众多基于tensorflow实现的各种网络，这里整理梳理一下</p>
+<h2 id="VGG-16">VGG-16</h2><p><a href="https://github.com/ry/tensorflow-vgg16" target="_blank" rel="external">https://github.com/ry/tensorflow-vgg16</a><br>这是一个基于caffe转换过来的预训练好的vgg16的模型，参数文件可以通过torrent下载，模型的结构详见<code>vgg16.py</code>，这个网络没有训练的代码，不够nice</p>
+<h2 id="ResNet">ResNet</h2><p><a href="https://github.com/ry/tensorflow-resnet" target="_blank" rel="external">https://github.com/ry/tensorflow-resnet</a><br>这也是一个从caffe转换过来的模型，训练好的模型文件可以通过torrent下载，其模型所需要的模块函数在<code>resnet.py</code>中，其<code>inference</code>和<code>inference_small</code>函数是完整网络。在<code>train_imagenet.py</code>中将模型声明logits传入<code>resnet_train.py</code>进行训练。</p>
+<h2 id="fcn_(Fully_Convolutional_Networks)">fcn (Fully Convolutional Networks)</h2><p><a href="https://github.com/MarvinTeichmann/tensorflow-fcn" target="_blank" rel="external">https://github.com/MarvinTeichmann/tensorflow-fcn</a><br>将caffe的VGG-16模型转换成npy格式后，<code>fcnxx_vgg.py</code>定义了模型，并加载vgg.npy的数据参数。通过<code>test_fcn_vgg.py</code>参数测试图片的分割结果。该网络没有提供训练代码。</p>
+<h2 id="YOLO">YOLO</h2><p><a href="https://github.com/gliese581gg/YOLO_tensorflow" target="_blank" rel="external">https://github.com/gliese581gg/YOLO_tensorflow</a><br>实现的一个YOLO的图像测试代码，比较简单，使用之前要下载对应的ckpt模型参数文件。没有训练代码，无法重现训练。</p>
+<h2 id="Inception-V3">Inception-V3</h2><p><a href="https://github.com/tensorflow/models/tree/master/inception" target="_blank" rel="external">https://github.com/tensorflow/models/tree/master/inception</a><br>tensorflow官方提供的一个inception-v3的实现，有较为详细的数据加载，训练，测试的代码。值得仔细研究。</p>
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/04/04/三万元搞定两室两厅装修攻略/" class="archive-article-date">
-  <time datetime="2015-04-04T00:37:28.000Z" itemprop="datePublished">4月 4</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/04/三万元搞定两室两厅装修攻略/">三万元搞定两室两厅装修攻略</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/03/23/五险一金/" class="archive-article-date">
-  <time datetime="2015-03-23T13:31:36.000Z" itemprop="datePublished">3月 23</time>
-</a>
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/07/22/tensorflow-modelresource/" data-id="ciqxxomr8000kn8fhukl8r1nz" class="article-share-link">Share</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/03/23/五险一金/">五险一金</a>
-    </h1>
-  
-
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/03/17/hello-world/" class="archive-article-date">
-  <time datetime="2015-03-17T13:31:09.205Z" itemprop="datePublished">3月 17</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/03/17/hello-world/">Hello World</a>
-    </h1>
-  
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
 
-    </header>
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/07/13/caffe-yolo/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">caffe学习（七）caffe-YOLO模型</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-  
-    </div></section>
-  
+
 </section>
         
           <aside id="sidebar">
