@@ -11,7 +11,7 @@
 <meta property="og:url" content="http://yoursite.com/2016/03/23/caffe-add-layer/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
 <meta property="og:description" content="最近阅读文章《Supervised Learning of Semantics-Preserving Hashing via Deep Neural Networks for Large-Scale Image Search》，对应的开源代码有两个版本https://github.com/kevinlin311tw/caffe-cvprw15，https://github.com/kevinlin">
-<meta property="og:updated_time" content="2016-03-23T14:28:21.752Z">
+<meta property="og:updated_time" content="2016-08-21T00:41:23.015Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="caffe学习（六）创建自己的模型">
 <meta name="twitter:description" content="最近阅读文章《Supervised Learning of Semantics-Preserving Hashing via Deep Neural Networks for Large-Scale Image Search》，对应的开源代码有两个版本https://github.com/kevinlin311tw/caffe-cvprw15，https://github.com/kevinlin">
@@ -129,6 +129,7 @@ layer {
 <span class="preprocessor">##########################</span>
 </code></pre><p>并把loss3/classifier层的名字改为<code>loss3/classifier_change</code>，bottom层改为<code>latent_SSDH_encode</code>，top层改为<code>loss3/classifier_change</code>，把lr_mult参数*10。</p>
 <p>最后把SoftmaxWithLoss层以及Accuracy层的bottom改为新层名<code>loss3/classifier_change</code>。</p>
+<p>这里详细介绍一下weight_filter的初始化细节，一般有<code>gaussian</code>和<code>xavier</code>两种方式：xavier具体方式是从[-scale, +scale]中进行均匀采样，对卷积层或全连接层中参数进行初始化的方法。<br>其中scale = \sqrt(3 / n), n根据不同实现可设置为n=(num_in + num_out) / 2 (Understanding the difficulty of training deep feedforward neural networks )，或n=num_out (caffe最初实现方法)</p>
 <h2 id="修改solver-prototxt">修改solver.prototxt</h2><ul>
 <li>将<code>test_initialization</code>屏蔽掉</li>
 <li>weight_decay改为0.0005</li>

@@ -766,7 +766,7 @@ make<span class="instruction"> check
 <h3 id="Install_lmdb">Install lmdb</h3><pre><code>pip <span class="keyword">install</span> lmdb
 </code></pre><h3 id="Install_hdf5">Install hdf5</h3><p>下载hdf5</p>
 <pre><code>tar xvf hdf5-1.8.5-patch1.tar
-cd hdf5-1.8.5-patch.tar
+cd hdf5-1.8.5-patch
 <span class="keyword">.</span>/configure --prefix=/opt/hdf5
 make
 make<span class="instruction"> check
@@ -945,7 +945,17 @@ chmod -R +r *
 <li>stepsize决定多次次迭代后减少学习率，应该和max_iter最大迭代次数综合考虑</li>
 <li>snapshot决定多次次迭代后保存一次模型</li>
 <li>snapshot_prefix是保存的模型文件名</li>
-<li>solver_mode是用GPU还是CPU<br>其他参数都是模型参数学习的相关参数，决定了模型的初始值和收敛速度，暂时先不调节</li>
+<li>solver_mode是用GPU还是CPU</li>
+<li>lr_policy: 这个参数可以选的参数如下：<ul>
+<li>fixed : lr永不变</li>
+<li>step : lr = baselr * gamma^(iter/stepsize)</li>
+<li>exp : lr = baselr * gamma^iter</li>
+<li>inv : lr = baselr <em> (1+gamma</em>iter)^(-power)</li>
+<li>multistep : 直接写iter在某个范围内时lr应该是多少，自定义学习曲线</li>
+<li>poly : lr = baselr * (1 - iter/maxiter)^power</li>
+<li>sigmoid : lr = baselr <em> (1 / (1 + e^(-gamma</em>(iter-stepsize))))<br>其他参数都是模型参数学习的相关参数，决定了模型的初始值和收敛速度，暂时先不调节</li>
+</ul>
+</li>
 </ul>
 <h2 id="训练">训练</h2><p>简单，执行</p>
 <pre><code>../build/tools/caffe train --<span class="keyword">solver</span><span class="built_in">=</span><span class="keyword">solver</span>.prototxt

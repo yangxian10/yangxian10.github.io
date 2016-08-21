@@ -681,6 +681,7 @@ layer {
 <span class="preprocessor">##########################</span>
 </code></pre><p>并把loss3/classifier层的名字改为<code>loss3/classifier_change</code>，bottom层改为<code>latent_SSDH_encode</code>，top层改为<code>loss3/classifier_change</code>，把lr_mult参数*10。</p>
 <p>最后把SoftmaxWithLoss层以及Accuracy层的bottom改为新层名<code>loss3/classifier_change</code>。</p>
+<p>这里详细介绍一下weight_filter的初始化细节，一般有<code>gaussian</code>和<code>xavier</code>两种方式：xavier具体方式是从[-scale, +scale]中进行均匀采样，对卷积层或全连接层中参数进行初始化的方法。<br>其中scale = \sqrt(3 / n), n根据不同实现可设置为n=(num_in + num_out) / 2 (Understanding the difficulty of training deep feedforward neural networks )，或n=num_out (caffe最初实现方法)</p>
 <h2 id="修改solver-prototxt">修改solver.prototxt</h2><ul>
 <li>将<code>test_initialization</code>屏蔽掉</li>
 <li>weight_decay改为0.0005</li>

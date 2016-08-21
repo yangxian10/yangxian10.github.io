@@ -17,7 +17,7 @@
 权重初始化def weight_variable(shape):
     initial = tf.truncated_normal(shape, dtype=tf.float32, stddev=0.1)
     return tf.Variable(initial)">
-<meta property="og:updated_time" content="2016-07-22T15:58:17.188Z">
+<meta property="og:updated_time" content="2016-08-21T00:46:36.342Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="tensorflow学习（四）自己创建CNN网络">
 <meta name="twitter:description" content="之前已经介绍过数据的加载和可视化的问题，这次该研究模型了。CNN网络应该是深度学习的一个经典了，话不多说，直接介绍核心模块。
@@ -157,8 +157,24 @@ norm1 = norm(pool1, lsize=<span class="number">4</span>, <span class="string">'n
 <pre><code>keep_prob = tf.<span class="function"><span class="title">placeholder</span><span class="params">(<span class="string">"float"</span>)</span></span>
 fc1_drop = tf<span class="class">.nn</span><span class="class">.dropout</span>(fc1, keep_prob)
 </code></pre><h2 id="Batch_Normalization">Batch Normalization</h2><p>《Batch Normalization: Accelerating Deep Network Training by  Reducing Internal Covariate Shift》文章中的batch normalization可以提高训练的收敛速度，甚至可以不使用dropout和L2正则就能取得很好的泛化能力，参考中文资料<a href="http://blog.csdn.net/happynear/article/details/44238541" target="_blank" rel="external">http://blog.csdn.net/happynear/article/details/44238541</a>。具体需要计算每个batch在该层所有特征图的均值和标准差，然后将上一层的输出归一化之后再送入下一层。</p>
-<p>具体在tensorflow中，用<code>tf.nn.moments</code>求出axes对应的特征图维度的均值<code>mean</code>和标准差<code>variance</code>，然后用<code>tf.nn.batch_normalization</code>进行归一化，其中<code>offset</code>一般初始化为0，<code>scale</code>初始化为1，另外offset、scale的shape与mean相同，<code>variance_epsilon</code>这个参数设为一个很小的数就行，比如0.001。<br>需要强调一点的是，BN在神经网络进行training和testing的时候，所用的mean、variance是不一样的！以上的batch_normalization在训练的时候有效，测试阶段，只有一个样本输入，这时候网络参数固定，用之前训练好的均值和标准差作为参数传入即可。类似图片样本测试时候需要先减去均值，而这个均值文件是由训练样本生成的，差不多的道理。</p>
-<h2 id="输出层">输出层</h2><p>普通输出层</p>
+<p>具体在tensorflow中，用<code>tf.nn.moments</code>求出axes对应的特征图维度的均值<code>mean</code>和标准差<code>variance</code>，然后用<code>tf.nn.batch_normalization</code>进行归一化，其中<code>offset</code>一般初始化为0，<code>scale</code>初始化为1，另外offset、scale的shape与mean相同，<code>variance_epsilon</code>这个参数设为一个很小的数就行，比如0.001。<br>需要强调一点的是，BN在神经网络进行training和testing的时候，所用的mean、variance是不一样的！以上的batch_normalization在训练的时候有效，测试阶段，只有一个样本输入，这时候网络参数固定，用之前训练好的均值和标准差作为参数传入即可。类似图片样本测试时候需要先减去均值，而这个均值文件是由训练样本生成的，差不多的道理。有一个不错的代码实现<a href="http://r2rt.com/implementing-batch-normalization-in-tensorflow.html" target="_blank" rel="external">http://r2rt.com/implementing-batch-normalization-in-tensorflow.html</a></p>
+<pre><code>def <span class="function"><span class="title">batch_norm_wrapper</span><span class="params">(inputs, is_training, decay = <span class="number">0.999</span>)</span></span>:
+    scale = tf.<span class="function"><span class="title">Variable</span><span class="params">(tf.ones([inputs.get_shape()</span></span>[-<span class="number">1</span>]]))
+    beta = tf.<span class="function"><span class="title">Variable</span><span class="params">(tf.zeros([inputs.get_shape()</span></span>[-<span class="number">1</span>]]))
+    pop_mean = tf.<span class="function"><span class="title">Variable</span><span class="params">(tf.zeros([inputs.get_shape()</span></span>[-<span class="number">1</span>]]), trainable=False)
+    pop_var = tf.<span class="function"><span class="title">Variable</span><span class="params">(tf.ones([inputs.get_shape()</span></span>[-<span class="number">1</span>]]), trainable=False)
+
+    <span class="keyword">if</span> is_training:
+        batch_mean, batch_var = tf<span class="class">.nn</span><span class="class">.moments</span>(inputs,[<span class="number">0</span>])
+        train_mean = tf.<span class="function"><span class="title">assign</span><span class="params">(pop_mean, pop_mean * decay + batch_mean * (<span class="number">1</span> - decay)</span></span>)
+        train_var = tf.<span class="function"><span class="title">assign</span><span class="params">(pop_var, pop_var * decay + batch_var * (<span class="number">1</span> - decay)</span></span>)
+        with tf.<span class="function"><span class="title">control_dependencies</span><span class="params">([train_mean, train_var])</span></span>:
+            return tf<span class="class">.nn</span><span class="class">.batch_normalization</span>(inputs, batch_mean, batch_var, beta, scale, epsilon)
+    <span class="keyword">else</span>:
+        return tf<span class="class">.nn</span><span class="class">.batch_normalization</span>(inputs, pop_mean, pop_var, beta, scale, epsilon)
+
+bn_z1 = <span class="function"><span class="title">batch_norm_wrapper</span><span class="params">(z1, is_training)</span></span>
+</code></pre><h2 id="输出层">输出层</h2><p>普通输出层</p>
 <pre><code>out = tf.<span class="function"><span class="title">matmul</span><span class="params">(fc2_drop, _weights[<span class="string">'out'</span>])</span></span> + _biases[<span class="string">'out'</span>]
 </code></pre><p>使用softmax层</p>
 <pre><code>out = tf<span class="class">.nn</span><span class="class">.softmax</span>(tf.<span class="function"><span class="title">matmul</span><span class="params">(fc2_drop, weights[<span class="string">'out'</span>])</span></span> + biases[<span class="string">'out'</span>])

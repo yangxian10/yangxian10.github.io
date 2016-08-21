@@ -15,7 +15,7 @@ tf.ima">
 <meta property="og:description" content="利用TensorBoard可以更好的了解深度学习训练过程以及参数的变化。思想是将tensorflow中的图的节点通过summary操作汇总到一起，再通过SummaryWriter写进protobuf，最后通过TensorBoard展示可视化结果。
 Summary操作tf.scalar_summary(tags, values, collections=None, name=None)
 tf.ima">
-<meta property="og:updated_time" content="2016-05-23T14:47:32.738Z">
+<meta property="og:updated_time" content="2016-08-21T00:26:57.290Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="tensorflow学习（三）TensorBoard可视化">
 <meta name="twitter:description" content="利用TensorBoard可以更好的了解深度学习训练过程以及参数的变化。思想是将tensorflow中的图的节点通过summary操作汇总到一起，再通过SummaryWriter写进protobuf，最后通过TensorBoard展示可视化结果。
@@ -135,6 +135,11 @@ merged_summary_op = tf.merge_all_summaries()
 </code></pre><p>或者直接执行</p>
 <pre><code>tensorboard <span class="comment">--logdir=/tmp/logs</span>
 </code></pre><p>然后通过浏览器打开<code>localhost:6006</code>，出来可视化界面后，就简单直观了，enjoy it！</p>
+<h2 id="tips">tips</h2><ul>
+<li>之前我的cnn代码里有valid_prediction，所以画出来的graph有两条分支，不太清晰，所以只留了train一个分支</li>
+<li>多用with，进行包裹，这样才好看，正如官网说的，你的summary代码决定了你的图结构</li>
+<li>不是所有的tensor都有必要记录，但是Variable和placeholder最好都用summary记录一下，也是为了好看</li>
+</ul>
 
       
     </div>
