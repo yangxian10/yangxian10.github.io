@@ -953,10 +953,11 @@ chmod -R +r *
 <li>inv : lr = baselr <em> (1+gamma</em>iter)^(-power)</li>
 <li>multistep : 直接写iter在某个范围内时lr应该是多少，自定义学习曲线</li>
 <li>poly : lr = baselr * (1 - iter/maxiter)^power</li>
-<li>sigmoid : lr = baselr <em> (1 / (1 + e^(-gamma</em>(iter-stepsize))))<br>其他参数都是模型参数学习的相关参数，决定了模型的初始值和收敛速度，暂时先不调节</li>
+<li>sigmoid : lr = baselr <em> (1 / (1 + e^(-gamma</em>(iter-stepsize))))</li>
 </ul>
 </li>
 </ul>
+<p>其他参数都是模型参数学习的相关参数，决定了模型的初始值和收敛速度，暂时先不调节</p>
 <h2 id="训练">训练</h2><p>简单，执行</p>
 <pre><code>../build/tools/caffe train --<span class="keyword">solver</span><span class="built_in">=</span><span class="keyword">solver</span>.prototxt
 </code></pre><p>看到了terminal不停的喷log了，那酸爽，记得看一下log中的test结果，可以看到top-1/top-5的验证结果。</p>
