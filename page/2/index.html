@@ -65,6 +65,147 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-tensorflow-data" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/19/tensorflow-data/" class="article-date">
+  <time datetime="2016-05-19T12:50:29.000Z" itemprop="datePublished">2016-05-19</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/05/19/tensorflow-data/">tensorflow学习（二）数据接口</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>网上的教程、官方的资料大多关注的都是如何使用模型，对于数据源的说明都比较简单。基本资料都是用的MNIST数据集做的实验。</p>
+<h2 id="供给数据概述">供给数据概述</h2><p>tensorflow的模型数据读取还是非常友好的，最适合大量的数据的变量操作的形式应该是feed机制，利用<code>tf.placeholder()</code>为操作的变量创建占位符，在<code>run()</code>或<code>eval()</code>的时候调用参数，将变量x和其真实标签y_传入模型。代码如下：</p>
+<pre><code>mnist = input_data.<span class="function"><span class="title">read_data_sets</span><span class="params">(<span class="string">'MNIST_data'</span>, one_hot=True)</span></span>
+
+...
+
+x = tf.<span class="function"><span class="title">placeholder</span><span class="params">(<span class="string">"float"</span>, shape=[None, <span class="number">784</span>])</span></span>
+y_ = tf.<span class="function"><span class="title">placeholder</span><span class="params">(<span class="string">"float"</span>, shape=[None, <span class="number">10</span>])</span></span>
+
+...
+
+<span class="keyword">for</span> <span class="tag">i</span> <span class="keyword">in</span> <span class="function"><span class="title">range</span><span class="params">(<span class="number">1000</span>)</span></span>:
+    batch = mnist<span class="class">.train</span><span class="class">.next_batch</span>(<span class="number">50</span>)
+    train_step.<span class="function"><span class="title">run</span><span class="params">(feed_dict={x:batch[<span class="number">0</span>], y_: batch[<span class="number">1</span>]})</span></span>
+</code></pre><p>上述代码解析：<br>首先将图像数据转换到4维的uint8的ndarray类型数组<code>[index, y, x, depth]</code>。标签数据根据是否为one_hot，转换为一个uint8的整型数值或者变成一个只有一个数值为1，其他维度为0的向量。然后将这样的数据标签对保存为tensorflow的DataSet类中。本例中这样的操作通过<code>mnist = input_data.read_data_sets(&#39;MNIST_data&#39;, one_hot=True)</code>实现。然后将这样的数据通过占位符feed进模型。</p>
+<h2 id="读取文件列表">读取文件列表</h2><p>我们可以通过一个文件列表来读入数据，之前都是通过python的glob来读取文件列表，也可以通过<code>tf.train.match_filenames_once</code>产生文件列表，然后交给<code>tf.train.string_input_producer</code>产生合适大小和是否乱序的文件名队列。</p>
+<h2 id="读取文件">读取文件</h2><h3 id="图片文件">图片文件</h3><p>读入后为numpy的<code>array</code>格式，范围<code>[-1,1]</code>，通道为<code>[H,W,channels]</code>，代码如下</p>
+<pre><code><span class="function"><span class="keyword">def</span> <span class="title">imread</span><span class="params">(self, file_name)</span>:</span>
+    <span class="comment">#    image : an image with type np.float32 in range [-1, 1]</span>
+    <span class="comment">#    of size (H x W x 3) in RGB or</span>
+    <span class="comment">#    of size (H x W x 1) in grayscale.</span>
+    img = skimage.img_as_float(skimage.io.imread(file_name, as_grey=<span class="keyword">False</span>)).astype(np.float32)
+    img = img*<span class="number">2.0</span> - <span class="number">1.0</span>
+    img_resize = skimage.transform.resize(img, (width, height, <span class="number">3</span>))
+    img_resize = img_resize[:, :, (<span class="number">2</span>,<span class="number">1</span>,<span class="number">0</span>)]
+    <span class="keyword">return</span> img_resize
+</code></pre><h3 id="csv文件">csv文件</h3><p>使用<code>tf.TextLineReader</code>读取文件的一行内容，然后通过<code>tf.decode_csv</code>来解析这一行内容并将其转为张量列表</p>
+<h3 id="二进制文件读取固定长度">二进制文件读取固定长度</h3><p>从二进制文件中读取固定长度纪录， 可以使用<code>tf.FixedLengthRecordReader</code>的<code>tf.decode_raw</code>操作。<code>decode_raw</code>操作可以讲一个字符串转换为一个uint8的张量。例程中的cifar-10的数据集的读入就是通过这个方式。</p>
+<h3 id="标准TensorFlow格式TFRecords文件">标准TensorFlow格式TFRecords文件</h3><p>将数据填入到Example协议内存块(protocol buffer)，将协议内存块序列化为一个字符串，并且通过<code>tf.python_io.TFRecordWriter</code>写入到TFRecords文件。通过传参images和labels将数据和标签数据保存到tfrecords中，代码如下：</p>
+<pre><code><span class="function"><span class="keyword">def</span> <span class="title">_int64_feature</span><span class="params">(value)</span>:</span>
+    <span class="keyword">return</span> tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+
+<span class="function"><span class="keyword">def</span> <span class="title">_bytes_feature</span><span class="params">(value)</span>:</span>
+    <span class="keyword">return</span> tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+
+<span class="function"><span class="keyword">def</span> <span class="title">convert_to</span><span class="params">(images, labels, name)</span>:</span>
+    num_examples = labels.shape[<span class="number">0</span>]
+    <span class="keyword">if</span> images.shape[<span class="number">0</span>] != num_examples:
+        <span class="keyword">raise</span> ValueError(<span class="string">"Images size %d does not match label size %d."</span> % (images.shape[<span class="number">0</span>], num_examples))
+    rows = images.shape[<span class="number">1</span>]
+    cols = images.shape[<span class="number">2</span>]
+    depth = images.shape[<span class="number">3</span>]
+
+    filename = os.path.join(FLAGS.directory, name + <span class="string">'.tfrecords'</span>)
+    print(<span class="string">'Writing'</span>, filename)
+    writer = tf.python_io.TFRecordWriter(filename)
+    <span class="keyword">for</span> index <span class="keyword">in</span> range(num_examples):
+        image_raw = images[index].tostring()
+        example = tf.train.Example(features=tf.train.Features(feature={
+            <span class="string">'height'</span>: _int64_feature(rows),
+            <span class="string">'width'</span>: _int64_feature(cols),
+            <span class="string">'depth'</span>: _int64_feature(depth),
+            <span class="string">'label'</span>: _int64_feature(int(labels[index])),
+            <span class="string">'image_raw'</span>: _bytes_feature(image_raw)}))
+        writer.write(example.SerializeToString())
+    writer.close()
+</code></pre><p>从TFRecords文件中读取数据，可以使用<code>tf.TFRecordReader</code>的<code>tf.parse_single_example</code>解析器。这个<code>parse_single_example</code>操作可以将Example协议内存块(protocol buffer)解析为张量。通过train参数传入TFRecords文件返回值是图像标签对。代码如下：</p>
+<pre><code><span class="function"><span class="keyword">def</span> <span class="title">read_and_decode</span><span class="params">(filename_queue)</span>:</span>
+    reader = tf.TFRecordReader()
+    _, serialized_example = reader.read(filename_queue)
+    features = tf.parse_single_example(
+        serialized_example,
+        <span class="comment"># Defaults are not specified since both keys are required.</span>
+        features={
+            <span class="string">'image_raw'</span>: tf.FixedLenFeature([], tf.string),
+            <span class="string">'label'</span>: tf.FixedLenFeature([], tf.int64),
+        })
+
+    <span class="comment"># Convert from a scalar string tensor (whose single string has</span>
+    <span class="comment"># length mnist.IMAGE_PIXELS) to a uint8 tensor with shape</span>
+    <span class="comment"># [mnist.IMAGE_PIXELS].</span>
+    image = tf.decode_raw(features[<span class="string">'image_raw'</span>], tf.uint8)
+    image.set_shape([mnist.IMAGE_PIXELS])
+
+    <span class="comment"># Convert from [0, 255] -&gt; [-0.5, 0.5] floats.</span>
+    image = tf.cast(image, tf.float32) * (<span class="number">1.</span> / <span class="number">255</span>) - <span class="number">0.5</span>
+    <span class="comment"># Convert label from a scalar uint8 tensor to an int32 scalar.</span>
+    label = tf.cast(features[<span class="string">'label'</span>], tf.int32)
+
+    <span class="keyword">return</span> image, label
+
+
+<span class="function"><span class="keyword">def</span> <span class="title">inputs</span><span class="params">(train, batch_size, num_epochs)</span>:</span>
+    <span class="keyword">if</span> <span class="keyword">not</span> num_epochs: num_epochs = <span class="keyword">None</span>
+    filename = os.path.join(FLAGS.train_dir, TRAIN_FILE <span class="keyword">if</span> train <span class="keyword">else</span> VALIDATION_FILE)
+
+    <span class="keyword">with</span> tf.name_scope(<span class="string">'input'</span>):
+        filename_queue = tf.train.string_input_producer([filename], num_epochs=num_epochs)
+        image, label = read_and_decode(filename_queue)
+
+        <span class="keyword">return</span> image, label
+</code></pre><h2 id="批处理">批处理</h2><p>TBD</p>
+<h2 id="创建线程并使用QueueRunner对象来预取">创建线程并使用QueueRunner对象来预取</h2><p>TBD</p>
+<h2 id="训练模型保存和恢复">训练模型保存和恢复</h2><p>通过实例化一个<code>tf.train.Saver</code>来实现模型的保存。</p>
+<pre><code>saver = tf<span class="class">.train</span><span class="class">.Saver</span>()
+saver.<span class="function"><span class="title">save</span><span class="params">(sess, FLAGS.train_dir, global_step=step)</span></span>
+</code></pre><p>在训练循环中，将定期调用<code>saver.save()</code>方法，向训练文件夹中写入包含了当前所有可训练参数的检查点文件。<br>恢复检查点的时候使用<code>saver.restore()</code>方法，重载模型的参数，继续训练。</p>
+<pre><code>saver.<span class="function"><span class="title">restore</span><span class="params">(sess, FLAGS.train_dir)</span></span>
+</code></pre><h2 id="参考资料">参考资料</h2><p><a href="http://wiki.jikexueyuan.com/project/tensorflow-zh/how_tos/reading_data.html" target="_blank" rel="external">http://wiki.jikexueyuan.com/project/tensorflow-zh/how_tos/reading_data.html</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cise3kexn000tqsfhh1rwxf5c" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-tensorflow-install" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/04/20/tensorflow-install/" class="article-date">
@@ -144,7 +285,7 @@ LD_PRELOAD=<span class="regexp">/lib64/libc</span>-<span class="number">2.15</sp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="ciqxxomrd000nn8fhh7mhfvar" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cise3kexn000nqsfhxxeb592m" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -217,7 +358,7 @@ n = p1.<span class="function"><span class="title">query</span><span class="param
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="ciqxxomsw001hn8fh7dca8x36" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cise3keyi001hqsfhs4ir8lq2" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nnsearch/">nnsearch</a></li></ul>
@@ -286,7 +427,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="ciqxxomum002hn8fhwfwayee4" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cise3kezd002hqsfh997z9vls" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/visualization/">visualization</a></li></ul>
@@ -329,7 +470,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="ciqxxomu10025n8fh8qxwe0gg" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cise3keyy0025qsfhbvgbsu51" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -604,7 +745,7 @@ wget http:<span class="comment">//pjreddie.com/media/files/extraction.conv.weigh
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="ciqxxomut002ln8fhq0w0l4ev" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="cise3kezd002lqsfhoryxmdq3" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/darknet/">darknet</a></li></ul>
@@ -710,7 +851,7 @@ layer {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="ciqxxomvv0038n8fhsofjojh7" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cise3kf0f0038qsfht3hy65b3" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -894,7 +1035,7 @@ awk <span class="string">'{print vara}'</span> vara=$<span class="keyword">var</
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="ciqxxomta001tn8fh1c4vqg13" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cise3keyi001tqsfhr74z8s65" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell/">shell</a></li></ul>
@@ -954,7 +1095,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="ciqxxomsf0015n8fhool7ulzz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cise3key20015qsfh4n0qoe73" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
@@ -1011,68 +1152,10 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="ciqxxomt5001pn8fhhd7wb6bf" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cise3keyi001pqsfhovm7sm3b" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-python-skill" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/02/18/python-skill/" class="article-date">
-  <time datetime="2016-02-18T13:21:09.000Z" itemprop="datePublished">2016-02-18</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/02/18/python-skill/">python技巧总结</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="查看运行时间">查看运行时间</h2><p>用ipython的run命令做profiling，找出耗时语句</p>
-<pre><code><span class="built_in">run</span> <span class="bash">-p xxx.py</span>
-</code></pre><h2 id="ipynb文件">ipynb文件</h2><p>ipynb文件是用浏览器演示python交互的优良插件，可以提供运行代码，插图，文章说明，插入公式等多种功能。<br>只需在含有ipynb文件的的父目录位置执行</p>
-<pre><code><span class="title">ipython</span> notebook
-</code></pre><p>即可生成shell服务器端，浏览器作为客户端展示出来。</p>
-<h2 id="内存优化">内存优化</h2><p>及时释放内存。大数组使用完之后，手动del释放array。注意所有对数组的引用都del之后，数组才会被del。这些引用包括A[2:]这样的view。<br>尽量重用内存，比如：</p>
-<pre><code>A = <span class="keyword">B </span>+ C # <span class="keyword">B </span>is neverused later
-</code></pre><p>可以改写成</p>
-<pre><code><span class="constant">B</span> += C
-<span class="constant">A</span> = B
-</code></pre><h2 id="random随机数模块">random随机数模块</h2><h3 id="random-random">random.random</h3><p>用于生成[0, 1.0)的随机浮点数</p>
-<h3 id="random-uniform(a,_b)">random.uniform(a, b)</h3><p>生成[a, b]的随机浮点数</p>
-<h3 id="random-randint(a,_b)">random.randint(a, b)</h3><p>生成[a, b]的随机整数</p>
-<h3 id="random-choice(sequence)">random.choice(sequence)</h3><p>从sequence中随机得到一个元素</p>
-<h3 id="random-shuffle(x[,_random])">random.shuffle(x[, random])</h3><p>用于将列表x元素打乱顺序</p>
-<h3 id="random-sample(sequence,_k)">random.sample(sequence, k)</h3><p>从指定序列中随机获取长度k的片段，不改变原有序列</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="ciqxxomsq001en8fhu9apn1ta" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
 
     </footer>
   </div>
@@ -1094,7 +1177,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">18</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">19</span></li></ul>
     </div>
   </div>
 
@@ -1103,7 +1186,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
     </div>
   </div>
 
@@ -1112,7 +1195,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 17.5px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 12.5px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
+      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 13.33px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 16.67px;">生活</a>
     </div>
   </div>
 
@@ -1121,7 +1204,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -1131,6 +1214,10 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/08/28/caffe-add-jni-example/">caffe学习（八）添加模块并JNI移植</a>
+          </li>
         
           <li>
             <a href="/2016/07/22/tensorflow-modelresource/">tensorflow学习（八）模型资源</a>
@@ -1146,10 +1233,6 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
         
           <li>
             <a href="/2016/06/22/python-spider/">python爬虫入门笔记</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/14/tensorflow-caffe2tensorflow/">tensorflow学习（七）caffe模型训练结果转换为tensorflow格式</a>
           </li>
         
       </ul>

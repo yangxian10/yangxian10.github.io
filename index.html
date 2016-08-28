@@ -65,6 +65,204 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-caffe-add-jni-example" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/08/28/caffe-add-jni-example/" class="article-date">
+  <time datetime="2016-08-28T04:08:31.000Z" itemprop="datePublished">2016-08-28</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/08/28/caffe-add-jni-example/">caffe学习（八）添加模块并JNI移植</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="添加识别代码">添加识别代码</h2><p>examples文件夹下面新建文件夹<code>porno_recognition</code>，并添加cpp源码。这里从<code>caffe/examples/cpp_classification/classification.cpp</code>中复制了一段识别的代码，并修改classify函数以及添加load函数。由于要生成动态链接库，所以把main函数屏蔽掉。</p>
+<h2 id="修改Makefile">修改Makefile</h2><p>找到<code>$(EXAMPLE_BINS): %.bin : %.o | $(DYNAMIC_NAME)</code>部分，添加<code>-fPIC -shared</code>，重新<code>make all</code>，编译生成 build/examples/porno_recognition/porno_recognition.bin，可以看到这个新生成的bin比之前的小，确认其为动态链接库的模型，执行<code>mv porno_recognition.bin libSuningPore.so</code></p>
+<h2 id="JNI">JNI</h2><h3 id="添加java接口函数">添加java接口函数</h3><p>创建文件夹<code>com\suning\pore</code>并在其目录下面添加<code>SuningPore.java</code>，代码如下：</p>
+<pre><code><span class="keyword">package</span> com.suning.pore;
+
+<span class="keyword">public</span> class SuningPore
+{
+    <span class="keyword">static</span>
+    {        
+        System.loadLibrary(<span class="string">"SuningPore"</span>);
+        System.out.<span class="built_in">println</span>(<span class="string">"***载入libSuningPore.so完成***"</span>);
+    }
+
+    <span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">static</span> <span class="built_in">int</span> load(<span class="keyword">String</span> ocrDataPath, <span class="keyword">String</span> libPath, <span class="keyword">String</span> logPath);
+    <span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">static</span> <span class="keyword">String</span> start(<span class="keyword">String</span> imgUrl, <span class="built_in">byte</span>[] pic);
+}
+</code></pre><p>这其中的<code>loadLibrary</code>函数用来加载<code>libSuningPore.so</code>动态链接库。load和start两个函数是这个动态链接库提供的两个接口函数。</p>
+<h3 id="创建-h文件">创建.h文件</h3><p>在com的上一级目录下，执行</p>
+<pre><code>javah com<span class="class">.suning</span><span class="class">.pore</span><span class="class">.SuningPore</span>
+</code></pre><p>生成文件<code>com_suning_pore_SuningPore.h</code></p>
+<h3 id="创建cpp接口实现代码">创建cpp接口实现代码</h3><p>创建<code>om_suning_pore_SuningPore.cpp</code>，并实现对应头文件中定义的两个接口函数的实现。并将之前实现的<code>porno_recognition.cpp</code>与该文件整合为一个文件</p>
+<pre><code><span class="preprocessor">#<span class="keyword">include</span> <span class="string">"com_suning_pore_SuningPore.h"</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span>
+
+<span class="function"><span class="keyword">int</span> <span class="title">jni_load</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *model_path, <span class="keyword">const</span> <span class="keyword">char</span>* lib_path, <span class="keyword">const</span> <span class="keyword">char</span> *log_path)</span></span>;
+
+<span class="built_in">std</span>::<span class="function"><span class="built_in">string</span> <span class="title">jni_start</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* imgUrl, <span class="keyword">const</span> <span class="keyword">unsigned</span> <span class="keyword">char</span> *p_imgdata, <span class="keyword">int</span> data_size)</span></span>;
+
+<span class="function">JNIEXPORT jint JNICALL <span class="title">Java_com_suning_pore_SuningPore_load</span>
+<span class="params">(JNIEnv *env, jclass obj, jstring model_path, jstring lib_path, jstring log_path)</span>
+</span>{
+    <span class="keyword">const</span> <span class="keyword">char</span> *model_string = (env)-&gt;GetStringUTFChars(model_path, <span class="number">0</span>);
+    <span class="keyword">const</span> <span class="keyword">char</span> *lib_string = (env)-&gt;GetStringUTFChars(lib_path, <span class="number">0</span>);
+    <span class="keyword">const</span> <span class="keyword">char</span> *log_string = (env)-&gt;GetStringUTFChars(log_path, <span class="number">0</span>);
+
+    jint ret = jni_load(model_string, lib_string, log_string);
+
+    (env)-&gt;ReleaseStringUTFChars(model_path, model_string);
+    (env)-&gt;ReleaseStringUTFChars(log_path, log_string);
+    (env)-&gt;ReleaseStringUTFChars(lib_path, lib_string);
+
+    <span class="keyword">return</span> ret;
+}
+
+<span class="function">JNIEXPORT jstring JNICALL <span class="title">Java_com_suning_pore_SuningPore_start</span>
+<span class="params">(JNIEnv *env, jclass obj, jstring img_url, jbyteArray in_buf)</span>
+</span>{
+    <span class="keyword">const</span> <span class="keyword">char</span> *url_string = (env)-&gt;GetStringUTFChars(img_url, <span class="number">0</span>);
+
+    jbyte *cbuf;
+    cbuf = (env)-&gt;GetByteArrayElements(in_buf, <span class="number">0</span>);
+    jsize in_len = (env)-&gt;GetArrayLength(in_buf);
+
+    <span class="keyword">const</span> <span class="keyword">unsigned</span> <span class="keyword">char</span> *p_imgdata = (<span class="keyword">unsigned</span> <span class="keyword">char</span>*)cbuf;
+    <span class="keyword">int</span> data_size = in_len;
+
+    jstring ret = <span class="number">0</span>;
+    <span class="keyword">if</span> (p_imgdata == <span class="literal">NULL</span> || data_size &lt;= <span class="number">0</span>)
+    {
+        <span class="keyword">return</span> ret;
+    }
+
+    <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span> out_str = jni_start(p_imgdata, data_size);
+
+    (env)-&gt;ReleaseStringUTFChars(img_url, url_string);
+    (env)-&gt;ReleaseByteArrayElements(in_buf, cbuf, <span class="number">0</span>);
+
+    <span class="keyword">if</span> (!out_str.empty()) {
+        ret = (env)-&gt;NewStringUTF(out_str.c_str());
+    }
+    <span class="keyword">return</span> ret;
+}
+</code></pre><p>然后将<code>om_suning_pore_SuningPore.cpp</code>和<code>om_suning_pore_SuningPore.h</code>放入<code>caffe/examples/porno_recognition</code>文件夹中，修改<code>Makefile.config</code>的中加入java的include，重新编译生成<code>com_suning_pore_SuningPore.bin</code>（注意：该文件实际上是一个动态链接库，不可直接执行）。</p>
+<pre><code><span class="comment">### Makefile.config ###</span>
+<span class="comment"># INCLUDE_DIRS := ...</span>
+    /usr/<span class="class"><span class="keyword">lib</span>/<span class="title">jvm</span>/<span class="title">java</span>/<span class="title">include</span> \</span>
+    /usr/<span class="class"><span class="keyword">lib</span>/<span class="title">jvm</span>/<span class="title">java</span>/<span class="title">include</span>/<span class="title">linux</span> \</span>
+</code></pre><h3 id="添加java测试程序">添加java测试程序</h3><p>在<code>com/suning/pore</code>下添加<code>TestSuningPore.java</code>并添加如下代码：</p>
+<pre><code><span class="keyword">package</span> com.suning.pore;
+
+<span class="keyword">import</span> java.io.File;
+<span class="keyword">import</span> java.io.FileInputStream;
+<span class="keyword">import</span> java.io.FileNotFoundException;
+
+<span class="keyword">public</span> class TestSuningPore
+{
+    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> main(<span class="keyword">String</span>[] args) <span class="keyword">throws</span> Exception
+    {
+        <span class="comment">// TODO Auto-generated method stub</span>
+
+        TestSuningPore test = <span class="keyword">new</span> TestSuningPore(); 
+
+        <span class="keyword">if</span> (args.length == <span class="number">0</span>)
+        {
+            System.out.<span class="built_in">println</span>(<span class="string">"image file missing"</span>);
+            <span class="keyword">return</span>;
+        }
+        test.porno_recognize(test.readImage(args[<span class="number">0</span>])); 
+    }
+
+    <span class="keyword">public</span> TestSuningPore(){}
+
+    <span class="keyword">private</span> <span class="built_in">byte</span>[] readImage(<span class="keyword">String</span> path) <span class="keyword">throws</span> Exception
+    {
+        File <span class="built_in">image</span> = <span class="keyword">new</span> File(path);
+        FileInputStream fis = <span class="keyword">new</span> FileInputStream(<span class="built_in">image</span>);
+
+        <span class="built_in">byte</span>[] b = <span class="keyword">new</span> <span class="built_in">byte</span>[(<span class="built_in">int</span>)<span class="built_in">image</span>.length()];
+        fis.read(b);
+        fis.close();
+
+        <span class="keyword">return</span> b;
+    }
+
+    <span class="keyword">public</span> <span class="keyword">String</span> porno_recognize(<span class="built_in">byte</span>[] imageByte)
+    {
+        <span class="keyword">if</span>(<span class="keyword">null</span> != imageByte)
+        {
+            SuningPore suning_pore = <span class="keyword">new</span> SuningPore();
+            <span class="built_in">boolean</span> status = <span class="keyword">false</span>;
+            System.out.<span class="built_in">println</span>(<span class="string">"check status: "</span> + status);
+
+            <span class="keyword">if</span>(!status)
+            {    
+                <span class="built_in">int</span> load = suning_pore.load(<span class="string">"/opt/pore/module/"</span>, <span class="string">"/opt/pore/lib/"</span>, <span class="string">"/opt/pore/log/"</span>);
+                <span class="keyword">if</span>(load != <span class="number">1</span>)
+                {
+                    System.out.<span class="built_in">println</span>(<span class="string">"Error: load failed!"</span>);
+                    <span class="keyword">return</span> <span class="string">"Error: load failed!"</span>;
+                }
+            }
+
+            <span class="keyword">try</span>
+            {
+
+                <span class="keyword">String</span> words = suning_pore.start(imageByte);
+                <span class="comment">//String words = SuningPore.start("http://abc.efg.cn/hij.jpg", imageByte);  // this also works</span>
+
+                System.out.<span class="built_in">println</span>(<span class="string">"\nresulting words:\n"</span> + words);
+
+                <span class="keyword">return</span> words;
+            } <span class="keyword">catch</span> (Exception e) {
+                <span class="comment">// TODO Auto-generated catch block</span>
+                e.printStackTrace();
+            }
+        }
+        <span class="keyword">return</span> <span class="keyword">null</span>;
+    }
+}
+</code></pre><h2 id="测试jni接口">测试jni接口</h2><p>进入com上一级目录，并添加<code>run.sh</code>，添加如下代码：</p>
+<pre><code>cp ~<span class="regexp">/caffe/</span>build<span class="regexp">/examples/</span>porno_recognition<span class="regexp">/com_suning_pore_SuningPore.bin ./</span>libSuningPore.so
+cp ~<span class="regexp">/caffe/</span>build<span class="regexp">/lib/</span>libcaffe.so.<span class="number">1.0</span>.<span class="number">0</span>-rc3 .
+javac -encoding UTF8 com<span class="regexp">/suning/</span>pore<span class="comment">/*.java
+java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
+</code></pre><p>通过<code>./run.sh xxx.jpg</code>命令测试该接口</p>
+<h2 id="tips">tips</h2><h3 id="依赖动态链接库问题">依赖动态链接库问题</h3><p>由于<code>libSuningPore.so</code>和<code>libcaffe.so.1.0.0-rc3</code>依赖较多的动态链接库，可能需要指定动态链接库的路径，这时候把相关的动态链接库放到指定路径中，通过<code>/etc/profile</code>和source命令使该路径生效，并通过<code>/etc/ld.so.conf</code>文件设置<code>include /opt/xxx/xxx</code>并<code>ldconfig</code>来使系统更新相关路径的动态链接库。然后再重新编译caffe，通过<code>ldd</code>命令就可以查看这两个用到的动态库确实在新路径下找到了相关依赖。<br>需要注意的一点是，如果使用了mkl，注意可能需要一个<code>libiomp5.so</code>的文件，添加到相关动态链接库里就可以了。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/08/28/caffe-add-jni-example/" data-id="cise3kf0f003bqsfhxm4d89xp" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-tensorflow-modelresource" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/07/22/tensorflow-modelresource/" class="article-date">
@@ -101,7 +299,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/22/tensorflow-modelresource/" data-id="ciqxxomr8000kn8fhukl8r1nz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/22/tensorflow-modelresource/" data-id="cise3kex7000kqsfhggkm5ecc" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -148,7 +346,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="ciqxxomv0002pn8fhokiv9lbr" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="cise3kezw002pqsfhmyv7cz3u" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -211,7 +409,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="ciqxxomtx0022n8fhjj2p1xeh" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="cise3keyy0022qsfhye8krc1u" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -305,7 +503,7 @@ images = re.<span class="function"><span class="title">findall</span><span class
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="ciqxxomsm001an8fhzzst67np" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cise3key2001aqsfh5pnsjify" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -362,7 +560,7 @@ params = params.<span class="function"><span class="title">item</span><span clas
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="ciqxxoms70012n8fharzhgbw5" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cise3key20012qsfhgac5z93i" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -428,7 +626,7 @@ label_n
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="ciqxxomrh000qn8fhrlwjop3j" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cise3kexn000qqsfhs8a881gh" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -695,7 +893,7 @@ init = tf.initialize_all_variables()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-captcha/" data-id="ciqxxoms0000zn8fhodpwi8q0" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-captcha/" data-id="cise3key2000zqsfhxs4ovenl" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -947,7 +1145,7 @@ init = tf.initialize_all_variables()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/28/tensorflow-cnn/" data-id="ciqxxomrs000wn8fhtw20smpd" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/28/tensorflow-cnn/" data-id="cise3kexn000wqsfhdoh3km2x" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1033,148 +1231,7 @@ merged_summary_op = tf.merge_all_summaries()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="ciqxxomr2000gn8fhfrxjn458" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-tensorflow-data" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/05/19/tensorflow-data/" class="article-date">
-  <time datetime="2016-05-19T12:50:29.000Z" itemprop="datePublished">2016-05-19</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/05/19/tensorflow-data/">tensorflow学习（二）数据接口</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>网上的教程、官方的资料大多关注的都是如何使用模型，对于数据源的说明都比较简单。基本资料都是用的MNIST数据集做的实验。</p>
-<h2 id="供给数据概述">供给数据概述</h2><p>tensorflow的模型数据读取还是非常友好的，最适合大量的数据的变量操作的形式应该是feed机制，利用<code>tf.placeholder()</code>为操作的变量创建占位符，在<code>run()</code>或<code>eval()</code>的时候调用参数，将变量x和其真实标签y_传入模型。代码如下：</p>
-<pre><code>mnist = input_data.<span class="function"><span class="title">read_data_sets</span><span class="params">(<span class="string">'MNIST_data'</span>, one_hot=True)</span></span>
-
-...
-
-x = tf.<span class="function"><span class="title">placeholder</span><span class="params">(<span class="string">"float"</span>, shape=[None, <span class="number">784</span>])</span></span>
-y_ = tf.<span class="function"><span class="title">placeholder</span><span class="params">(<span class="string">"float"</span>, shape=[None, <span class="number">10</span>])</span></span>
-
-...
-
-<span class="keyword">for</span> <span class="tag">i</span> <span class="keyword">in</span> <span class="function"><span class="title">range</span><span class="params">(<span class="number">1000</span>)</span></span>:
-    batch = mnist<span class="class">.train</span><span class="class">.next_batch</span>(<span class="number">50</span>)
-    train_step.<span class="function"><span class="title">run</span><span class="params">(feed_dict={x:batch[<span class="number">0</span>], y_: batch[<span class="number">1</span>]})</span></span>
-</code></pre><p>上述代码解析：<br>首先将图像数据转换到4维的uint8的ndarray类型数组<code>[index, y, x, depth]</code>。标签数据根据是否为one_hot，转换为一个uint8的整型数值或者变成一个只有一个数值为1，其他维度为0的向量。然后将这样的数据标签对保存为tensorflow的DataSet类中。本例中这样的操作通过<code>mnist = input_data.read_data_sets(&#39;MNIST_data&#39;, one_hot=True)</code>实现。然后将这样的数据通过占位符feed进模型。</p>
-<h2 id="读取文件列表">读取文件列表</h2><p>我们可以通过一个文件列表来读入数据，之前都是通过python的glob来读取文件列表，也可以通过<code>tf.train.match_filenames_once</code>产生文件列表，然后交给<code>tf.train.string_input_producer</code>产生合适大小和是否乱序的文件名队列。</p>
-<h2 id="读取文件">读取文件</h2><h3 id="图片文件">图片文件</h3><p>读入后为numpy的<code>array</code>格式，范围<code>[-1,1]</code>，通道为<code>[H,W,channels]</code>，代码如下</p>
-<pre><code><span class="function"><span class="keyword">def</span> <span class="title">imread</span><span class="params">(self, file_name)</span>:</span>
-    <span class="comment">#    image : an image with type np.float32 in range [-1, 1]</span>
-    <span class="comment">#    of size (H x W x 3) in RGB or</span>
-    <span class="comment">#    of size (H x W x 1) in grayscale.</span>
-    img = skimage.img_as_float(skimage.io.imread(file_name, as_grey=<span class="keyword">False</span>)).astype(np.float32)
-    img = img*<span class="number">2.0</span> - <span class="number">1.0</span>
-    img_resize = skimage.transform.resize(img, (width, height, <span class="number">3</span>))
-    img_resize = img_resize[:, :, (<span class="number">2</span>,<span class="number">1</span>,<span class="number">0</span>)]
-    <span class="keyword">return</span> img_resize
-</code></pre><h3 id="csv文件">csv文件</h3><p>使用<code>tf.TextLineReader</code>读取文件的一行内容，然后通过<code>tf.decode_csv</code>来解析这一行内容并将其转为张量列表</p>
-<h3 id="二进制文件读取固定长度">二进制文件读取固定长度</h3><p>从二进制文件中读取固定长度纪录， 可以使用<code>tf.FixedLengthRecordReader</code>的<code>tf.decode_raw</code>操作。<code>decode_raw</code>操作可以讲一个字符串转换为一个uint8的张量。例程中的cifar-10的数据集的读入就是通过这个方式。</p>
-<h3 id="标准TensorFlow格式TFRecords文件">标准TensorFlow格式TFRecords文件</h3><p>将数据填入到Example协议内存块(protocol buffer)，将协议内存块序列化为一个字符串，并且通过<code>tf.python_io.TFRecordWriter</code>写入到TFRecords文件。通过传参images和labels将数据和标签数据保存到tfrecords中，代码如下：</p>
-<pre><code><span class="function"><span class="keyword">def</span> <span class="title">_int64_feature</span><span class="params">(value)</span>:</span>
-    <span class="keyword">return</span> tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
-
-<span class="function"><span class="keyword">def</span> <span class="title">_bytes_feature</span><span class="params">(value)</span>:</span>
-    <span class="keyword">return</span> tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
-
-<span class="function"><span class="keyword">def</span> <span class="title">convert_to</span><span class="params">(images, labels, name)</span>:</span>
-    num_examples = labels.shape[<span class="number">0</span>]
-    <span class="keyword">if</span> images.shape[<span class="number">0</span>] != num_examples:
-        <span class="keyword">raise</span> ValueError(<span class="string">"Images size %d does not match label size %d."</span> % (images.shape[<span class="number">0</span>], num_examples))
-    rows = images.shape[<span class="number">1</span>]
-    cols = images.shape[<span class="number">2</span>]
-    depth = images.shape[<span class="number">3</span>]
-
-    filename = os.path.join(FLAGS.directory, name + <span class="string">'.tfrecords'</span>)
-    print(<span class="string">'Writing'</span>, filename)
-    writer = tf.python_io.TFRecordWriter(filename)
-    <span class="keyword">for</span> index <span class="keyword">in</span> range(num_examples):
-        image_raw = images[index].tostring()
-        example = tf.train.Example(features=tf.train.Features(feature={
-            <span class="string">'height'</span>: _int64_feature(rows),
-            <span class="string">'width'</span>: _int64_feature(cols),
-            <span class="string">'depth'</span>: _int64_feature(depth),
-            <span class="string">'label'</span>: _int64_feature(int(labels[index])),
-            <span class="string">'image_raw'</span>: _bytes_feature(image_raw)}))
-        writer.write(example.SerializeToString())
-    writer.close()
-</code></pre><p>从TFRecords文件中读取数据，可以使用<code>tf.TFRecordReader</code>的<code>tf.parse_single_example</code>解析器。这个<code>parse_single_example</code>操作可以将Example协议内存块(protocol buffer)解析为张量。通过train参数传入TFRecords文件返回值是图像标签对。代码如下：</p>
-<pre><code><span class="function"><span class="keyword">def</span> <span class="title">read_and_decode</span><span class="params">(filename_queue)</span>:</span>
-    reader = tf.TFRecordReader()
-    _, serialized_example = reader.read(filename_queue)
-    features = tf.parse_single_example(
-        serialized_example,
-        <span class="comment"># Defaults are not specified since both keys are required.</span>
-        features={
-            <span class="string">'image_raw'</span>: tf.FixedLenFeature([], tf.string),
-            <span class="string">'label'</span>: tf.FixedLenFeature([], tf.int64),
-        })
-
-    <span class="comment"># Convert from a scalar string tensor (whose single string has</span>
-    <span class="comment"># length mnist.IMAGE_PIXELS) to a uint8 tensor with shape</span>
-    <span class="comment"># [mnist.IMAGE_PIXELS].</span>
-    image = tf.decode_raw(features[<span class="string">'image_raw'</span>], tf.uint8)
-    image.set_shape([mnist.IMAGE_PIXELS])
-
-    <span class="comment"># Convert from [0, 255] -&gt; [-0.5, 0.5] floats.</span>
-    image = tf.cast(image, tf.float32) * (<span class="number">1.</span> / <span class="number">255</span>) - <span class="number">0.5</span>
-    <span class="comment"># Convert label from a scalar uint8 tensor to an int32 scalar.</span>
-    label = tf.cast(features[<span class="string">'label'</span>], tf.int32)
-
-    <span class="keyword">return</span> image, label
-
-
-<span class="function"><span class="keyword">def</span> <span class="title">inputs</span><span class="params">(train, batch_size, num_epochs)</span>:</span>
-    <span class="keyword">if</span> <span class="keyword">not</span> num_epochs: num_epochs = <span class="keyword">None</span>
-    filename = os.path.join(FLAGS.train_dir, TRAIN_FILE <span class="keyword">if</span> train <span class="keyword">else</span> VALIDATION_FILE)
-
-    <span class="keyword">with</span> tf.name_scope(<span class="string">'input'</span>):
-        filename_queue = tf.train.string_input_producer([filename], num_epochs=num_epochs)
-        image, label = read_and_decode(filename_queue)
-
-        <span class="keyword">return</span> image, label
-</code></pre><h2 id="批处理">批处理</h2><p>TBD</p>
-<h2 id="创建线程并使用QueueRunner对象来预取">创建线程并使用QueueRunner对象来预取</h2><p>TBD</p>
-<h2 id="训练模型保存和恢复">训练模型保存和恢复</h2><p>通过实例化一个<code>tf.train.Saver</code>来实现模型的保存。</p>
-<pre><code>saver = tf<span class="class">.train</span><span class="class">.Saver</span>()
-saver.<span class="function"><span class="title">save</span><span class="params">(sess, FLAGS.train_dir, global_step=step)</span></span>
-</code></pre><p>在训练循环中，将定期调用<code>saver.save()</code>方法，向训练文件夹中写入包含了当前所有可训练参数的检查点文件。<br>恢复检查点的时候使用<code>saver.restore()</code>方法，重载模型的参数，继续训练。</p>
-<pre><code>saver.<span class="function"><span class="title">restore</span><span class="params">(sess, FLAGS.train_dir)</span></span>
-</code></pre><h2 id="参考资料">参考资料</h2><p><a href="http://wiki.jikexueyuan.com/project/tensorflow-zh/how_tos/reading_data.html" target="_blank" rel="external">http://wiki.jikexueyuan.com/project/tensorflow-zh/how_tos/reading_data.html</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="ciqxxomrm000tn8fh3yn4etn8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cise3kex7000gqsfhp0vmuu0f" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1199,7 +1256,7 @@ saver.<span class="function"><span class="title">save</span><span class="params"
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">18</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">19</span></li></ul>
     </div>
   </div>
 
@@ -1208,7 +1265,7 @@ saver.<span class="function"><span class="title">save</span><span class="params"
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
     </div>
   </div>
 
@@ -1217,7 +1274,7 @@ saver.<span class="function"><span class="title">save</span><span class="params"
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 17.5px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 12.5px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
+      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 10px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 13.33px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 16.67px;">生活</a>
     </div>
   </div>
 
@@ -1226,7 +1283,7 @@ saver.<span class="function"><span class="title">save</span><span class="params"
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -1236,6 +1293,10 @@ saver.<span class="function"><span class="title">save</span><span class="params"
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/08/28/caffe-add-jni-example/">caffe学习（八）添加模块并JNI移植</a>
+          </li>
         
           <li>
             <a href="/2016/07/22/tensorflow-modelresource/">tensorflow学习（八）模型资源</a>
@@ -1251,10 +1312,6 @@ saver.<span class="function"><span class="title">save</span><span class="params"
         
           <li>
             <a href="/2016/06/22/python-spider/">python爬虫入门笔记</a>
-          </li>
-        
-          <li>
-            <a href="/2016/06/14/tensorflow-caffe2tensorflow/">tensorflow学习（七）caffe模型训练结果转换为tensorflow格式</a>
           </li>
         
       </ul>
