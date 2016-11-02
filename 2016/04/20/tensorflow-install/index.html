@@ -11,7 +11,7 @@
 <meta property="og:url" content="http://yoursite.com/2016/04/20/tensorflow-install/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
 <meta property="og:description" content="tensorflow是google开源的深度学习平台，由于其性能比较差，一开始我是拒绝的，不过由于google强大的影响力和执行力，版本迭代更新很快，现在性能已经很快了，而且最新的版本也支持了分布式。而且tensorflow的中文文档也是所有开源框架里最完善的，所以近期抽空学习一下。还是先从安装搞起。虽然其有比较完善的官方文档https://www.tensorflow.org/以及其中文版本ht">
-<meta property="og:updated_time" content="2016-05-25T11:27:49.614Z">
+<meta property="og:updated_time" content="2016-11-02T14:20:22.126Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="tensorflow学习（一）安装配置">
 <meta name="twitter:description" content="tensorflow是google开源的深度学习平台，由于其性能比较差，一开始我是拒绝的，不过由于google强大的影响力和执行力，版本迭代更新很快，现在性能已经很快了，而且最新的版本也支持了分布式。而且tensorflow的中文文档也是所有开源框架里最完善的，所以近期抽空学习一下。还是先从安装搞起。虽然其有比较完善的官方文档https://www.tensorflow.org/以及其中文版本ht">
@@ -139,6 +139,19 @@ rpm2cpio libstdc++-<span class="number">4.8</span><span class="number">.2</span>
 </code></pre><p>获取高级版本的libc.so，比如/lib64/libc-2.15.so，这个步骤非常繁琐，编译生成很麻烦。我是通过从另外高级版本的机器copy过来使用的，所以没有生成，过程隐去。<br>接下来就是将软链接指向新的libc，实际操作注意rm原来的链接之后，系统的大部分命令都无法使用了，要用<code>LD_PRELOAD=/lib64/libc-2.15.so</code>指定所使用的libc才能运行shell命令。代码如下：</p>
 <pre><code>rm -rf /lib64/libc.so.<span class="number">6</span>
 LD_PRELOAD=<span class="regexp">/lib64/libc</span>-<span class="number">2.15</span>.so ln -<span class="regexp">s/lib64/libc-2.15.so  lib64/libc</span>.so.<span class="number">6</span>
+</code></pre><h1 id="基于源码安装(不建议)">基于源码安装(不建议)</h1><h2 id="安装jdk">安装jdk</h2><p>bazel依赖于jdk，网上都是安装JDK 8，由于centos默认是JDK 7，并且我们项目用的java版本也是1.7，所以去bazel官网看了一下，也是支持JDK 7的。所以这里没安装java</p>
+<h2 id="安装bazel">安装bazel</h2><pre><code>git clone http<span class="variable">s:</span>//github.<span class="keyword">com</span>/bazelbuild/bazel.git
+<span class="keyword">cd</span> bazel
+./compile.<span class="keyword">sh</span>
+sudo
+<span class="keyword">cp</span> output/bazel /usr/local/bin/
+</code></pre><h2 id="编译tensorflow">编译tensorflow</h2><pre><code>git clone <span class="symbol">https:</span>/<span class="regexp">/github.com/tensorflow</span><span class="regexp">/tensorflow
+cd tensorflow
+./configure</span>
+<span class="comment"># choose with Google Cloud Platform / with GPU</span>
+bazel build -c opt --config=cuda /<span class="regexp">/tensorflow/tools</span><span class="regexp">/pip_package:build_pip_package
+bazel-bin/tensorflow</span><span class="regexp">/tools/pip</span>_package/build_pip_package /tmp/tensorflow_pkg
+pip install /tmp/tensorflow_pkg/tensorflow-<span class="number">0.10</span>.<span class="number">0</span>-py2-none-any.whl
 </code></pre>
       
     </div>
