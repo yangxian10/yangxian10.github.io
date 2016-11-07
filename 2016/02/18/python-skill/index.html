@@ -21,7 +21,7 @@ ipynb文件ipynb文件是用浏览器演示python交互的优良插件，可以�
 ipython notebook
 即可生成shell服务器端，浏览器作为客户端展示出来。
 内存优化及时释放内存。大数组使用完之后">
-<meta property="og:updated_time" content="2016-04-20T12:44:55.922Z">
+<meta property="og:updated_time" content="2016-11-07T13:21:45.809Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="python技巧总结">
 <meta name="twitter:description" content="查看运行时间用ipython的run命令做profiling，找出耗时语句
@@ -115,7 +115,16 @@ ipython notebook
 </code></pre><p>可以改写成</p>
 <pre><code><span class="constant">B</span> += C
 <span class="constant">A</span> = B
-</code></pre><h2 id="random随机数模块">random随机数模块</h2><h3 id="random-random">random.random</h3><p>用于生成[0, 1.0)的随机浮点数</p>
+</code></pre><h2 id="py2exe">py2exe</h2><p>windows环境把python脚步打包成可执行程序，安装py2exe。注意使用pip install安装只能支持python3版本，要想在python2.7环境下使用py2exe，要在这里下载<a href="https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win32-py2.7.exe/download" target="_blank" rel="external">py2exe-0.6.9.win32-py2.7.exe</a></p>
+<p>在脚步所在目录下新建一个<code>setup.py</code>文件，加入</p>
+<pre><code>from distutils<span class="class">.core</span> import setup
+import py2exe
+
+<span class="function"><span class="title">setup</span><span class="params">(windows = [<span class="string">'xxxxxx.py'</span>])</span></span>
+</code></pre><p>然后执行</p>
+<pre><code>python setup<span class="class">.py</span> py2exe
+</code></pre><p>然后可执行程序以及相关依赖都会创建在dist文件夹，打包带走dist即可。</p>
+<h2 id="random随机数模块">random随机数模块</h2><h3 id="random-random">random.random</h3><p>用于生成[0, 1.0)的随机浮点数</p>
 <h3 id="random-uniform(a,_b)">random.uniform(a, b)</h3><p>生成[a, b]的随机浮点数</p>
 <h3 id="random-randint(a,_b)">random.randint(a, b)</h3><p>生成[a, b]的随机整数</p>
 <h3 id="random-choice(sequence)">random.choice(sequence)</h3><p>从sequence中随机得到一个元素</p>

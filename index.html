@@ -495,10 +495,42 @@ null_proxy_handler = urllib2.<span class="function"><span class="title">ProxyHan
 urllib2.<span class="function"><span class="title">install_opener</span><span class="params">(opener)</span></span>
 </code></pre><h3 id="超时设置Timeout">超时设置Timeout</h3><p>在urlopen的时候可以通过设置timeout参数解决网站相应过慢造成的影响。</p>
 <pre><code>response = urllib2.<span class="function"><span class="title">urlopen</span><span class="params">(<span class="string">'http://www.baidu.com'</span>, timeout=<span class="number">10</span>)</span></span>
+</code></pre><h3 id="发送数据">发送数据</h3><p>用来实现和浏览器之间的行为交互</p>
+<pre><code><span class="keyword">data</span> = urllib.parse.urlencode({<span class="string">"act"</span>: <span class="string">"login"</span>, <span class="string">"email"</span>: <span class="string">"xxxxx@qq.com"</span>, <span class="string">"password"</span>: <span class="string">"123456"</span>}).encode(<span class="string">'utf-8'</span>)
+request1 = urllib2.Request(url, <span class="keyword">data</span>=<span class="keyword">data</span>)           <span class="comment"># POST方法</span>
+request2 = urllib2.Request(url+<span class="string">"?%s"</span> % <span class="keyword">data</span>)         <span class="comment"># GET方法</span>
+response = urllib2.urlopen(request1)
+</code></pre><h3 id="常用超时异常">常用超时异常</h3><pre><code>try:
+    urllib2.<span class="function"><span class="title">urlopen</span><span class="params">(request)</span></span>
+except urllib2<span class="class">.HTTPError</span> as e:
+    <span class="function"><span class="title">print</span><span class="params">(e.code, e.reason)</span></span>
+except urllib2<span class="class">.URLError</span> as e:
+    <span class="function"><span class="title">print</span><span class="params">(e.errno, e.reason)</span></span>
+</code></pre><h3 id="服务器cookie检查">服务器cookie检查</h3><pre><code>import <span class="keyword">http</span>.cookiejar
+cookie_jar = <span class="keyword">http</span>.cookiejar.CookieJar()
+cookie_jar_handler = urllib.request.HTTPCookieProcessor(cookiejar=cookie_jar)
+opener = urllib2.build_opener(cookie_jar_handler)        <span class="comment"># add_handler</span>
+response = opener.<span class="built_in">open</span>(url)
+</code></pre><h3 id="获取cookie">获取cookie</h3><p>两种方式，1）直接贴到headers中</p>
+<pre><code>request = urllib2.<span class="function"><span class="title">Request</span><span class="params">(url)</span></span>
+request.<span class="function"><span class="title">add_header</span><span class="params">(<span class="string">'Cookie'</span>, <span class="string">"PHPSESSID=btqkg9amjrtoeev8coq0m78396; USERINFO=n6nxTHTY%2BJA39z6CpNB4eKN8f0KsYLjAQTwPe%2BhLHLruEbjaeh4ulhWAS5RysUM%2B; "</span>)</span></span>
+</code></pre><p>2）构建cookie</p>
+<pre><code>import http<span class="class">.cookiejar</span>
+cookie = http<span class="class">.cookiejar</span><span class="class">.Cookie</span>(name=<span class="string">"xx"</span>, value=<span class="string">"xx"</span>, domain=<span class="string">"xx"</span>, ...)
+cookie_jar = http<span class="class">.cookiejar</span><span class="class">.CookieJar</span>()
+cookie_jar.<span class="function"><span class="title">set_cookie</span><span class="params">(cookie)</span></span>
+cookie_jar_handler = urllib<span class="class">.request</span><span class="class">.HTTPCookieProcessor</span>(cookiejar=cookie_jar)
+opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(cookie_jar_handler)</span></span>
+response = opener.<span class="function"><span class="title">open</span><span class="params">(url)</span></span>
+</code></pre><h3 id="HTTP身份认证">HTTP身份认证</h3><pre><code>password_mgr = urllib2.<span class="function"><span class="title">HTTPPasswordMgrWithDefaultRealm</span><span class="params">()</span></span>
+password_mgr.<span class="function"><span class="title">add_password</span><span class="params">(realm=None, uri=url, user=<span class="string">'username'</span>, passwd=<span class="string">'password'</span>)</span></span>
+handler = urllib2.<span class="function"><span class="title">HTTPBasicAuthHandler</span><span class="params">(password_mgr)</span></span>
+opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(handler)</span></span>
+response = opener.<span class="function"><span class="title">open</span><span class="params">(url)</span></span>
 </code></pre><h1 id="简易图片爬虫">简易图片爬虫</h1><p>关键的就是解析的时候匹配图片内容，得到了图片链接的话，用wget或者其他模块都能保存图片</p>
 <pre><code>patternImg = re.<span class="function"><span class="title">compile</span><span class="params">(<span class="string">'&lt;img.*?src="(.*?)"'</span>,re.S)</span></span>
 images = re.<span class="function"><span class="title">findall</span><span class="params">(patternImg, url_data)</span></span>
-</code></pre><h1 id="参考资料与推荐文章">参考资料与推荐文章</h1><p><a href="http://cuiqingcai.com/" target="_blank" rel="external">http://cuiqingcai.com/</a><br><a href="http://mp.weixin.qq.com/s?__biz=MjM5ODIzNDQ3Mw==&amp;mid=402180172&amp;idx=1&amp;sn=1db24327a15cea8fab6907069fbaabbf&amp;scene=0#wechat_redirect" target="_blank" rel="external">数据时代的反爬虫绝技</a></p>
+</code></pre><h1 id="参考资料与推荐文章">参考资料与推荐文章</h1><p><a href="http://cuiqingcai.com/" target="_blank" rel="external">http://cuiqingcai.com/</a><br><a href="http://mp.weixin.qq.com/s?__biz=MjM5ODIzNDQ3Mw==&amp;mid=402180172&amp;idx=1&amp;sn=1db24327a15cea8fab6907069fbaabbf&amp;scene=0#wechat_redirect" target="_blank" rel="external">数据时代的反爬虫绝技</a><br><a href="https://zhuanlan.zhihu.com/p/22982208" target="_blank" rel="external">一个很“水”的Python爬虫入门代码文件</a><br><a href="https://zhuanlan.zhihu.com/p/23064000" target="_blank" rel="external">“史上最详细”的Python模拟登录新浪微博流程</a><br><a href="https://luzhijun.github.io/2016/10/29/%E5%BE%AE%E5%8D%9A%E8%AF%9D%E9%A2%98%E7%88%AC%E5%8F%96%E4%B8%8E%E5%AD%98%E5%82%A8%E5%88%86%E6%9E%90/" target="_blank" rel="external">微博话题爬取与存储分析</a></p>
 
       
     </div>
