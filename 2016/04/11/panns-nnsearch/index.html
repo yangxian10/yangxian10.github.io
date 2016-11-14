@@ -3,21 +3,27 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Python高维数据最近邻快速检索库 | 杨现的个人博客</title>
+  <title>高维海量数据快速检索库 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Pannshttps://github.com/ryanrhymes/panns这是一个用python写的针对高维数据的approximate k-nearest neighbors算法包，目前支持欧式距离和余弦距离两种度量。对500维以上的高维特征进行了优化。虽然性能弱于Annoy，但是更加轻量，比FLANN和scikit-learn更为好用
-安装sudo pip install panns -">
+  <meta name="description" content="falconn这个库使用的是局部敏感哈希构建索引。效率较高。
+python实现官方的api文档https://falconn-lib.org/pdoc/falconn/其实非常详细，这里把其中关键的地方再提炼一下。安装非常简单
+pip install falconn
+数据准备，需要将所有的索引特征存储到一个numpy的二维array中，其中每行代表一个数据，行数表示数据点数，列表示特征维度。注意，">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Python高维数据最近邻快速检索库">
+<meta property="og:title" content="高维海量数据快速检索库">
 <meta property="og:url" content="http://yoursite.com/2016/04/11/panns-nnsearch/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="Pannshttps://github.com/ryanrhymes/panns这是一个用python写的针对高维数据的approximate k-nearest neighbors算法包，目前支持欧式距离和余弦距离两种度量。对500维以上的高维特征进行了优化。虽然性能弱于Annoy，但是更加轻量，比FLANN和scikit-learn更为好用
-安装sudo pip install panns -">
-<meta property="og:updated_time" content="2016-04-11T13:03:42.365Z">
+<meta property="og:description" content="falconn这个库使用的是局部敏感哈希构建索引。效率较高。
+python实现官方的api文档https://falconn-lib.org/pdoc/falconn/其实非常详细，这里把其中关键的地方再提炼一下。安装非常简单
+pip install falconn
+数据准备，需要将所有的索引特征存储到一个numpy的二维array中，其中每行代表一个数据，行数表示数据点数，列表示特征维度。注意，">
+<meta property="og:updated_time" content="2016-11-14T13:29:02.220Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Python高维数据最近邻快速检索库">
-<meta name="twitter:description" content="Pannshttps://github.com/ryanrhymes/panns这是一个用python写的针对高维数据的approximate k-nearest neighbors算法包，目前支持欧式距离和余弦距离两种度量。对500维以上的高维特征进行了优化。虽然性能弱于Annoy，但是更加轻量，比FLANN和scikit-learn更为好用
-安装sudo pip install panns -">
+<meta name="twitter:title" content="高维海量数据快速检索库">
+<meta name="twitter:description" content="falconn这个库使用的是局部敏感哈希构建索引。效率较高。
+python实现官方的api文档https://falconn-lib.org/pdoc/falconn/其实非常详细，这里把其中关键的地方再提炼一下。安装非常简单
+pip install falconn
+数据准备，需要将所有的索引特征存储到一个numpy的二维array中，其中每行代表一个数据，行数表示数据点数，列表示特征维度。注意，">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -85,7 +91,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      Python高维数据最近邻快速检索库
+      高维海量数据快速检索库
     </h1>
   
 
@@ -93,7 +99,27 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="Panns">Panns</h1><p><a href="https://github.com/ryanrhymes/panns" target="_blank" rel="external">https://github.com/ryanrhymes/panns</a>这是一个用python写的针对高维数据的approximate k-nearest neighbors算法包，目前支持欧式距离和余弦距离两种度量。对500维以上的高维特征进行了优化。虽然性能弱于Annoy，但是更加轻量，比FLANN和scikit-learn更为好用</p>
+        <h1 id="falconn">falconn</h1><p>这个库使用的是局部敏感哈希构建索引。效率较高。</p>
+<h3 id="python实现">python实现</h3><p>官方的api文档<a href="https://falconn-lib.org/pdoc/falconn/" target="_blank" rel="external">https://falconn-lib.org/pdoc/falconn/</a>其实非常详细，这里把其中关键的地方再提炼一下。<br>安装非常简单</p>
+<pre><code>pip <span class="keyword">install</span> falconn
+</code></pre><p>数据准备，需要将所有的索引特征存储到一个numpy的二维array中，其中每行代表一个数据，行数表示数据点数，列表示特征维度。注意，最好把数据转换为float32数据类型，提高算法性能，并将数据归一化减去均值，提高算法性能。具体操作如下</p>
+<pre><code>dataset = dataset.<span class="function"><span class="title">astype</span><span class="params">(numpy.float32)</span></span>
+dataset -= numpy.<span class="function"><span class="title">mean</span><span class="params">(dataset, axis=<span class="number">0</span>)</span></span>
+</code></pre><p>构建哈希超参数，将数据维度和点数传入<code>get_default_parameters</code>获得合适的超参数，得到的超参数可以通过手动微调或者<code>compute_number_of_hash_functions</code>来对其中细节进行微调。</p>
+<pre><code>num_points, dim = dataset<span class="class">.shape</span>
+parms = falconn.<span class="function"><span class="title">get_default_parameters</span><span class="params">(num_points, dim)</span></span>
+falconn.<span class="function"><span class="title">compute_number_of_hash_functions</span><span class="params">(<span class="number">7</span>, parms)</span></span>
+</code></pre><p>创建索引实例<code>LSHIndex</code>，并通过方法<code>setup</code>构建索引。</p>
+<pre><code>lsh_index = falconn.<span class="function"><span class="title">LSHIndex</span><span class="params">(parms)</span></span>
+lsh_index.<span class="function"><span class="title">setup</span><span class="params">(dataset)</span></span>
+</code></pre><p>查询的函数有很多，可以根据需要进行选择</p>
+<pre><code><span class="function"><span class="title">find_k_nearest_neighbors</span><span class="params">()</span></span>
+<span class="function"><span class="title">find_near_neighbors</span><span class="params">()</span></span>
+<span class="function"><span class="title">find_nearest_neighbor</span><span class="params">()</span></span>
+<span class="function"><span class="title">get_candidates_with_duplicates</span><span class="params">()</span></span>
+<span class="function"><span class="title">get_unique_candidates</span><span class="params">()</span></span>
+</code></pre><h3 id="C++实现">C++实现</h3><p>TBD</p>
+<h1 id="Panns">Panns</h1><p><a href="https://github.com/ryanrhymes/panns" target="_blank" rel="external">https://github.com/ryanrhymes/panns</a>这是一个用python写的针对高维数据的approximate k-nearest neighbors算法包，目前支持欧式距离和余弦距离两种度量。对500维以上的高维特征进行了优化。虽然性能弱于Annoy，但是更加轻量，比FLANN和scikit-learn更为好用</p>
 <h3 id="安装">安装</h3><pre><code>sudo pip <span class="operator"><span class="keyword">install</span> panns <span class="comment">--upgrade</span></span>
 </code></pre><h3 id="使用示例">使用示例</h3><pre><code><span class="keyword">from</span> panns import *
 
@@ -124,6 +150,7 @@ n = p1.<span class="function"><span class="title">query</span><span class="param
 </code></pre><h1 id="Annoy">Annoy</h1><p><a href="https://github.com/spotify/annoy" target="_blank" rel="external">https://github.com/spotify/annoy</a>这是一个用C++编写的python打包的最近邻搜索算法包，应该是目前性能最好的算法包。</p>
 <h3 id="安装-1">安装</h3><pre><code>pip <span class="keyword">install</span> annoy
 </code></pre><h3 id="实例">实例</h3><p>tbd</p>
+<h2 id="参考资料">参考资料</h2><p><a href="http://yongyuan.name/blog/index-billion-deep-descriptors.html" target="_blank" rel="external">机器视觉：十亿规模的深度描述子如何有效索引</a></p>
 
       
     </div>
