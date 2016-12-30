@@ -3,39 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>tensorflow学习（六）CNN网络Inception | 杨现的个人博客</title>
+  <title>Archives: 2016/12 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="这次我们来上手一个大型网络,googLeNet。这篇讲一下Inception v3网络的训练和测试以及数据集的加载。
-数据准备将图片按照类别放入不同的文件夹下。格式如下：
-data_dir/train/label_0/a.jpg
-data_dir/train/label_0/b.jpg
-...
-data_dir/train/label_1/f.jpg
-...
-data_dir/validation">
-<meta property="og:type" content="article">
-<meta property="og:title" content="tensorflow学习（六）CNN网络Inception">
-<meta property="og:url" content="http://yoursite.com/2016/06/13/tensorflow-inception/index.html">
+  <meta name="description" content="迭代的是人，递归的是神">
+<meta property="og:type" content="website">
+<meta property="og:title" content="杨现的个人博客">
+<meta property="og:url" content="http://yoursite.com/archives/2016/12/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="这次我们来上手一个大型网络,googLeNet。这篇讲一下Inception v3网络的训练和测试以及数据集的加载。
-数据准备将图片按照类别放入不同的文件夹下。格式如下：
-data_dir/train/label_0/a.jpg
-data_dir/train/label_0/b.jpg
-...
-data_dir/train/label_1/f.jpg
-...
-data_dir/validation">
-<meta property="og:updated_time" content="2016-06-13T11:57:39.928Z">
+<meta property="og:description" content="迭代的是人，递归的是神">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="tensorflow学习（六）CNN网络Inception">
-<meta name="twitter:description" content="这次我们来上手一个大型网络,googLeNet。这篇讲一下Inception v3网络的训练和测试以及数据集的加载。
-数据准备将图片按照类别放入不同的文件夹下。格式如下：
-data_dir/train/label_0/a.jpg
-data_dir/train/label_0/b.jpg
-...
-data_dir/train/label_1/f.jpg
-...
-data_dir/validation">
+<meta name="twitter:title" content="杨现的个人博客">
+<meta name="twitter:description" content="迭代的是人，递归的是神">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -85,91 +63,39 @@ data_dir/validation">
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-tensorflow-inception" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/06/13/tensorflow-inception/" class="article-date">
-  <time datetime="2016-06-13T11:57:11.000Z" itemprop="datePublished">2016-06-13</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
+        <section id="main">
   
-    <h1 class="article-title" itemprop="name">
-      tensorflow学习（六）CNN网络Inception
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2016" class="archive-year">2016</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      <a href="/2016/12/30/cmake-learn/" class="archive-article-date">
+  <time datetime="2016-12-30T02:20:10.000Z" itemprop="datePublished">12月 30</time>
+</a>
+      
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2016/12/30/cmake-learn/">用CMake搭建一个高质量的C/C++工程</a>
     </h1>
   
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>这次我们来上手一个大型网络,googLeNet。这篇讲一下Inception v3网络的训练和测试以及数据集的加载。</p>
-<h2 id="数据准备">数据准备</h2><p>将图片按照类别放入不同的文件夹下。格式如下：</p>
-<pre><code>data_dir/train/label_0/<span class="tag">a</span><span class="class">.jpg</span>
-data_dir/train/label_0/<span class="tag">b</span><span class="class">.jpg</span>
-...
-data_dir/train/label_1/f<span class="class">.jpg</span>
-...
-data_dir/validation/label_0/c<span class="class">.jpg</span>
-data_dir/validation/label_0/d<span class="class">.jpg</span>
-...
-data_dir/labels.txt
-</code></pre><p>同时将所有label的类别整理成一个txt放在data_dir/labels.txt文件中，行数代表该类别对应的整数值，从0开始计数，其文本内容如下：</p>
-<pre><code>label_0
-label_1
-label_2
-...
-label_n
-</code></pre><h3 id="转化成为TFRecord格式">转化成为TFRecord格式</h3><p>首先通过<code>_find_iamge_files</code>函数得到全量图片的文件名、标签、标签文本信息的对应关系，并打乱排序。然后按线程数将全量文件分块，分别执行<code>_process_image_files_batch</code>。将数据按分块分别写入对应的TFRecordWriter。这个操作的代码我整理保存在了<a href="https://github.com/yangxian10/tensorflow_code/blob/master/build_image_tfrecord_data.py" target="_blank" rel="external">build_image_tfrecord_data.py</a>。其中两个重要的参数，一个是进程数量的控制参数<code>num_threads</code>和Record数据分块的参数<code>num_shards</code>。我这里有个不同，原来代码是读文件之后直接压入Record，我是用OpenCV解码之后，将解码后数据变成string压入Record。代码调用格式如下：</p>
-<pre><code>python build_image_tfrecord_data.py \
-  -<span class="ruby">-train_directory=mydata/train \
-</span>  -<span class="ruby">-validation_directory=mydata/validation \
-</span>  -<span class="ruby">-output_directory=mydata/tf_record \
-</span>  -<span class="ruby">-labels_file=mydata/labels.txt</span>
-</code></pre><h2 id="网络模型">网络模型</h2><h2 id="单机训练">单机训练</h2><h2 id="分布式训练">分布式训练</h2><h2 id="测试评估">测试评估</h2><h3 id="参考文献">参考文献</h3><p><a href="https://github.com/tensorflow/models/tree/master/inception" target="_blank" rel="external">https://github.com/tensorflow/models/tree/master/inception</a><br><a href="http://arxiv.org/abs/1512.00567" target="_blank" rel="external">http://arxiv.org/abs/1512.00567</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cixb6drju000ql0fhn7tdlocr" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
-
-    </footer>
+    </header>
   </div>
-  
-    
-<nav id="article-nav">
-  
-    <a href="/2016/06/14/tensorflow-caffe2tensorflow/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          tensorflow学习（七）caffe模型训练结果转换为tensorflow格式
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2016/06/13/tensorflow-captcha/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">tensorflow学习（五）基于CNN的验证码识别</div>
-    </a>
-  
-</nav>
-
-  
 </article>
-
+  
+  
+    </div></section>
+  
 </section>
         
           <aside id="sidebar">
