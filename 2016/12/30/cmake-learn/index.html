@@ -29,7 +29,7 @@ SET(VAR">
 PROJECT(projectname [CXX] [C])
 显式定义变量
 SET(VAR">
-<meta property="og:updated_time" content="2016-12-30T02:23:27.024Z">
+<meta property="og:updated_time" content="2017-01-14T00:09:29.019Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="用CMake搭建一个高质量的C/C++工程">
 <meta name="twitter:description" content="准备工作
@@ -146,6 +146,8 @@ SET(VAR">
 <span class="constant">SET</span>(<span class="constant">EXECUTABLE_OUTPUT_PATH</span> <span class="variable">${</span><span class="constant">PROJECT_BINARY_DIR</span>}/bin)
 <span class="constant">SET</span>(<span class="constant">LIBRARY_OUTPUT_PATH</span> <span class="variable">${</span><span class="constant">PROJECT_BINARY_DIR</span>}/<span class="class"><span class="keyword">lib</span>)</span>
 <span class="constant">CMAKE_INSTALL_PREFIX</span>  <span class="comment"># 配置安装路径，默认定义是/usr/local</span>
+</code></pre><h2 id="OpenCV相关技巧">OpenCV相关技巧</h2><pre><code><span class="function"><span class="title">find_package</span><span class="params">(OpenCV REQUIRED)</span></span>
+<span class="function"><span class="title">target_link_libraries</span><span class="params">(target ${OpenCV_LIBS})</span></span>
 </code></pre>
       
     </div>
@@ -259,7 +261,7 @@ SET(VAR">
   
   <div class="outer">
     <div id="footer-info" class="inner">
-      &copy; 2016 Xian Yang<br>
+      &copy; 2017 Xian Yang<br>
       Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
