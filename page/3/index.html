@@ -65,6 +65,66 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-spark-learn" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/02/23/spark-learn/" class="article-date">
+  <time datetime="2016-02-23T13:50:37.000Z" itemprop="datePublished">2016-02-23</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/study/">study</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/02/23/spark-learn/">Spark学习记录</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本笔记主要记录Spark在Hadoop环境中使用python语言进行算法开发过程中遇到的问题</p>
+<h3 id="Spark的启动">Spark的启动</h3><p>在Spark的安装路径中的<code>bin</code>路径中有pyspark，这是一种交互式的调用方法，还可以编写好python脚本之后通过</p>
+<pre><code><span class="label">spark</span>-<span class="keyword">submit </span>xxx.py
+</code></pre><p>的方式来调用。</p>
+<h3 id="sc_is_not_defined">sc is not defined</h3><p>任何Spark程序都需要一个SparkContext来开始，其包含了Spark集群配置的各种参数，如果代码报错<code>sc is not defined</code>，需要添加如下代码进行初始化：</p>
+<pre><code>from pyspark import SparkContext
+sc = <span class="function"><span class="title">SparkContext</span><span class="params">(<span class="string">'local[2]'</span>, <span class="string">'First Spark App'</span>)</span></span>
+</code></pre><h3 id="常用HDFS_Shell命令">常用HDFS Shell命令</h3><p>大多数FS Shell命令和对应的Unix Shell命令类似，格式为hadoop fs <args>，如下：</args></p>
+<pre><code>hadoop <span class="built_in">fs</span> -cat URI [URI …]
+hadoop <span class="built_in">fs</span> -chmod [-R] &lt;<span class="built_in">MODE</span>[,<span class="built_in">MODE</span>]... | OCTALMODE&gt; URI [URI …]
+hadoop <span class="built_in">fs</span> -cp URI [URI …] &lt;dest&gt;
+hadoop <span class="built_in">fs</span> -du URI [URI …]
+hadoop <span class="built_in">fs</span> -<span class="built_in">mkdir</span> &lt;paths&gt;
+hadoop <span class="built_in">fs</span> -ls &lt;args&gt;
+hadoop <span class="built_in">fs</span> -rmr URI [URI …]    # rm -rf
+</code></pre><p>在HDFS和本地之间复制文件的命令如下：</p>
+<pre><code>hadoop fs -get [-ignorecrc] [-crc] <span class="variable">&lt;src&gt;</span> <span class="variable">&lt;localdst&gt;</span>    <span class="comment"># 复制文件到本地文件系统</span>
+hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="variable">&lt;dst&gt;</span>    <span class="comment"># 本地文件复制到HDFS</span>
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cizcouue400186cfh5i44cwbu" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-ml-skill" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/02/18/ml-skill/" class="article-date">
@@ -110,7 +170,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cixb6drkp001pl0fhq32fh029" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cizcouuez001s6cfhk2no3wxe" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
@@ -177,7 +237,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cixb6drk9001el0fhiqrixx2j" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cizcouue4001h6cfhd0r8bpf3" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -261,7 +321,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cixb6drl5001xl0fhmk5avp7m" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cizcouuff00206cfhli19kj93" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
@@ -309,7 +369,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cixb6drn1003hl0fhsbksbpo1" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cizcouuhr003k6cfhmjg58wu4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/source/">source</a></li></ul>
@@ -354,7 +414,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cixb6drbx0000l0fhdta8kp3k" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cizcouu3u00006cfhhitje1un" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tricks/">tricks</a></li></ul>
@@ -429,7 +489,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cixb6drlq002dl0fhv461rxcc" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cizcouug1002g6cfhvc4s2wqe" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dataset/">dataset</a></li></ul>
@@ -545,7 +605,7 @@ detector = dlib.get_frontal_face_detector()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cixb6drlq0028l0fh649fkxv4" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cizcouug0002b6cfhvxhfd86z" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/face/">face</a></li></ul>
@@ -606,7 +666,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cixb6drkp001ll0fhv0b5cd82" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cizcouuej001o6cfhjj5qcgqv" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mxnet/">mxnet</a></li></ul>
@@ -671,79 +731,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cixb6drmm0035l0fh0na1dvmv" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-caffe-interface" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/08/23/caffe-interface/" class="article-date">
-  <time datetime="2015-08-23T12:28:12.000Z" itemprop="datePublished">2015-08-23</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/08/23/caffe-interface/">caffe学习（四）caffe的接口参数说明</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>caffe接口参数</p>
-<h2 id="C接口">C接口</h2><h3 id="train相关参数">train相关参数</h3><ul>
-<li>-solver参数（必须有），与<code>solver.prototxt</code>文件一起使用</li>
-<li>-snapshot参数（可选），通常用来从之前训练一半的模型<code>xxx.solverstate</code>继续训练使用</li>
-<li>-weights参数（选填），与训练好的<code>model.caffemodel</code>一起使用，用来在fine-tuning的时候初始化参数</li>
-<li>-gpu参数，用来选择使用GPU，根据<code>nvidia-smi</code>的GPU的ID选择，比如选择第三块GPU就使用<code>-gpu 2</code>的参数，如果想使用所有的GPU一起跑一个程序，就使用<code>-gpu all</code></li>
-</ul>
-<p>举个例子<br><!-- lang:bash--></p>
-<pre><code># train LeNet
-caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt
-# train on GPU <span class="number">2</span>
-caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt -gpu <span class="number">2</span>
-# resume training <span class="keyword">from</span> the half-way point snapshot
-caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt -snapshot examples<span class="regexp">/mnist/</span>lenet_iter_5000.solverstate
-# fine-tune CaffeNet model weights <span class="keyword">for</span> style recognition
-caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</span>solver.prototxt -weights models<span class="regexp">/bvlc_reference_caffenet/</span>bvlc_reference_caffenet.caffemodel
-</code></pre><h3 id="test、time相关参数">test、time相关参数</h3><ul>
-<li>-iterations迭代次数，time的时候测试的次数，默认为50次</li>
-<li>-model测试时候选择加载的模型，对应<code>train_val.prototxt</code>或者<code>deploy.prototxt</code>一起使用</li>
-</ul>
-<p>举个例子<br><!-- lang:bash--></p>
-<pre><code># score the learned LeNet model on the validation <span class="operator"><span class="keyword">set</span> <span class="keyword">as</span> defined <span class="keyword">in</span> the
-# <span class="keyword">model</span> architeture lenet_train_test.prototxt
-caffe <span class="keyword">test</span> -<span class="keyword">model</span> examples/mnist/lenet_train_test.prototxt -weights examples/mnist/lenet_iter_10000.caffemodel -gpu <span class="number">0</span> -iterations <span class="number">100</span>
-# <span class="keyword">time</span> a <span class="keyword">model</span> architecture <span class="keyword">with</span> the given weights <span class="keyword">on</span> the <span class="keyword">first</span> GPU <span class="keyword">for</span> <span class="number">10</span> iterations
-caffe <span class="keyword">time</span> -<span class="keyword">model</span> examples/mnist/lenet_train_test.prototxt -weights examples/mnist/lenet_iter_10000.caffemodel -gpu <span class="number">0</span> -iterations <span class="number">10</span></span>
-</code></pre><h3 id="device_query相关参数">device_query相关参数</h3><p>这个模块用来查看多GPU时候的一些显卡相关信息。举例<br><!-- lang:bash--></p>
-<pre><code><span class="comment"># query the first device</span>
-<span class="title">caffe</span> device_query -gpu <span class="number">0</span>
-</code></pre><h2 id="python接口">python接口</h2><p>通过<code>import caffe</code>来加载caffe模块，几个比较重要的模块caffe.Net, caffe.SDGSolver, caffe.io, caffe.draw</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cixb6drmm0032l0fhzrbwoz33" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cizcouuhc00386cfhjuvuibl7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -768,7 +756,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">19</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">20</span></li></ul>
     </div>
   </div>
 
@@ -777,7 +765,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
     </div>
   </div>
 
@@ -786,7 +774,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 13.33px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 20px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 13.33px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 16.67px;">生活</a>
+      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 12.5px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 17.5px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 12.5px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
     </div>
   </div>
 
@@ -795,7 +783,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -805,6 +793,10 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/02/19/tensorflow1-0-install/">tensorflow学习（九）1.0正式版安装配置</a>
+          </li>
         
           <li>
             <a href="/2016/12/30/cmake-learn/">用CMake搭建一个高质量的C/C++工程</a>
@@ -820,10 +812,6 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
         
           <li>
             <a href="/2016/07/13/caffe-yolo/">caffe学习（七）caffe-YOLO模型</a>
-          </li>
-        
-          <li>
-            <a href="/2016/07/06/guides-japan/">日本攻略</a>
           </li>
         
       </ul>
