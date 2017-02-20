@@ -91,22 +91,28 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>tensorflow官方认定的转换工具为<a href="https://github.com/ethereon/caffe-tensorflow" target="_blank" rel="external">https://github.com/ethereon/caffe-tensorflow</a>。我们尝试一下转换一个caffe训练的图像识别模型</p>
-<h2 id="caffe-tensorflow安装">caffe-tensorflow安装</h2><pre><code>git clone <span class="string">https:</span><span class="comment">//github.com/ethereon/caffe-tensorflow</span>
-</code></pre><h2 id="生成模型训练代码">生成模型训练代码</h2><p>利用<code>convert.py</code>可以将caffe网络定义的deploy.prototxt文件转换为tensorflow的python实现，不过这种转换之后的模型代码还需要import kaffe模块，虽然<code>kaffe.tensorflow.Network</code>没有其他依赖，可以单独加载到新代码中即可使用，方便移植，我还是更倾向于转换之后参考这个代码重新写一份。调用方式如下：</p>
-<pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --code-output-path=./myNetTensorflow.py
-</code></pre><h2 id="转换训练好的模型">转换训练好的模型</h2><p>也可以将caffemodel的weights和biases参数读取出来转换为npy的格式，并通过<code>numpy.load()</code>读取数据。转换数据的脚本如下：</p>
-<pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --caffemodel=./mynet<span class="class">.caffemodel</span> --data-output-path=./myNetTensorflow.npy
-</code></pre><p>由于转换过来的npy数据的类型比奇怪，是0-d array，要将其取出来需要如下读取方式</p>
-<pre><code>params = np.<span class="function"><span class="title">load</span><span class="params">()</span></span>
-params = params.<span class="function"><span class="title">item</span><span class="params">()</span></span>
-</code></pre><h2 id="注意事项">注意事项</h2><ul>
-<li><p>caffe的模型应该是较新的版本，才能转换</p>
-</li>
-<li><p>并不是所有的caffe模型都能转换为tensorflow，比如caffe的padding支持很多方式，tensorflow目前只支持<code>SAME</code>和<code>VALID</code></p>
-</li>
-</ul>
-
+        <p>近期tensorflow发布了正式版，我们也赶快更新起来。</p>
+<h2 id="安装环境">安装环境</h2><p>操作系统centOS 7.0， k80四卡。注意tensorflow1.0.0只支持CUDA8，所以需要将<strong>CUDA升级到8.0，cudnn升级到v5</strong>。</p>
+<h2 id="安装OpenCV">安装OpenCV</h2><p>注意之前选择的OpenCV2.4.11版本对CUDA8.0是不兼容的，要升级到<strong>OpenCV2.4.13</strong>。</p>
+<pre><code>cd ~/opencv
+mkdir <span class="operator"><span class="keyword">release</span>
+cd <span class="keyword">release</span>
+cmake -<span class="keyword">D</span> CMAKE_BUILD_TYPE=<span class="keyword">RELEASE</span> -<span class="keyword">D</span> CMAKE_INSTALL_PREFIX=/usr/<span class="keyword">local</span> -<span class="keyword">D</span> CUDA_GENERATION=Kepler ..
+make -j8
+sudo make <span class="keyword">install</span></span>
+</code></pre><p>因为OpenCV在cmake的时候找不到anaconda的python路径，所以需要手动将cv2.so和cv.py复制到anaconda对应的lib下。注意安装完之后再编译与OpenCV相关程序会出现报错<code>cannot find -lopencv_dep_cudart</code>。解决办法是要控制CMake的一个开关，在cmake的时候注意</p>
+<pre><code>cmake -D CUD<span class="built_in">A_USE</span>_STATIC_CUD<span class="built_in">A_RUNTIME</span>=OFF ..
+</code></pre><p>或者在CMakeLists.txt中在<code>find_package(OpenCV REQUIRED)</code>前添加</p>
+<pre><code><span class="function"><span class="title">set</span><span class="params">(CUDA_USE_STATIC_CUDA_RUNTIME OFF)</span></span>
+</code></pre><p>但这样还是需要更改每个工程的配置，还是有些麻烦，我采用了大杀器，更改了cmake安装包里的默认配置。使用的是cmake3.7.0这个安装包。</p>
+<pre><code>vim ./Modules/FindCUDA.cmake
+# line 793, ON <span class="comment">--&gt; OFF</span>
+option(CUDA_USE_STATIC_CUDA_RUNTIME "<span class="operator"><span class="keyword">Use</span> the <span class="keyword">static</span> <span class="keyword">version</span> <span class="keyword">of</span> the CUDA runtime <span class="keyword">library</span> <span class="keyword">if</span> available<span class="string">" OFF)</span></span>
+</code></pre><p>注意官网日志说明<strong>OpenCV3.2版本支持CUDA8</strong>，如果硬着头皮上OpenCV3.2，安装也没啥多说的。注意k80的GPU是kepler架构，如果是pascal架构的也要相应选择。在安装的时候还会遇到<code>Downloading ippicv_linux_20151201.tgz...</code>的问题，要确保服务器能访问<code>raw.githubusercontent.com</code>。还有一个bug是mkl也要更新到1.13新版本，不然会报错缺少<code>mkl_version.h</code>文件。</p>
+<h2 id="安装tensorflow">安装tensorflow</h2><p>新版本东风tensorflow安装已经非常简单了，只需要直接pip安装即可。相应的依赖包都会自动更新到匹配版本，非常方便</p>
+<pre><code>pip <span class="keyword">install</span> tensorflow-gpu    <span class="comment"># gpu version</span>
+pip <span class="keyword">install</span> tensorflow    <span class="comment"># cpu version</span>
+</code></pre>
       
     </div>
     <footer class="article-footer">
