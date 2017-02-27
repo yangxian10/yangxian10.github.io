@@ -3,17 +3,30 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2015/4 | 杨现的个人博客</title>
+  <title>tensorflow学习（十）实用工具介绍 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="迭代的是人，递归的是神">
-<meta property="og:type" content="website">
-<meta property="og:title" content="杨现的个人博客">
-<meta property="og:url" content="http://yoursite.com/archives/2015/04/index.html">
+  <meta name="description" content="compatibility升级代码到兼容1.0版本更新脚本# file
+tf_upgrade.py --infile &amp;lt;input_code&amp;gt; --outfile &amp;lt;output_code&amp;gt;
+# dir
+tf_upgrade.py --intree &amp;lt;input_dir&amp;gt; -outtree &amp;lt;output_dir&amp;gt;
+执行过程中的新旧函数改动详见rep">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tensorflow学习（十）实用工具介绍">
+<meta property="og:url" content="http://yoursite.com/2017/02/27/tensorflow-update/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="迭代的是人，递归的是神">
+<meta property="og:description" content="compatibility升级代码到兼容1.0版本更新脚本# file
+tf_upgrade.py --infile &amp;lt;input_code&amp;gt; --outfile &amp;lt;output_code&amp;gt;
+# dir
+tf_upgrade.py --intree &amp;lt;input_dir&amp;gt; -outtree &amp;lt;output_dir&amp;gt;
+执行过程中的新旧函数改动详见rep">
+<meta property="og:updated_time" content="2017-02-27T13:58:12.539Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="杨现的个人博客">
-<meta name="twitter:description" content="迭代的是人，递归的是神">
+<meta name="twitter:title" content="tensorflow学习（十）实用工具介绍">
+<meta name="twitter:description" content="compatibility升级代码到兼容1.0版本更新脚本# file
+tf_upgrade.py --infile &amp;lt;input_code&amp;gt; --outfile &amp;lt;output_code&amp;gt;
+# dir
+tf_upgrade.py --intree &amp;lt;input_dir&amp;gt; -outtree &amp;lt;output_dir&amp;gt;
+执行过程中的新旧函数改动详见rep">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -63,58 +76,69 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2015" class="archive-year">2015</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/04/12/单反拍摄入门/" class="archive-article-date">
-  <time datetime="2015-04-12T13:06:30.000Z" itemprop="datePublished">4月 12</time>
+        <section id="main"><article id="post-tensorflow-update" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/02/27/tensorflow-update/" class="article-date">
+  <time datetime="2017-02-27T13:56:03.000Z" itemprop="datePublished">2017-02-27</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/12/单反拍摄入门/">单反拍摄入门</a>
+    <h1 class="article-title" itemprop="name">
+      tensorflow学习（十）实用工具介绍
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/04/04/三万元搞定两室两厅装修攻略/" class="archive-article-date">
-  <time datetime="2015-04-04T00:37:28.000Z" itemprop="datePublished">4月 4</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/04/三万元搞定两室两厅装修攻略/">三万元搞定两室两厅装修攻略</a>
-    </h1>
-  
+        <h2 id="compatibility升级代码到兼容1-0版本">compatibility升级代码到兼容1.0版本</h2><h3 id="更新脚本">更新脚本</h3><pre><code><span class="comment"># file</span>
+tf_upgrade.py --infile <span class="variable">&lt;input_code&gt;</span> --outfile <span class="variable">&lt;output_code&gt;</span>
+<span class="comment"># dir</span>
+tf_upgrade.py --intree <span class="variable">&lt;input_dir&gt;</span> -outtree <span class="variable">&lt;output_dir&gt;</span>
+</code></pre><p>执行过程中的新旧函数改动详见<code>report.txt</code>。</p>
+<h3 id="tips">tips</h3><ul>
+<li><p>注意升级代码之前不要手工更改代码</p>
+</li>
+<li><p>升级后的部分函数无法更新，需要根据日志再手工更新部分函数</p>
+</li>
+</ul>
 
-    </header>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/02/27/tensorflow-update/" data-id="cizo66lpz000k60fhh394ruau" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/02/19/tensorflow1-0-install/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">tensorflow学习（九）1.0正式版安装配置</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-  
-    </div></section>
-  
+
 </section>
         
           <aside id="sidebar">
