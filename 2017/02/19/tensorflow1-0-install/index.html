@@ -21,7 +21,7 @@ c">
 cd ~/opencv
 mkdir release
 c">
-<meta property="og:updated_time" content="2017-03-09T13:44:48.673Z">
+<meta property="og:updated_time" content="2017-03-09T14:14:37.293Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="tensorflow学习（九）1.0正式版安装配置">
 <meta name="twitter:description" content="近期tensorflow发布了正式版，我们也赶快更新起来。
@@ -126,6 +126,8 @@ option(CUDA_USE_STATIC_CUDA_RUNTIME "<span class="operator"><span class="keyword
 <h2 id="安装tensorflow">安装tensorflow</h2><p>新版本tensorflow安装已经非常简单了，只需要直接pip安装即可。相应的依赖包都会自动更新到匹配版本，非常方便</p>
 <pre><code>pip <span class="keyword">install</span> tensorflow-gpu    <span class="comment"># gpu version</span>
 pip <span class="keyword">install</span> tensorflow    <span class="comment"># cpu version</span>
+</code></pre><h2 id="tips">tips</h2><p>安装好之后可能会遇到can’t find libmkl_avx.so的问题，应该是anaconda和tensorflow的安装顺序导致的，可以通过下面的办法暂时解决</p>
+<pre><code><span class="built_in">export</span> LD_PRELOAD=libmkl_rt.so
 </code></pre>
       
     </div>
