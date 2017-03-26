@@ -65,6 +65,97 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-tensorflow-saver" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/03/26/tensorflow-saver/" class="article-date">
+  <time datetime="2017-03-26T02:04:50.000Z" itemprop="datePublished">2017-03-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/26/tensorflow-saver/">tensorflow学习（十一）保存和恢复模型</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="保存/恢复对象">保存/恢复对象</h2><p>tf.train.Saver这个类负责保存和恢复模型。实际使用中，可以在模型训练的不同阶段保存多个checkpoints。为了防止硬盘被写满，保存模型过大，实际中保存n个最近的checkpoints。</p>
+<pre><code><span class="preprocessor"># save</span>
+v1 = tf.Variable(<span class="number">1.0</span>, name=<span class="string">"v1"</span>)
+saver = tf.train.Saver()  <span class="preprocessor"># global</span>
+saver_local = tf.train.Saver({<span class="string">'v1'</span>: v1})  <span class="preprocessor"># local</span>
+sess = tf.Session()
+<span class="keyword">for</span> <span class="keyword">step</span> <span class="keyword">in</span> xrange(<span class="number">1000000</span>):
+    sess.<span class="built_in">run</span>(..training_op..)
+    <span class="keyword">if</span> <span class="keyword">step</span> % <span class="number">1000</span> == <span class="number">0</span>:
+        saver.save(sess, <span class="string">'my-model'</span>, global_step=<span class="keyword">step</span>)  ==&gt; filename: <span class="string">'my-model-1000'</span>
+
+<span class="preprocessor"># restore</span>
+saver.restore(sess, <span class="string">'my-model-1000'</span>)
+saver.restore(sess, saver.latest_checkpoint())  <span class="preprocessor"># 可以自动传入参数路径</span>
+</code></pre><p>执行save方法之后，会生成一系列的文件，最好是单独放在一个路径中。</p>
+<h2 id="利用模型fine-tune">利用模型fine-tune</h2><pre><code>vgg_saver = <span class="keyword">tf</span>.train.import_meta_graph(<span class="string">'vgg16.meta'</span>)
+vgg_graph = <span class="keyword">tf</span>.get_default_graph()
+
+self.x_plh = vgg_grah.get_tensor_by_name(<span class="string">'input:0'</span>)
+
+# 选择想要保留的层
+output_conv =vgg_graph.get_tensor_by_name(<span class="string">'conv1_2:0'</span>)
+# output_conv =vgg_graph.get_tensor_by_name(<span class="string">'conv2_2:0'</span>)
+# output_conv =vgg_graph.get_tensor_by_name(<span class="string">'conv3_3:0'</span>)
+
+output_conv_sg = <span class="keyword">tf</span>.stop_gradient(output_conv)
+
+# 添加自己的网络结构
+output_conv_shape = output_conv_sg.get_shape().as_list()
+W1 = <span class="keyword">tf</span>.get_variable(<span class="string">'W1'</span>, shape=[<span class="number">1</span>, <span class="number">1</span>, output_conv_shape[<span class="number">3</span>], <span class="number">32</span>], initializer=<span class="keyword">tf</span>.random_normal_initializer(stddev=<span class="number">1</span><span class="keyword">e</span>-<span class="number">1</span>))
+b1 = <span class="keyword">tf</span>.get_variable(<span class="string">'b1'</span>, shape=[<span class="number">32</span>], initializer=<span class="keyword">tf</span>.constant_initializer(<span class="number">0.1</span>))
+z1 = <span class="keyword">tf</span>.<span class="keyword">nn</span>.conv2d(output_conv_sg, W1, strides=[<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>) + b1
+<span class="keyword">a</span> = <span class="keyword">tf</span>.<span class="keyword">nn</span>.relu(z1)
+</code></pre><h2 id="从caffe模型加载参数">从caffe模型加载参数</h2><p>tensorflow其实可以从任意算法，我们这里用caffe的模型参数为例</p>
+<pre><code>from six<span class="class">.moves</span> import cPickle
+
+net = caffe.<span class="function"><span class="title">Net</span><span class="params">(args.prototxt, args.caffemodel, caffe.TEST)</span></span>
+
+net_skeleton = <span class="function"><span class="title">list</span><span class="params">()</span></span> 
+<span class="keyword">for</span> name, item <span class="keyword">in</span> net<span class="class">.params</span><span class="class">.iteritems</span>():
+    net_skeleton.<span class="function"><span class="title">append</span><span class="params">([name + <span class="string">'/w'</span>, item[<span class="number">0</span>].data.shape[::-<span class="number">1</span>]])</span></span>
+    net_skeleton.<span class="function"><span class="title">append</span><span class="params">([name + <span class="string">'/b'</span>, item[<span class="number">1</span>].data.shape])</span></span>
+with <span class="function"><span class="title">open</span><span class="params">(os.path.join(args.output_dir, <span class="string">'net_skeleton.ckpt'</span>)</span></span>, <span class="string">'wb'</span>) as f:
+    cPickle.<span class="function"><span class="title">dump</span><span class="params">(net_skeleton, f, protocol=cPickle.HIGHEST_PROTOCOL)</span></span>
+
+net_weights = <span class="function"><span class="title">dict</span><span class="params">()</span></span>
+<span class="keyword">for</span> name, item <span class="keyword">in</span> net<span class="class">.params</span><span class="class">.iteritems</span>():
+    net_weights[name + <span class="string">'/w'</span>] = item[<span class="number">0</span>]<span class="class">.data</span><span class="class">.transpose</span>(<span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">0</span>)
+    net_weights[name + <span class="string">'/b'</span>] = item[<span class="number">1</span>]<span class="class">.data</span>
+with <span class="function"><span class="title">open</span><span class="params">(os.path.join(args.output_dir,<span class="string">'net_weights.ckpt'</span>)</span></span>, <span class="string">'wb'</span>) as f:
+    cPickle.<span class="function"><span class="title">dump</span><span class="params">(net_weights, f, protocol=cPickle.HIGHEST_PROTOCOL)</span></span>
+<span class="tag">del</span> net, net_skeleton, net_weights
+</code></pre><p>保存好上述模型后，通过下面的方法加载即可</p>
+<pre><code>saver = tf<span class="class">.train</span><span class="class">.Saver</span>(var_list=trainable)
+saver.<span class="function"><span class="title">restore</span><span class="params">(sess, os.path.join(args.output_dir,<span class="string">'net_weights.ckpt'</span>)</span></span>)
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/03/26/tensorflow-saver/" data-id="cj0q271v8000qfkfhte42vjp0" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-tensorflow-update" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/02/27/tensorflow-update/" class="article-date">
@@ -106,7 +197,7 @@ tf_upgrade.py --intree <span class="variable">&lt;input_dir&gt;</span> -outtree 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/02/27/tensorflow-update/" data-id="cizva14c1000kngfh6ezw2vlw" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/02/27/tensorflow-update/" data-id="cj0q271us000kfkfhnhgtsjjh" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -171,7 +262,7 @@ pip <span class="keyword">install</span> tensorflow    <span class="comment"># c
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/02/19/tensorflow1-0-install/" data-id="cizva14br000gngfhw360c6d9" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/02/19/tensorflow1-0-install/" data-id="cj0q271us000gfkfhjmmn5oq0" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -244,7 +335,7 @@ pip <span class="keyword">install</span> tensorflow    <span class="comment"># c
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/12/30/cmake-learn/" data-id="cizva14gz002vngfhu9kkehc4" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/12/30/cmake-learn/" data-id="cj0q271xk002wfkfhbtv9im3i" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
@@ -442,7 +533,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/08/28/caffe-add-jni-example/" data-id="cizva14iw003kngfhbrmarpoy" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/08/28/caffe-add-jni-example/" data-id="cj0q271y0003lfkfhdfq33mnh" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -490,7 +581,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/22/tensorflow-modelresource/" data-id="cizva14cb000qngfh9qywgnmd" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/22/tensorflow-modelresource/" data-id="cj0q271v8000rfkfhsw977r7y" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -537,7 +628,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="cizva14h7002yngfh27gigxim" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="cj0q271xk002zfkfhcl0h2je4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -600,7 +691,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="cizva14fv0028ngfht7mukjfr" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="cj0q271wy0029fkfhkiksnrbx" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -726,7 +817,7 @@ images = re.<span class="function"><span class="title">findall</span><span class
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cizva14e5001gngfhbalrykgb" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cj0q271w3001hfkfhrqwez8qc" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -783,73 +874,7 @@ params = params.<span class="function"><span class="title">item</span><span clas
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cizva14do0018ngfh0035be3g" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-tensorflow-inception" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/06/13/tensorflow-inception/" class="article-date">
-  <time datetime="2016-06-13T11:57:11.000Z" itemprop="datePublished">2016-06-13</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/06/13/tensorflow-inception/">tensorflow学习（六）CNN网络Inception</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>这次我们来上手一个大型网络,googLeNet。这篇讲一下Inception v3网络的训练和测试以及数据集的加载。</p>
-<h2 id="数据准备">数据准备</h2><p>将图片按照类别放入不同的文件夹下。格式如下：</p>
-<pre><code>data_dir/train/label_0/<span class="tag">a</span><span class="class">.jpg</span>
-data_dir/train/label_0/<span class="tag">b</span><span class="class">.jpg</span>
-...
-data_dir/train/label_1/f<span class="class">.jpg</span>
-...
-data_dir/validation/label_0/c<span class="class">.jpg</span>
-data_dir/validation/label_0/d<span class="class">.jpg</span>
-...
-data_dir/labels.txt
-</code></pre><p>同时将所有label的类别整理成一个txt放在data_dir/labels.txt文件中，行数代表该类别对应的整数值，从0开始计数，其文本内容如下：</p>
-<pre><code>label_0
-label_1
-label_2
-...
-label_n
-</code></pre><h3 id="转化成为TFRecord格式">转化成为TFRecord格式</h3><p>首先通过<code>_find_iamge_files</code>函数得到全量图片的文件名、标签、标签文本信息的对应关系，并打乱排序。然后按线程数将全量文件分块，分别执行<code>_process_image_files_batch</code>。将数据按分块分别写入对应的TFRecordWriter。这个操作的代码我整理保存在了<a href="https://github.com/yangxian10/tensorflow_code/blob/master/build_image_tfrecord_data.py" target="_blank" rel="external">build_image_tfrecord_data.py</a>。其中两个重要的参数，一个是进程数量的控制参数<code>num_threads</code>和Record数据分块的参数<code>num_shards</code>。我这里有个不同，原来代码是读文件之后直接压入Record，我是用OpenCV解码之后，将解码后数据变成string压入Record。代码调用格式如下：</p>
-<pre><code>python build_image_tfrecord_data.py \
-  -<span class="ruby">-train_directory=mydata/train \
-</span>  -<span class="ruby">-validation_directory=mydata/validation \
-</span>  -<span class="ruby">-output_directory=mydata/tf_record \
-</span>  -<span class="ruby">-labels_file=mydata/labels.txt</span>
-</code></pre><h2 id="网络模型">网络模型</h2><h2 id="单机训练">单机训练</h2><h2 id="分布式训练">分布式训练</h2><h2 id="测试评估">测试评估</h2><h3 id="参考文献">参考文献</h3><p><a href="https://github.com/tensorflow/models/tree/master/inception" target="_blank" rel="external">https://github.com/tensorflow/models/tree/master/inception</a><br><a href="http://arxiv.org/abs/1512.00567" target="_blank" rel="external">http://arxiv.org/abs/1512.00567</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cizva14cu000wngfhacps0po4" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cj0q271vn0019fkfheb44272b" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -901,7 +926,7 @@ label_n
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -911,6 +936,10 @@ label_n
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/03/26/tensorflow-saver/">tensorflow学习（十一）保存和恢复模型</a>
+          </li>
         
           <li>
             <a href="/2017/02/27/tensorflow-update/">tensorflow学习（十）实用工具介绍</a>
@@ -926,10 +955,6 @@ label_n
         
           <li>
             <a href="/2016/08/28/caffe-add-jni-example/">caffe学习（八）添加模块并JNI移植</a>
-          </li>
-        
-          <li>
-            <a href="/2016/07/22/tensorflow-modelresource/">tensorflow学习（八）模型资源</a>
           </li>
         
       </ul>
