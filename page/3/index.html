@@ -65,6 +65,281 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-darknet-yolo" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/03/25/darknet-yolo/" class="article-date">
+  <time datetime="2016-03-25T13:54:01.000Z" itemprop="datePublished">2016-03-25</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/25/darknet-yolo/">darknet学习（一）YOLO目标检测</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="darknet安装">darknet安装</h1><p>darknet的安装还是非常简单的，依赖只有cuda和opencv，安装好之后执行以下命令即可安装编译成功</p>
+<pre><code>git clone <span class="attribute">https</span>:<span class="regexp">//gi</span>thub.com/pjreddie/darknet.git
+cd darknet
+vim Makefile
+<span class="comment">######</span><span class="comment">######</span><span class="comment">#####[modify Makefile]
+GPU=1
+OPENCV=1
+OPTS=-Ofast  # 如果gcc版本过低，这里可能需要改成-O3
+###</span><span class="comment">######</span><span class="comment">######</span><span class="comment">##[close]</span>
+make
+</code></pre><h1 id="YOLO训练">YOLO训练</h1><h2 id="准备训练数据">准备训练数据</h2><p>检测算法需要对图像中的目标区域进行标注，我这里实验只准备了5个类别的检测数据，我用python基于OpenCV做了一个简单的标注工具，可以得到矩形左上角、右下角的坐标位置，代码如下：</p>
+<pre><code><span class="keyword">import</span> os
+<span class="keyword">import</span> cv2
+<span class="keyword">import</span> numpy <span class="keyword">as</span> np
+<span class="keyword">import</span> copy
+<span class="keyword">import</span> glob
+<span class="keyword">import</span> sys
+
+
+<span class="comment">#PT1 = (0,0)</span>
+<span class="comment">#PT2 = (0,0)</span>
+<span class="function"><span class="keyword">def</span> <span class="title">draw_box</span><span class="params">(event, x, y, flags, param)</span>:</span>
+    <span class="keyword">global</span> PT1
+    <span class="keyword">global</span> PT2
+    <span class="keyword">global</span> img_copy
+    <span class="keyword">if</span> event == cv2.EVENT_LBUTTONDOWN <span class="keyword">and</span> flags == cv2.EVENT_FLAG_LBUTTON:    
+        PT1 = (x,y)
+        PT2 = (x,y)
+    <span class="keyword">if</span> flags == cv2.EVENT_FLAG_LBUTTON:
+        PT2 = (x,y)
+    <span class="keyword">if</span> event == cv2.EVENT_LBUTTONUP:
+        PT2 = (x,y)
+    cv2.rectangle(img_copy, PT1, PT2, (<span class="number">0</span>,<span class="number">255</span>,<span class="number">0</span>), <span class="number">2</span>)
+    cv2.imshow(<span class="string">'image'</span>, img_copy)
+    img_copy = copy.deepcopy(img)
+
+
+<span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:
+    img_path = <span class="string">'D:/test'</span>
+    img_list = glob.glob(os.path.join(img_path, <span class="string">'*.jpg'</span>))
+    img_list = sorted(img_list)
+<span class="comment">#    print img_list</span>
+    box_result_name = <span class="string">'box_result.txt'</span>
+    img_processed = []
+    <span class="keyword">try</span>:
+        <span class="keyword">with</span> open(os.path.join(img_path, box_result_name), <span class="string">'rb'</span>) <span class="keyword">as</span> f_box:
+            <span class="keyword">for</span> line <span class="keyword">in</span> f_box.readlines():
+                line = line.strip().split(<span class="string">','</span>)
+                img_processed.append(line[<span class="number">0</span>])
+    <span class="keyword">except</span> IOError:
+        <span class="keyword">pass</span>
+    img_processed = set(img_processed)
+
+    cv2.namedWindow(<span class="string">'image'</span>)
+    cv2.setMouseCallback(<span class="string">'image'</span>, draw_box)
+
+    f_box = open(os.path.join(img_path, box_result_name), <span class="string">'a'</span>)
+    <span class="keyword">for</span> img_name <span class="keyword">in</span> img_list:
+        <span class="keyword">print</span> img_name
+        <span class="keyword">if</span> img_name <span class="keyword">in</span> img_processed:
+            <span class="keyword">continue</span>
+        img = cv2.imread(img_name)
+        img_copy = copy.deepcopy(img)
+        PT1 = (<span class="number">0</span>,<span class="number">0</span>)
+        PT2 = (<span class="number">0</span>,<span class="number">0</span>)
+
+        <span class="keyword">while</span> (<span class="number">1</span>):
+            key = cv2.waitKey(<span class="number">0</span>)
+            <span class="keyword">if</span> key == <span class="number">27</span>:
+                cv2.destroyAllWindows()
+                f_box.close()
+                sys.exit(<span class="number">0</span>)
+            <span class="keyword">elif</span> key == <span class="number">32</span>:
+                <span class="keyword">if</span> PT1[<span class="number">0</span>]==<span class="number">0</span> <span class="keyword">or</span> PT1[<span class="number">1</span>]==<span class="number">0</span> <span class="keyword">or</span> PT2[<span class="number">0</span>]==<span class="number">0</span> <span class="keyword">or</span> PT2[<span class="number">1</span>]==<span class="number">0</span> <span class="keyword">or</span> abs(PT2[<span class="number">0</span>]-PT1[<span class="number">0</span>])&lt;<span class="number">10</span> <span class="keyword">or</span> abs(PT2[<span class="number">1</span>]-PT1[<span class="number">1</span>])&lt;<span class="number">10</span>:
+                    <span class="keyword">continue</span>
+                <span class="keyword">if</span> PT1[<span class="number">0</span>] &lt; PT2[<span class="number">0</span>]:
+                    x1 = PT1[<span class="number">0</span>]
+                    x2 = PT2[<span class="number">0</span>]
+                <span class="keyword">else</span>:
+                    x1 = PT2[<span class="number">0</span>]
+                    x2 = PT1[<span class="number">0</span>]
+                <span class="keyword">if</span> PT1[<span class="number">1</span>] &lt; PT2[<span class="number">1</span>]:
+                    y1 = PT1[<span class="number">1</span>]
+                    y2 = PT2[<span class="number">1</span>]
+                <span class="keyword">else</span>:
+                    y1 = PT2[<span class="number">1</span>]
+                    y2 = PT1[<span class="number">1</span>]
+                f_box.write(<span class="string">'%s,%d,%d,%d,%d\n'</span> % (img_name, x1, y1, x2, y2))
+                <span class="comment">#print 'next image'</span>
+                <span class="keyword">break</span>
+            <span class="keyword">elif</span> key == <span class="number">122</span>:
+                f_box.close()
+                f_box = open(os.path.join(img_path, box_result_name), <span class="string">'rb'</span>)
+                lines = f_box.readlines()
+                f_box.close()
+                curr = lines[:-<span class="number">1</span>]
+                f_box = open(os.path.join(img_path, box_result_name), <span class="string">'w'</span>)
+                <span class="keyword">for</span> line <span class="keyword">in</span> lines:
+                    line = line.strip()
+                    f_box.write(<span class="string">'%s'</span> % line)
+                <span class="keyword">print</span> <span class="string">'delete last image box'</span>
+                cv2.destroyAllWindows()
+                f_box.close()
+                sys.exit(<span class="number">0</span>)
+        <span class="keyword">else</span>:
+            <span class="keyword">break</span>
+    cv2.destroyAllWindows()
+    f_box.close()
+</code></pre><p>这个标注工具代码比较繁琐，不过还算鲁棒，可以有效处理误标注并实现自动跳转下一张图的功能。每一个待检测的类别用这个标注工具可以生成一个对应的文本文件说明每一张图的矩形坐标位置。</p>
+<h2 id="生成用于darknet的标注">生成用于darknet的标注</h2><p>darknet要求每一张图片<code>a.jpg</code>对应一个<code>a.txt</code>，文本里面一行信息说明groundtruth的类别和图像原始宽高的相对坐标，如下：</p>
+<pre><code><span class="preprocessor"># &lt;object-class&gt; &lt;x&gt; &lt;y&gt; &lt;width&gt; &lt;height&gt;</span>
+<span class="number">1</span> <span class="number">0.526875</span> <span class="number">0.499375</span> <span class="number">0.30875</span> <span class="number">0.80375</span>
+</code></pre><p>我基于darknet自带的<code>scripts\voc_label.py</code>写了一个脚本把图像以及标注工具生成的矩形坐标转换成满足darknet的标注信息</p>
+<pre><code><span class="keyword">import</span> pickle
+<span class="keyword">import</span> os
+from os <span class="keyword">import</span> listdir, getcwd
+from os.path <span class="keyword">import</span> <span class="built_in">join</span>
+
+sets = [<span class="string">'men_jacket'</span>, <span class="string">'men_bottem'</span>, <span class="string">'underwear'</span>, <span class="string">'women_bottem'</span>, <span class="string">'women_jacket'</span>]
+classes = [<span class="string">'men_jacket'</span>, <span class="string">'men_bottem'</span>, <span class="string">'underwear'</span>, <span class="string">'women_bottem'</span>, <span class="string">'women_jacket'</span>]
+
+
+def convert(<span class="built_in">size</span>, <span class="built_in">box</span>):
+    dw = <span class="number">1.</span>/<span class="built_in">size</span>[<span class="number">0</span>]
+    dh = <span class="number">1.</span>/<span class="built_in">size</span>[<span class="number">1</span>]
+    x = (<span class="built_in">box</span>[<span class="number">0</span>] + <span class="built_in">box</span>[<span class="number">2</span>])/<span class="number">2.0</span>
+    y = (<span class="built_in">box</span>[<span class="number">1</span>] + <span class="built_in">box</span>[<span class="number">3</span>])/<span class="number">2.0</span>
+    w = <span class="built_in">box</span>[<span class="number">2</span>] - <span class="built_in">box</span>[<span class="number">0</span>]
+    h = <span class="built_in">box</span>[<span class="number">3</span>] - <span class="built_in">box</span>[<span class="number">1</span>]
+    x = x*dw
+    w = w*dw
+    y = y*dh
+    h = h*dh
+    <span class="keyword">return</span> (x,y,w,h)
+
+def convert_annotation(<span class="built_in">line</span>, image_id, set_id):
+    out_file = <span class="built_in">open</span>(<span class="string">'box_labels/%s/%s.txt'</span>%(set_id, image_id), <span class="string">'w'</span>)
+
+    w = <span class="number">800</span>
+    h = <span class="number">800</span>
+    cls = <span class="built_in">line</span>[<span class="number">0</span>].<span class="built_in">split</span>(<span class="string">'/'</span>)[<span class="number">1</span>]
+    <span class="keyword">if</span> cls not in classes:
+        <span class="keyword">return</span>
+    cls_id = classes.index(cls)
+
+    b = (<span class="built_in">float</span>(<span class="built_in">line</span>[<span class="number">1</span>]), <span class="built_in">float</span>(<span class="built_in">line</span>[<span class="number">2</span>]), <span class="built_in">float</span>(<span class="built_in">line</span>[<span class="number">3</span>]), <span class="built_in">float</span>(<span class="built_in">line</span>[<span class="number">4</span>]))
+    bb = convert((w,h), b)
+    out_file.write(<span class="built_in">str</span>(cls_id) + <span class="string">" "</span> + <span class="string">" "</span>.<span class="built_in">join</span>([<span class="built_in">str</span>(a) <span class="keyword">for</span> a in bb]) + <span class="string">'\n'</span>)
+    out_file.close
+
+wd = getcwd()
+list_file = <span class="built_in">open</span>(<span class="string">'train.txt'</span>, <span class="string">'w'</span>)
+<span class="keyword">for</span> set_id in sets:
+    <span class="keyword">if</span> not os.path.exists(<span class="string">'box_labels/%s'</span> % (set_id)):
+        os.makedirs(<span class="string">'box_labels/%s'</span> % (set_id))
+    images_info = <span class="built_in">open</span>(<span class="string">'box_imgs/%s.txt'</span> % (set_id)).readlines()
+    <span class="keyword">for</span> <span class="built_in">line</span> in images_info:
+        <span class="built_in">line</span> = <span class="built_in">line</span>.strip().<span class="built_in">split</span>(<span class="string">','</span>)
+        image_id = <span class="built_in">line</span>[<span class="number">0</span>].<span class="built_in">split</span>(<span class="string">'/'</span>)[<span class="number">2</span>].<span class="built_in">split</span>(<span class="string">'.'</span>)[<span class="number">0</span>]
+        list_file.write(<span class="string">'%s/box_imgs/%s/%s.jpg\n'</span> % (wd, set_id, image_id))
+        convert_annotation(<span class="built_in">line</span>, image_id, set_id)
+list_file.close()
+</code></pre><p>执行这个脚本会生成一个<code>box_labels</code>文件夹，并在里面生成对应的darknet标签信息。同时生成一个<code>train.txt</code>说明用于训练的图片的路径。</p>
+<h2 id="更改YOLO模型参数">更改YOLO模型参数</h2><p>对<code>cfg/yolo.cfg</code>的配置文件进行调整</p>
+<pre><code>subdivisions=<span class="number">2</span> <span class="preprocessor"># 原来为<span class="number">64</span>，改小可以提高训练速度，同时增加显存使用</span>
+output= <span class="number">735</span> <span class="preprocessor"># 最后connected层，原来值为<span class="number">1470</span></span>
+classes = <span class="number">5</span> <span class="preprocessor"># detection层，这里设置为<span class="number">5</span></span>
+</code></pre><p>这个参数的确定由公式<code>output = S x S x (5*B+C)</code>，其中S=7，B=2, C=5（5是我实验使用的类别数）。</p>
+<p>改写<code>src/data.c</code>中的<code>fill_truth_region</code>函数，确定图像和标签数据的加载位置</p>
+<pre><code>//    char *labelpath = find_replace<span class="list">(<span class="keyword">path</span>, <span class="string">"images"</span>, <span class="string">"labels"</span>)</span><span class="comment">;</span>
+    char *labelpath = find_replace<span class="list">(<span class="keyword">path</span>, <span class="string">"box_imgs"</span>, <span class="string">"box_labels"</span>)</span><span class="comment">;</span>
+</code></pre><p>改写<code>src/yolo.c</code>：</p>
+<pre><code>//<span class="type">char</span> *voc_names[] = {<span class="string">"aeroplane"</span>, <span class="string">"bicycle"</span>, <span class="string">"bird"</span>, <span class="string">"boat"</span>, <span class="string">"bottle"</span>, <span class="string">"bus"</span>, <span class="string">"car"</span>, <span class="string">"cat"</span>, <span class="string">"chair"</span>, <span class="string">"cow"</span>, <span class="string">"diningtable"</span>, <span class="string">"dog"</span>, <span class="string">"horse"</span>, <span class="string">"motorbike"</span>, <span class="string">"person"</span>, <span class="string">"pottedplant"</span>, <span class="string">"sheep"</span>, <span class="string">"sofa"</span>, <span class="string">"train"</span>, <span class="string">"tvmonitor"</span>};
+//image voc_labels[<span class="number">20</span>];
+<span class="type">char</span> *voc_names[] = {<span class="string">"men_jacket"</span>, <span class="string">"men_bottem"</span>, <span class="string">"underwear"</span>, <span class="string">"women_bottem"</span>, <span class="string">"women_jacket"</span>};
+image voc_labels[<span class="number">5</span>];
+<span class="type">void</span> train_yolo(<span class="type">char</span> *cfgfile, <span class="type">char</span> *weightfile)
+{
+//    <span class="type">char</span> *train_images = <span class="string">"/data/voc/train.txt"</span>;
+//    <span class="type">char</span> *backup_directory = <span class="string">"/home/pjreddie/backup/"</span>;
+    <span class="type">char</span> *train_images = <span class="string">"/home/xixi/darknet/train.txt"</span>;
+    <span class="type">char</span> *backup_directory = <span class="string">"/home/xixi/darknet/results/"</span>;
+
+...
+
+<span class="type">void</span> run_yolo(<span class="type">int</span> argc, <span class="type">char</span> **argv)
+{
+    /*
+    <span class="type">int</span> i;
+    <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; <span class="number">20</span>; ++i){
+        <span class="type">char</span> buff[<span class="number">256</span>];
+        sprintf(buff, <span class="string">"data/labels/%s.png"</span>, voc_names[i]);
+        voc_labels[i] = load_image_color(buff, <span class="number">0</span>, <span class="number">0</span>);
+    }
+    */
+</code></pre><p>改好之后重新编译代码，下载预训练好的模型参数文件，并开始训练</p>
+<pre><code>make
+wget http:<span class="comment">//pjreddie.com/media/files/extraction.conv.weights</span>
+./darknet -<span class="tag">i</span> <span class="number">2</span> yolo train cfg/yolo<span class="class">.cfg</span> extraction<span class="class">.conv</span><span class="class">.weights</span>
+</code></pre><p>在results文件夹下面就好生成训练好的模型文件，当迭代40000次后，会输出最终模型文件yolo_final.weights。这个过程用GPU大概需要3天时间，消耗显存6个G。（-i参数表示使用第二块GPU）</p>
+<h1 id="YOLO检测">YOLO检测</h1><pre><code><span class="comment"># 检测单张图片</span>
+./darknet yolo <span class="built_in">test</span> cfg/yolo.cfg results/yolo_final.weights &lt;image&gt;
+<span class="comment"># 检测多张图片</span>
+./darknet yolo <span class="built_in">test</span> cfg/yolo.cfg results/yolo_final.weights
+<span class="comment"># 改变检测的阈值</span>
+./darknet yolo <span class="built_in">test</span> cfg/yolo.cfg results/yolo_final.weights &lt;image&gt; -thresh <span class="number">0</span>
+<span class="comment"># 改为CPU模式检测</span>
+./darknet -nogpu yolo <span class="built_in">test</span> cfg/yolo.cfg results/yolo_final.weights &lt;image&gt;
+</code></pre><p>经过测试，在GPU环境下，测试一张图片跑完整的YOLO模型需要40ms~100ms，CPU环境下需要5秒以上。</p>
+<h1 id="补充">补充</h1><p>YOLO官方后来又出了一个yolo2.cfg，研究了一下，每一卷积层都加了batch_normlization，提高训练速度，破费。同时把最后的一个全连接层改成了一个local层</p>
+<h1 id="讨论和思考">讨论和思考</h1><ul>
+<li><p>YOLO的核心思想就是利用整张图作为网络的输入，直接在输出层回归bounding box的位置和bounding box所属的类别。</p>
+</li>
+<li><p>将一副图像经过类似alexnet的特征提取，最后经过一层的全连接层之后又映射回SxS个网格(grid cell)，如果某个object的中心 落在这个网格中，则这个网格就负责预测这个object。</p>
+</li>
+<li><p>每个网格要预测B个bounding box，每个bounding box除了要回归自身的位置之外，还要附带预测一个confidence值。 这个confidence等于所预测的box中含有object的置信度（object落在其中，取1，否则取0）和这个box和truth的IOU交集的乘积确定。这样每个网格要返回bounding box预测的(x, y, w, h)和confidence5个值，以及object的类别信息C类，所以最后一层的输出应该为<code>S x S x (5*B+C)</code>。</p>
+</li>
+<li><p>由于xywh取的是相对坐标，归一化为0~1，confidence取值范围为0~1，category的类别取值为0或1，简单实现了归一化的目的，然而由于目标函数使用了均方误差损失函数，位置坐标和类别判别信息维度对损失函数的贡献不应该是一样的，所以文章中采用了如下的方法改进</p>
+</li>
+</ul>
+<ol>
+<li>更重视坐标预测，给这些损失前面赋予更大的loss weight, 训练中取5。</li>
+<li>对没有object的box的confidence loss，赋予小的loss weight，训练中取0.5。</li>
+<li>有object的box的confidence loss和类别的loss的loss weight正常取1。</li>
+</ol>
+<ul>
+<li><p>对于小的box位置偏差对实际的效果影响更为严重，但均方误差对这个没有体现，所以对w和h参数又取了平方根处理，增大的小box的位置偏移对loss函数的影响。</p>
+</li>
+<li><p>一个网格有多个bounding box的时候，根据IOU值取前B个进行处理。所以对多个物体相互靠近的时候处理的并不是十分理想。</p>
+</li>
+<li><p>在test一张图片的时候，通过网络得到SxSx(5*B+C)层的值后，每个网格的类别信息Pr1，其对应的bounding box的confidence Pr2以及box和网格的IOU信息的乘积用来预测box属于某一类的概率。根据阈值过滤后，对保留的boxes进行非极大值抑制NMS处理，得到最终结果。</p>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="cj0v11zfl002xvsfhz3gp3bm4" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/darknet/">darknet</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-caffe-add-layer" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/03/23/caffe-add-layer/" class="article-date">
@@ -159,7 +434,7 @@ layer {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cj0q271y0003ifkfhrcxs4mi7" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cj0v11zg7003nvsfh7xt9rd2k" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -343,7 +618,7 @@ awk <span class="string">'{print vara}'</span> vara=$<span class="keyword">var</
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cj0q271wi0020fkfh69y7qa8x" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cj0v11zeq0025vsfh75elbsf0" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell/">shell</a></li></ul>
@@ -403,7 +678,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cj0q271w3001cfkfhfy1lxoz3" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cj0v11zea001hvsfh03jdtq40" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
@@ -460,7 +735,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cj0q271wi001wfkfhtkps0b76" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cj0v11zeq0021vsfhqtd93uhs" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
@@ -527,7 +802,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cj0q271w3001lfkfh62z07ecl" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cj0v11zea001qvsfhdpojmcf4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -611,7 +886,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cj0q271wy0024fkfhf74fy4fx" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cj0v11zf60029vsfhdg7p4kyo" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
@@ -659,7 +934,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cj0q271yg003ofkfht4ppc6fc" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cj0v11zgn003tvsfh4jpfb8g2" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/source/">source</a></li></ul>
@@ -704,7 +979,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cj0q271tq0000fkfh304uqd17" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cj0v11z4h0000vsfh0xg1hykb" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tricks/">tricks</a></li></ul>
@@ -780,7 +1055,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cj0q271xk002kfkfhi25ivc3h" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cj0v11zfl002pvsfhcl8eik47" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dataset/">dataset</a></li></ul>
@@ -792,125 +1067,9 @@ import py2exe
 
 
   
-    <article id="post-dlib-face-detect" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/11/04/dlib-face-detect/" class="article-date">
-  <time datetime="2015-11-04T13:53:46.000Z" itemprop="datePublished">2015-11-04</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Computer-Vision/">Computer Vision</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/11/04/dlib-face-detect/">基于dlib的人脸检测</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>dlib的人脸检测模块要比OpenCV的效果好一些，归功于其使用的是HOG特征。</p>
-<h2 id="dlib安装">dlib安装</h2><p>在windows下我的环境是vs2013和cmake3.2，cmake版本低了会导致编译失败。下载dlib的zip包，然后解压，然后执行如下，就把c++和python的配置好了。注意其中的CMakeLists.txt文件中的OpenCV宏与新版本的OpenCV不相配，需要改成OpenCV REQUIRED，否则<code>webcam_face_pose_ex</code>这个与摄像头有关的模块不会执行成功。</p>
-<pre><code>cd examples
-vim CMakeLists.txt
-<span class="comment">######</span><span class="comment">######</span><span class="comment">######</span><span class="comment">####[open CMakeList.txt]
-# find_package(OpenCV) --&gt;
-find_package(OpenCV REQUIRED)
-###</span><span class="comment">######</span><span class="comment">######</span><span class="comment">######</span><span class="comment">#[close CMakeList.txt]</span>
-mkdir build
-cd build
-cmake .. -DUSE_AVX_INSTRUCTIONS=ON
-cmake --build . --config Release
-cd ..<span class="regexp">/../</span>
-python setup.py install --<span class="literal">yes</span> USE_AVX_INSTRUCTIONS <span class="comment"># AVX为object detector的加速开关</span>
-</code></pre><h2 id="人脸检测demo">人脸检测demo</h2><p>在<code>exmaples/faces</code>文件夹下面新建文件<code>face_detector.py</code>，根据官网例程添加代码：</p>
-<pre><code>import sys
-
-import dlib
-from skimage import io
-
-detector = dlib.get_frontal_face_detector()
-<span class="keyword">win</span> = dlib.image_window()
-
-<span class="keyword">for</span> f <span class="keyword">in</span> sys.argv[1:]:
-    <span class="keyword">print</span>(<span class="string">"Processing file: {}"</span>.<span class="keyword">format</span>(f))
-    img = io.imread(f)
-    # The 1 <span class="keyword">in</span> the second argument indicates that we should upsample the image
-    # 1 time.  This will make everything bigger and allow <span class="keyword">us</span> to detect <span class="keyword">more</span>
-    # faces.
-    dets = detector(img, 1)
-    <span class="keyword">print</span>(<span class="string">"Number of faces detected: {}"</span>.<span class="keyword">format</span>(len(dets)))
-    <span class="keyword">for</span> i, <span class="keyword">d</span> <span class="keyword">in</span> enumerate(dets):
-        <span class="keyword">print</span>(<span class="string">"Detection {}: Left: {} Top: {} Right: {} Bottom: {}"</span>.<span class="keyword">format</span>(
-            i, <span class="keyword">d</span>.left(), <span class="keyword">d</span>.top(), <span class="keyword">d</span>.right(), <span class="keyword">d</span>.bottom()))
-
-    <span class="keyword">win</span>.clear_overlay()
-    <span class="keyword">win</span>.set_image(img)
-    <span class="keyword">win</span>.add_overlay(dets)
-    dlib.hit_enter_to_continue()
-
-
-# Finally, <span class="keyword">if</span> you really want to you can ask the detector to tell you the <span class="keyword">score</span>
-# <span class="keyword">for</span> each detection.  The <span class="keyword">score</span> is bigger <span class="keyword">for</span> <span class="keyword">more</span> confident detections.
-# Also, the idx tells you <span class="keyword">which</span> of the face sub-detectors matched.  This can be
-# used to broadly identify faces <span class="keyword">in</span> different orientations.
-<span class="keyword">if</span> (len(sys.argv[1:]) &gt; 0):
-    img = io.imread(sys.argv[1])
-    dets, scores, idx = detector.<span class="keyword">run</span>(img, 1)
-    <span class="keyword">for</span> i, <span class="keyword">d</span> <span class="keyword">in</span> enumerate(dets):
-        <span class="keyword">print</span>(<span class="string">"Detection {}, score: {}, face_type:{}"</span>.<span class="keyword">format</span>(
-            <span class="keyword">d</span>, scores[i], idx[i]))
-</code></pre><p>然后执行如下命令即可看到人脸检测效果：</p>
-<pre><code><span class="tag">python</span> <span class="tag">face_detector</span><span class="class">.py</span> *<span class="class">.jpg</span>
-</code></pre><h2 id="补充">补充</h2><p>C++环境也是一样的，执行<code>cmake build</code>后在<code>examples/build</code>目录下生成可执行文件<code>face_detection_ex</code>，执行</p>
-<pre><code><span class="title">face_detection_ex</span> ../faces/<span class="regexp">*.jpg</span>
-</code></pre><p>注意<strong>C++接口要想得到矩形框对应的置信度的话也是可以的，也可以根据置信度设置矩形框筛选的阈值，默认阈值为0</strong>，下面为两种接口的函数声明：</p>
-<pre><code><span class="keyword">template</span> &lt;
-    <span class="keyword">typename</span> image_type
-    &gt;
-<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;rectangle&gt; <span class="keyword">operator</span>() (
-    <span class="keyword">const</span> image_type&amp; img,
-    <span class="keyword">double</span> adjust_threshold = <span class="number">0</span>
-);
-
-<span class="keyword">template</span> &lt;
-    <span class="keyword">typename</span> image_type
-    &gt;
-<span class="function"><span class="keyword">void</span> <span class="title">operator</span><span class="params">()</span> <span class="params">(
-    <span class="keyword">const</span> image_type&amp; img,
-    <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::pair&lt;<span class="keyword">double</span>, rectangle&gt; &gt;&amp; final_dets,
-    <span class="keyword">double</span> adjust_threshold = <span class="number">0</span>
-)</span></span>;
-</code></pre><h2 id="dlib的人脸关键点检测">dlib的人脸关键点检测</h2><p>下载文件<a href="http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2" target="_blank" rel="external">http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2</a>解压后将<code>shape_predictor_68_face_landmarks.dat</code>放到<code>examples/build</code>目录，执行</p>
-<pre><code><span class="tag">webcam_face_pose_ex</span> <span class="tag">shape_predictor_68_face_landmarks</span><span class="class">.dat</span>
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cj0q271xg002ffkfhx576ib4f" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/face/">face</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
     </nav>
   
 </section>
@@ -921,7 +1080,7 @@ detector = dlib.get_frontal_face_detector()
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">21</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">23</span></li></ul>
     </div>
   </div>
 
@@ -930,7 +1089,7 @@ detector = dlib.get_frontal_face_detector()
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
     </div>
   </div>
 
@@ -948,7 +1107,7 @@ detector = dlib.get_frontal_face_detector()
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -958,6 +1117,10 @@ detector = dlib.get_frontal_face_detector()
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/03/29/tensorflow-mydata/">tensorflow学习（十二）加载自定义图像数据集</a>
+          </li>
         
           <li>
             <a href="/2017/03/26/tensorflow-saver/">tensorflow学习（十一）保存和恢复模型</a>
@@ -973,10 +1136,6 @@ detector = dlib.get_frontal_face_detector()
         
           <li>
             <a href="/2016/12/30/cmake-learn/">用CMake搭建一个高质量的C/C++工程</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/28/caffe-add-jni-example/">caffe学习（八）添加模块并JNI移植</a>
           </li>
         
       </ul>

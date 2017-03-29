@@ -3,24 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>tensorflow学习（三）TensorBoard可视化 | 杨现的个人博客</title>
+  <title>杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="利用TensorBoard可以更好的了解深度学习训练过程以及参数的变化。思想是将tensorflow中的图的节点通过summary操作汇总到一起，再通过Ssummary.FileWriter写进protobuf，最后通过TensorBoard展示可视化结果。
-Summary操作tf.summary.scalar(name, values, collections=None)
-tf.summary.">
-<meta property="og:type" content="article">
-<meta property="og:title" content="tensorflow学习（三）TensorBoard可视化">
-<meta property="og:url" content="http://yoursite.com/2016/05/23/tensorflow-tensorboard/index.html">
+  <meta name="description" content="迭代的是人，递归的是神">
+<meta property="og:type" content="website">
+<meta property="og:title" content="杨现的个人博客">
+<meta property="og:url" content="http://yoursite.com/page/5/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="利用TensorBoard可以更好的了解深度学习训练过程以及参数的变化。思想是将tensorflow中的图的节点通过summary操作汇总到一起，再通过Ssummary.FileWriter写进protobuf，最后通过TensorBoard展示可视化结果。
-Summary操作tf.summary.scalar(name, values, collections=None)
-tf.summary.">
-<meta property="og:updated_time" content="2017-03-29T13:46:18.356Z">
+<meta property="og:description" content="迭代的是人，递归的是神">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="tensorflow学习（三）TensorBoard可视化">
-<meta name="twitter:description" content="利用TensorBoard可以更好的了解深度学习训练过程以及参数的变化。思想是将tensorflow中的图的节点通过summary操作汇总到一起，再通过Ssummary.FileWriter写进protobuf，最后通过TensorBoard展示可视化结果。
-Summary操作tf.summary.scalar(name, values, collections=None)
-tf.summary.">
+<meta name="twitter:title" content="杨现的个人博客">
+<meta name="twitter:description" content="迭代的是人，递归的是神">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -70,16 +63,14 @@ tf.summary.">
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-tensorflow-tensorboard" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main">
+  
+    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/05/23/tensorflow-tensorboard/" class="article-date">
-  <time datetime="2016-05-23T14:30:31.000Z" itemprop="datePublished">2016-05-23</time>
+    <a href="/2015/03/17/hello-world/" class="article-date">
+  <time datetime="2015-03-17T13:31:09.205Z" itemprop="datePublished">2015-03-17</time>
 </a>
     
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
   </div>
   <div class="article-inner">
     
@@ -87,8 +78,8 @@ tf.summary.">
       <header class="article-header">
         
   
-    <h1 class="article-title" itemprop="name">
-      tensorflow学习（三）TensorBoard可视化
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/03/17/hello-world/">Hello World</a>
     </h1>
   
 
@@ -96,85 +87,34 @@ tf.summary.">
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>利用TensorBoard可以更好的了解深度学习训练过程以及参数的变化。思想是将tensorflow中的图的节点通过summary操作汇总到一起，再通过Ssummary.FileWriter写进protobuf，最后通过TensorBoard展示可视化结果。</p>
-<h2 id="Summary操作">Summary操作</h2><pre><code>tf<span class="class">.summary</span><span class="class">.scalar</span>(name, values, collections=None)
-tf<span class="class">.summary</span><span class="class">.image</span>(name, tensor, max_outputs=None, collections=None)
-tf<span class="class">.summary</span><span class="class">.histogram</span>(name, values, collections=None)
-tf<span class="class">.summary</span><span class="class">.merge</span>(inputs, collections=None, name=None)
-tf<span class="class">.summary</span><span class="class">.merge_all</span>(key=<span class="string">'summaries'</span>)
-</code></pre><p>其中<code>summary.scalar</code>显示任意一个向量的数据，比如学习率或者loss。<br>其中<code>summary.image</code>可以显示节点中的4维的ndarray的数据。<br>其中<code>summary.histogram</code>用来显示多个数据的分布情况<br>以上创建的节点通过<code>merge_all</code>进行汇总合并。</p>
-<h2 id="SummaryWriter类">SummaryWriter类</h2><p>通过合并汇总后的protobuf对象传递给<code>tf.summary.FileWriter</code>。其参数<code>logdir</code>指定事件存储路径，<code>add_graph</code>方法控制显示的图像。并通过session.run和<code>add_summary</code><br>写入。</p>
-<h2 id="Demo">Demo</h2><p>这里我们用一个loss accuracy做一个summary的TensorBoard的demo，代码如下：</p>
-<pre><code># normal step
-<span class="label">...</span>
-<span class="label">init</span> = tf.global_variables_initializer()
-
-<span class="label">tf.summary.scalar</span>(<span class="string">'loss'</span>, cost)
-<span class="label">tf.summary.scalar</span>(<span class="string">'accuracy'</span>, accuracy)
-<span class="label">merged_summary_op</span> = tf.summary.merge_all()
-
-<span class="label">with</span> tf.Seesion() as sess:
-    sess.run(init)
-
-    summary_writer = tf.summary.FileWriter(<span class="string">'/tmp/logs'</span>)
-    summary_writer.<span class="keyword">add_graph(sess.graph)
-</span>
-    <span class="preprocessor">while</span> step * <span class="keyword">batch_size </span>&lt; training_iters:
-        <span class="keyword">batch_xs, </span><span class="keyword">batch_ys </span>= mnist.train.next_batch(<span class="keyword">batch_size)
-</span>        sess.run(optimizer, feed_dict={x: <span class="keyword">batch_xs, </span>y: <span class="keyword">batch_ys, </span>keep_prob: dropout})
-        <span class="preprocessor">if</span> step % display_step == <span class="number">0</span>:
-            acc = sess.run(accuracy, feed_dict={x: <span class="keyword">batch_xs, </span>y: <span class="keyword">batch_ys, </span>keep_prob: <span class="number">1</span>.})
-            loss = sess.run(cost, feed_dict={x: <span class="keyword">batch_xs, </span>y: <span class="keyword">batch_ys, </span>keep_prob: <span class="number">1</span>.})
-
-            summary_str = sess.run(merged_summary_op, feed_dict={x: <span class="keyword">batch_xs, </span>y: <span class="keyword">batch_ys, </span>keep_prob: <span class="number">1</span>.})
-            summary_writer.<span class="keyword">add_summary(summary_str, </span>step)
-
-        step += <span class="number">1</span>
-</code></pre><h2 id="启动TensorBoard">启动TensorBoard</h2><p>执行命令：</p>
-<pre><code>python tensorflow<span class="regexp">/tensorboard/</span>tensorboard.py --logdir=<span class="regexp">/tmp/</span>logs
-</code></pre><p>或者直接执行</p>
-<pre><code>tensorboard <span class="comment">--logdir=/tmp/logs</span>
-</code></pre><p>然后通过浏览器打开<code>localhost:6006</code>，出来可视化界面后，就简单直观了，enjoy it！</p>
-<h2 id="tips">tips</h2><ul>
-<li>之前我的cnn代码里有valid_prediction，所以画出来的graph有两条分支，不太清晰，所以只留了train一个分支</li>
-<li>多用with，进行包裹，这样才好看，正如官网说的，你的summary代码决定了你的图结构</li>
-<li>不是所有的tensor都有必要记录，但是Variable和placeholder最好都用summary记录一下，也是为了好看</li>
-</ul>
+        <p>Welcome to <a href="http://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="http://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="http://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
+<h2 id="Quick_Start">Quick Start</h2><h3 id="Create_a_new_post">Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+<p>More info: <a href="http://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
+<h3 id="Run_server">Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="http://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
+<h3 id="Generate_static_files">Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="http://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
+<h3 id="Deploy_to_remote_sites">Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="http://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cj0v11zd9000nvsfh3l8ea4u1" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="cj0v11zf6002dvsfhcj3ha67b" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
-
     </footer>
   </div>
   
-    
-<nav id="article-nav">
-  
-    <a href="/2016/05/28/tensorflow-cnn/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          tensorflow学习（四）自己创建CNN网络
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2016/05/19/tensorflow-data/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">tensorflow学习（二）数据接口</div>
-    </a>
-  
-</nav>
-
-  
 </article>
 
+
+  
+  
+    <nav id="page-nav">
+      <a class="extend prev" rel="prev" href="/page/4/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span>
+    </nav>
+  
 </section>
         
           <aside id="sidebar">

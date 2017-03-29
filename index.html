@@ -65,12 +65,155 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-tensorflow-mydata" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/03/29/tensorflow-mydata/" class="article-date">
+  <time datetime="2017-03-29T13:47:50.000Z" itemprop="datePublished">2017-03-29</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/29/tensorflow-mydata/">tensorflow学习（十二）加载自定义图像数据集</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>之前介绍了一种官方的TFRecords序列化方法，感觉过于复杂，这次实践一次自定义数据集的数据加载方案。介绍几个关键的步骤。</p>
+<h2 id="数据读取">数据读取</h2><ul>
+<li>获取数据集的图像文件以及对应标签文件的文件名列表</li>
+<li>讲文件名列表转换为tensor格式</li>
+<li>根据文件名列表读取图像并转换为tensor，并进行预处理</li>
+<li>产生一个batch的数据</li>
+</ul>
+<p>其中前3个方法在<code>ImageReader</code>初始化过程中实现，最后一个步骤在<code>dequeue</code>方法中实现，实例如下：</p>
+<pre><code><span class="function"><span class="keyword">def</span> <span class="title">read_labeled_image_list</span><span class="params">(data_dir, data_list)</span>:</span>
+    f = open(data_list, <span class="string">'r'</span>)
+    images = []
+    labels = []
+    <span class="keyword">for</span> line <span class="keyword">in</span> f:
+        image, label = line.strip(<span class="string">"\n"</span>).split(<span class="string">' '</span>)
+        images.append(data_dir + image)
+        labels.append(int(label))
+    <span class="keyword">return</span> images, labels
+
+<span class="function"><span class="keyword">def</span> <span class="title">read_images_from_disk</span><span class="params">(input_queue, input_size, random_scale)</span>:</span> 
+    img_contents = tf.read_file(input_queue[<span class="number">0</span>])
+    img = tf.image.decode_jpeg(img_contents, channels=<span class="number">3</span>)
+    <span class="keyword">if</span> input_size <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:
+        h = input_size
+        w = input_size
+        <span class="keyword">if</span> random_scale:
+            scale = tf.random_uniform([<span class="number">1</span>], minval=<span class="number">0.75</span>, maxval=<span class="number">1.25</span>, dtype=tf.float32, seed=<span class="keyword">None</span>)
+            h_new = tf.to_int32(tf.mul(tf.to_float(tf.shape(img)[<span class="number">0</span>]), scale))
+            w_new = tf.to_int32(tf.mul(tf.to_float(tf.shape(img)[<span class="number">1</span>]), scale))
+            new_shape = tf.squeeze(tf.pack([h_new, w_new]), squeeze_dims=[<span class="number">1</span>])
+            img = tf.image.resize_images(img, new_shape)
+        img = tf.image.resize_image_with_crop_or_pad(img, h, w)
+    <span class="comment"># RGB -&gt; BGR.</span>
+    img_r, img_g, img_b = tf.split(split_dim=<span class="number">2</span>, num_split=<span class="number">3</span>, value=img)
+    img = tf.cast(tf.concat(<span class="number">2</span>, [img_b, img_g, img_r]), dtype=tf.float32)
+    <span class="comment"># Extract mean.</span>
+    img -= np.array((<span class="number">104.008</span>,<span class="number">116.669</span>,<span class="number">122.675</span>), dtype=np.float32)
+
+    label = tf.cast(input_queue[<span class="number">1</span>], tf.int32)
+    <span class="keyword">return</span> img, label
+
+<span class="class"><span class="keyword">class</span> <span class="title">ImageReader</span><span class="params">(object)</span>:</span>
+    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, data_dir, data_list, input_size, random_scale)</span>:</span>
+        self.data_dir = data_dir
+        self.data_list = data_list
+        self.input_size = input_size
+
+        self.image_list, self.label_list = read_labeled_image_list(self.data_dir, self.data_list)
+        self.images = tf.convert_to_tensor(self.image_list, dtype=tf.string)
+        self.labels = tf.convert_to_tensor(self.label_list, dtype=tf.string)
+        self.queue = tf.train.slice_input_producer([self.images, self.labels],
+                                                   shuffle=input_size <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>) <span class="comment"># Not shuffling if it is val.</span>
+        self.image, self.label = read_images_from_disk(self.queue, self.input_size, random_scale) 
+
+    <span class="function"><span class="keyword">def</span> <span class="title">dequeue</span><span class="params">(self, num_elements)</span>:</span>
+        image_batch, label_batch = tf.train.batch([self.image, self.label], num_elements)
+        <span class="keyword">return</span> image_batch, label_batch
+</code></pre><h2 id="线程和队列">线程和队列</h2><p><code>Coordinator</code>类负责多个线程的同步工作和同步终止，<code>tf.train.start_queue_runners</code>负责创建一组线程。推荐的使用模版</p>
+<pre><code>init_op = tf.global_variables_initializer()
+sess = tf.Session()
+sess.run(init_op)
+
+# <span class="operator"><span class="keyword">Start</span> <span class="keyword">input</span> <span class="keyword">enqueue</span> threads.
+coord = tf.train.Coordinator()
+threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+
+try:
+    <span class="keyword">while</span> <span class="keyword">not</span> coord.should_stop():
+        sess.run(train_op)
+<span class="keyword">except</span> tf.<span class="keyword">errors</span>.OutOfRangeError:
+    print <span class="string">'Done training -- epoch limit reached'</span>
+finally:
+    coord.request_stop()
+
+coord.<span class="keyword">join</span>(threads)
+sess.<span class="keyword">close</span>()</span>
+</code></pre><h2 id="调用实例">调用实例</h2><pre><code><span class="comment"># image_batch, label_batch = tf.train.batch([image, label], 32)</span>
+<span class="constant">reader</span> = ImageReader()
+image_batch, label_batch = reader.dequeue(32)
+<span class="constant">loss</span> = loss = tf.nn.softmax_cross_entropy_with_logits(prediction, label_batch)
+
+<span class="constant">init_op</span> = tf.global_variables_initializer()
+<span class="constant">sess</span> = tf.Session()
+sess.run(init_op)
+
+<span class="constant">coord</span> = tf.train.Coordinator()
+<span class="constant">threads</span> = tf.train.start_queue_runners(sess=sess, coord=coord)
+
+<span class="title">try:</span>
+    for step in range(args.num_steps):
+        loss_value = sess.run(loss)
+except tf.errors.OutOfRangeError:
+    print 'Done training -- epoch limit reached'
+<span class="title">finally:</span>
+    coord.request_stop()
+
+coord.join(threads)
+sess.close()
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/03/29/tensorflow-mydata/" data-id="cj0v11zdf000tvsfh5jeifq5c" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-tensorflow-saver" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/03/26/tensorflow-saver/" class="article-date">
   <time datetime="2017-03-26T02:04:50.000Z" itemprop="datePublished">2017-03-26</time>
 </a>
     
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
   </div>
   <div class="article-inner">
     
@@ -146,9 +289,11 @@ saver.<span class="function"><span class="title">restore</span><span class="para
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/03/26/tensorflow-saver/" data-id="cj0q271v8000qfkfhte42vjp0" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/03/26/tensorflow-saver/" data-id="cj0v11zdc000qvsfh4lhgh0ki" class="article-share-link">Share</a>
       
       
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
     </footer>
   </div>
   
@@ -197,7 +342,7 @@ tf_upgrade.py --intree <span class="variable">&lt;input_dir&gt;</span> -outtree 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/02/27/tensorflow-update/" data-id="cj0q271us000kfkfhnhgtsjjh" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/02/27/tensorflow-update/" data-id="cj0v11zct000kvsfh28txq946" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -262,7 +407,7 @@ pip <span class="keyword">install</span> tensorflow    <span class="comment"># c
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/02/19/tensorflow1-0-install/" data-id="cj0q271us000gfkfhjmmn5oq0" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/02/19/tensorflow1-0-install/" data-id="cj0v11zct000gvsfhzhk041js" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -335,7 +480,7 @@ pip <span class="keyword">install</span> tensorflow    <span class="comment"># c
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/12/30/cmake-learn/" data-id="cj0q271xk002wfkfhbtv9im3i" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/12/30/cmake-learn/" data-id="cj0v11zfl0031vsfhgodp8bun" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
@@ -533,7 +678,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/08/28/caffe-add-jni-example/" data-id="cj0q271y0003lfkfhdfq33mnh" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/08/28/caffe-add-jni-example/" data-id="cj0v11zgn003qvsfh46fcw16m" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -581,7 +726,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/22/tensorflow-modelresource/" data-id="cj0q271v8000rfkfhsw977r7y" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/22/tensorflow-modelresource/" data-id="cj0v11zdf000wvsfhausou6ab" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -628,7 +773,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="cj0q271xk002zfkfhcl0h2je4" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="cj0v11zg20034vsfhnyqn8kzs" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -691,7 +836,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="cj0q271wy0029fkfhkiksnrbx" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="cj0v11zf6002evsfhcuve89x9" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -817,7 +962,7 @@ images = re.<span class="function"><span class="title">findall</span><span class
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cj0q271w3001hfkfhrqwez8qc" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cj0v11zea001mvsfhlc0uqsg2" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -829,66 +974,9 @@ images = re.<span class="function"><span class="title">findall</span><span class
 
 
   
-    <article id="post-tensorflow-caffe2tensorflow" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/06/14/tensorflow-caffe2tensorflow/" class="article-date">
-  <time datetime="2016-06-14T13:28:21.000Z" itemprop="datePublished">2016-06-14</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/06/14/tensorflow-caffe2tensorflow/">tensorflow学习（七）caffe模型训练结果转换为tensorflow格式</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>tensorflow官方认定的转换工具为<a href="https://github.com/ethereon/caffe-tensorflow" target="_blank" rel="external">https://github.com/ethereon/caffe-tensorflow</a>。我们尝试一下转换一个caffe训练的图像识别模型</p>
-<h2 id="caffe-tensorflow安装">caffe-tensorflow安装</h2><pre><code>git clone <span class="string">https:</span><span class="comment">//github.com/ethereon/caffe-tensorflow</span>
-</code></pre><h2 id="生成模型训练代码">生成模型训练代码</h2><p>利用<code>convert.py</code>可以将caffe网络定义的deploy.prototxt文件转换为tensorflow的python实现，不过这种转换之后的模型代码还需要import kaffe模块，虽然<code>kaffe.tensorflow.Network</code>没有其他依赖，可以单独加载到新代码中即可使用，方便移植，我还是更倾向于转换之后参考这个代码重新写一份。调用方式如下：</p>
-<pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --code-output-path=./myNetTensorflow.py
-</code></pre><h2 id="转换训练好的模型">转换训练好的模型</h2><p>也可以将caffemodel的weights和biases参数读取出来转换为npy的格式，并通过<code>numpy.load()</code>读取数据。转换数据的脚本如下：</p>
-<pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --caffemodel=./mynet<span class="class">.caffemodel</span> --data-output-path=./myNetTensorflow.npy
-</code></pre><p>由于转换过来的npy数据的类型比奇怪，是0-d array，要将其取出来需要如下读取方式</p>
-<pre><code>params = np.<span class="function"><span class="title">load</span><span class="params">()</span></span>
-params = params.<span class="function"><span class="title">item</span><span class="params">()</span></span>
-</code></pre><h2 id="注意事项">注意事项</h2><ul>
-<li><p>caffe的模型应该是较新的版本，才能转换</p>
-</li>
-<li><p>并不是所有的caffe模型都能转换为tensorflow，比如caffe的padding支持很多方式，tensorflow目前只支持<code>SAME</code>和<code>VALID</code></p>
-</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cj0q271vn0019fkfheb44272b" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
   
 </section>
@@ -899,7 +987,7 @@ params = params.<span class="function"><span class="title">item</span><span clas
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">21</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">23</span></li></ul>
     </div>
   </div>
 
@@ -908,7 +996,7 @@ params = params.<span class="function"><span class="title">item</span><span clas
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
     </div>
   </div>
 
@@ -926,7 +1014,7 @@ params = params.<span class="function"><span class="title">item</span><span clas
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -936,6 +1024,10 @@ params = params.<span class="function"><span class="title">item</span><span clas
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/03/29/tensorflow-mydata/">tensorflow学习（十二）加载自定义图像数据集</a>
+          </li>
         
           <li>
             <a href="/2017/03/26/tensorflow-saver/">tensorflow学习（十一）保存和恢复模型</a>
@@ -951,10 +1043,6 @@ params = params.<span class="function"><span class="title">item</span><span clas
         
           <li>
             <a href="/2016/12/30/cmake-learn/">用CMake搭建一个高质量的C/C++工程</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/28/caffe-add-jni-example/">caffe学习（八）添加模块并JNI移植</a>
           </li>
         
       </ul>
