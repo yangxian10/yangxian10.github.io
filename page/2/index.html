@@ -65,6 +65,132 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-python-spider" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/22/python-spider/" class="article-date">
+  <time datetime="2016-06-22T13:02:36.000Z" itemprop="datePublished">2016-06-22</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/study/">study</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/22/python-spider/">python爬虫入门笔记</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="写在前面">写在前面</h1><p>爬虫其实内容的爬取不是最为困难的地方，真正难点在于如何混在群众之中不被发现。由于我在爬虫界还处于幼儿园水平，所以简单写几个脚本爬点美女图片还勉强，想跟亚一爬谈笑风生就不指望了。</p>
+<h1 id="urllib基础">urllib基础</h1><h3 id="html抓取">html抓取</h3><pre><code>import urllib2
+
+request = urllib2.<span class="function"><span class="title">Request</span><span class="params">(<span class="string">"http://www.baidu.com"</span>)</span></span>
+response = urllib2.<span class="function"><span class="title">urlopen</span><span class="params">(request)</span></span>
+data = response.<span class="function"><span class="title">read</span><span class="params">()</span></span>
+</code></pre><p>data就得到了百度主页的html信息。</p>
+<h3 id="html解析">html解析</h3><p>主要就是用<code>re</code>模块来正则匹配</p>
+<pre><code>import re
+
+#返回pattern对象
+re.<span class="function"><span class="title">compile</span><span class="params">(string[,flag])</span></span>  
+#以下为匹配所用函数
+re.<span class="function"><span class="title">match</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">search</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">split</span><span class="params">(pattern, string[, maxsplit])</span></span>
+re.<span class="function"><span class="title">findall</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">finditer</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">sub</span><span class="params">(pattern, repl, string[, count])</span></span>
+re.<span class="function"><span class="title">subn</span><span class="params">(pattern, repl, string[, count])</span></span>
+</code></pre><p>比较常用的findall，用列表的形式返回全部能匹配的子串。</p>
+<h1 id="反爬伪装">反爬伪装</h1><p>现在主流的反爬策略基本基于三个层面：</p>
+<ul>
+<li>IP层，同一ip访问过多会被封杀</li>
+<li>HTTP协议层，判断是否真实的浏览器行为</li>
+<li>行为层，判断是否真实用户行为<br>上述的程序通常在<code>response.read()</code>的时候会报错10054、10060之类的错误。</li>
+</ul>
+<h3 id="伪装浏览器Header">伪装浏览器Header</h3><p>用chrome打开浏览器，调试模式，然后打开Network模块，选择其中一个页面，打开Headers页面，其中最后的agent就是请求的身份，不填写身份的话，很容易被反爬策略封杀掉。</p>
+<pre><code>user_agent = <span class="comment">'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'</span>
+headers = {<span class="comment">'User-Agent' : user_agent}</span>
+#    <span class="built_in">request</span> = urllib2.<span class="built_in">Request</span>(url, headers)
+<span class="built_in">request</span> = urllib2.<span class="built_in">Request</span>(url)
+<span class="built_in">request</span>.add_header(<span class="comment">'User-Agent', user_agent)</span>
+<span class="built_in">response</span> = urllib2.urlopen(<span class="built_in">request</span>)
+page = <span class="built_in">response</span>.read()
+</code></pre><p>除此之外，有些反爬策略还有反盗链的设计，需要在headers中传入referer</p>
+<pre><code>request.<span class="function"><span class="title">add_header</span><span class="params">(<span class="string">'Referer'</span>, <span class="string">'http://www.taobao.com'</span>)</span></span>
+</code></pre><h3 id="proxy代理设置">proxy代理设置</h3><p>如果ip访问次数过多也会被封杀，采用代理服务器的方法来定期更换代理。</p>
+<pre><code>enable_proxy = True
+proxy_handler = urllib2.<span class="function"><span class="title">ProxyHandler</span><span class="params">({<span class="string">"http"</span> : <span class="string">'http://192.168.0.1:8080'</span>})</span></span>
+null_proxy_handler = urllib2.<span class="function"><span class="title">ProxyHandler</span><span class="params">({})</span></span>
+<span class="keyword">if</span> enable_proxy:
+    opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(proxy_handler)</span></span>
+<span class="keyword">else</span>:
+    opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(null_proxy_handler)</span></span>
+urllib2.<span class="function"><span class="title">install_opener</span><span class="params">(opener)</span></span>
+</code></pre><h3 id="超时设置Timeout">超时设置Timeout</h3><p>在urlopen的时候可以通过设置timeout参数解决网站相应过慢造成的影响。</p>
+<pre><code>response = urllib2.<span class="function"><span class="title">urlopen</span><span class="params">(<span class="string">'http://www.baidu.com'</span>, timeout=<span class="number">10</span>)</span></span>
+</code></pre><h3 id="发送数据">发送数据</h3><p>用来实现和浏览器之间的行为交互</p>
+<pre><code><span class="keyword">data</span> = urllib.parse.urlencode({<span class="string">"act"</span>: <span class="string">"login"</span>, <span class="string">"email"</span>: <span class="string">"xxxxx@qq.com"</span>, <span class="string">"password"</span>: <span class="string">"123456"</span>}).encode(<span class="string">'utf-8'</span>)
+request1 = urllib2.Request(url, <span class="keyword">data</span>=<span class="keyword">data</span>)           <span class="comment"># POST方法</span>
+request2 = urllib2.Request(url+<span class="string">"?%s"</span> % <span class="keyword">data</span>)         <span class="comment"># GET方法</span>
+response = urllib2.urlopen(request1)
+</code></pre><h3 id="常用超时异常">常用超时异常</h3><pre><code>try:
+    urllib2.<span class="function"><span class="title">urlopen</span><span class="params">(request)</span></span>
+except urllib2<span class="class">.HTTPError</span> as e:
+    <span class="function"><span class="title">print</span><span class="params">(e.code, e.reason)</span></span>
+except urllib2<span class="class">.URLError</span> as e:
+    <span class="function"><span class="title">print</span><span class="params">(e.errno, e.reason)</span></span>
+</code></pre><h3 id="服务器cookie检查">服务器cookie检查</h3><pre><code>import <span class="keyword">http</span>.cookiejar
+cookie_jar = <span class="keyword">http</span>.cookiejar.CookieJar()
+cookie_jar_handler = urllib.request.HTTPCookieProcessor(cookiejar=cookie_jar)
+opener = urllib2.build_opener(cookie_jar_handler)        <span class="comment"># add_handler</span>
+response = opener.<span class="built_in">open</span>(url)
+</code></pre><h3 id="获取cookie">获取cookie</h3><p>两种方式，1）直接贴到headers中</p>
+<pre><code>request = urllib2.<span class="function"><span class="title">Request</span><span class="params">(url)</span></span>
+request.<span class="function"><span class="title">add_header</span><span class="params">(<span class="string">'Cookie'</span>, <span class="string">"PHPSESSID=btqkg9amjrtoeev8coq0m78396; USERINFO=n6nxTHTY%2BJA39z6CpNB4eKN8f0KsYLjAQTwPe%2BhLHLruEbjaeh4ulhWAS5RysUM%2B; "</span>)</span></span>
+</code></pre><p>2）构建cookie</p>
+<pre><code>import http<span class="class">.cookiejar</span>
+cookie = http<span class="class">.cookiejar</span><span class="class">.Cookie</span>(name=<span class="string">"xx"</span>, value=<span class="string">"xx"</span>, domain=<span class="string">"xx"</span>, ...)
+cookie_jar = http<span class="class">.cookiejar</span><span class="class">.CookieJar</span>()
+cookie_jar.<span class="function"><span class="title">set_cookie</span><span class="params">(cookie)</span></span>
+cookie_jar_handler = urllib<span class="class">.request</span><span class="class">.HTTPCookieProcessor</span>(cookiejar=cookie_jar)
+opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(cookie_jar_handler)</span></span>
+response = opener.<span class="function"><span class="title">open</span><span class="params">(url)</span></span>
+</code></pre><h3 id="HTTP身份认证">HTTP身份认证</h3><pre><code>password_mgr = urllib2.<span class="function"><span class="title">HTTPPasswordMgrWithDefaultRealm</span><span class="params">()</span></span>
+password_mgr.<span class="function"><span class="title">add_password</span><span class="params">(realm=None, uri=url, user=<span class="string">'username'</span>, passwd=<span class="string">'password'</span>)</span></span>
+handler = urllib2.<span class="function"><span class="title">HTTPBasicAuthHandler</span><span class="params">(password_mgr)</span></span>
+opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(handler)</span></span>
+response = opener.<span class="function"><span class="title">open</span><span class="params">(url)</span></span>
+</code></pre><h1 id="简易图片爬虫">简易图片爬虫</h1><p>关键的就是解析的时候匹配图片内容，得到了图片链接的话，用wget或者其他模块都能保存图片</p>
+<pre><code>patternImg = re.<span class="function"><span class="title">compile</span><span class="params">(<span class="string">'&lt;img.*?src="(.*?)"'</span>,re.S)</span></span>
+images = re.<span class="function"><span class="title">findall</span><span class="params">(patternImg, url_data)</span></span>
+</code></pre><h1 id="参考资料与推荐文章">参考资料与推荐文章</h1><p><a href="http://cuiqingcai.com/" target="_blank" rel="external">http://cuiqingcai.com/</a><br><a href="http://mp.weixin.qq.com/s?__biz=MjM5ODIzNDQ3Mw==&amp;mid=402180172&amp;idx=1&amp;sn=1db24327a15cea8fab6907069fbaabbf&amp;scene=0#wechat_redirect" target="_blank" rel="external">数据时代的反爬虫绝技</a><br><a href="https://zhuanlan.zhihu.com/p/22982208" target="_blank" rel="external">一个很“水”的Python爬虫入门代码文件</a><br><a href="https://zhuanlan.zhihu.com/p/23064000" target="_blank" rel="external">“史上最详细”的Python模拟登录新浪微博流程</a><br><a href="https://luzhijun.github.io/2016/10/29/%E5%BE%AE%E5%8D%9A%E8%AF%9D%E9%A2%98%E7%88%AC%E5%8F%96%E4%B8%8E%E5%AD%98%E5%82%A8%E5%88%86%E6%9E%90/" target="_blank" rel="external">微博话题爬取与存储分析</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cj1t09rf5001p8sfhmhmzc0h5" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-tensorflow-caffe2tensorflow" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/06/14/tensorflow-caffe2tensorflow/" class="article-date">
@@ -110,7 +236,7 @@ params = params.<span class="function"><span class="title">item</span><span clas
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cj0v11zdv001evsfhtke9irhs" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cj1t09rf2001h8sfhv2f86d2a" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -176,7 +302,7 @@ label_n
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cj0v11zdv0012vsfhw50m8drl" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cj1t09rej00128sfhn07icj3j" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -443,7 +569,7 @@ init = tf.initialize_all_variables()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-captcha/" data-id="cj0v11zdv001bvsfh1wxcpany" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-captcha/" data-id="cj1t09rez001e8sfh2zx6llyf" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -695,7 +821,7 @@ init = tf.initialize_all_variables()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/28/tensorflow-cnn/" data-id="cj0v11zdv0018vsfhve8v4hjg" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/28/tensorflow-cnn/" data-id="cj1t09rej001b8sfhcdasacbs" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -781,7 +907,7 @@ tf<span class="class">.summary</span><span class="class">.merge_all</span>(key=<
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cj0v11zd9000nvsfh3l8ea4u1" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cj1t09rdo000n8sfhtfhyb2ap" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -922,7 +1048,7 @@ saver.<span class="function"><span class="title">save</span><span class="params"
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cj0v11zdv0015vsfh5ykqcozl" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cj1t09rej00188sfhglgc1o05" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1026,7 +1152,7 @@ pip install /tmp/tensorflow_pkg/tensorflow-<span class="number">0.10</span>.<spa
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cj0v11zdf000zvsfhitx7jdja" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cj1t09re4000z8sfhoxdfhgij" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1120,7 +1246,7 @@ n = p1.<span class="function"><span class="title">query</span><span class="param
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cj0v11zeq001tvsfha9u3do6x" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cj1t09rf5001w8sfhrmovlg0p" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nnsearch/">nnsearch</a></li></ul>
@@ -1190,53 +1316,10 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cj0v11zfl002tvsfhlbtwzfsz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cj1t09rgg002w8sfhw4bso6op" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/visualization/">visualization</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-good-site" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/03/30/good-site/" class="article-date">
-  <time datetime="2016-03-30T11:18:48.000Z" itemprop="datePublished">2016-03-30</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/life/">life</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/30/good-site/">good_site</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>在线简历生成网站<a href="https://cvmkr.com/" target="_blank" rel="external">https://cvmkr.com/</a><br>翻墙路由器的原理与实现<a href="http://drops.wooyun.org/papers/10177" target="_blank" rel="external">http://drops.wooyun.org/papers/10177</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cj0v11zf6002hvsfh1esq65ov" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
 
     </footer>
   </div>
@@ -1258,7 +1341,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">23</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">24</span></li></ul>
     </div>
   </div>
 
@@ -1267,7 +1350,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">12</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
     </div>
   </div>
 
@@ -1285,7 +1368,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -1295,6 +1378,10 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/04/22/tensorflow-gpu/">tensorflow学习（十三）GPU使用技巧整理</a>
+          </li>
         
           <li>
             <a href="/2017/03/29/tensorflow-mydata/">tensorflow学习（十二）加载自定义图像数据集</a>
@@ -1310,10 +1397,6 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
         
           <li>
             <a href="/2017/02/19/tensorflow1-0-install/">tensorflow学习（九）1.0正式版安装配置</a>
-          </li>
-        
-          <li>
-            <a href="/2016/12/30/cmake-learn/">用CMake搭建一个高质量的C/C++工程</a>
           </li>
         
       </ul>
