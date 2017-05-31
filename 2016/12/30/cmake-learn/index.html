@@ -29,7 +29,7 @@ SET(VAR">
 PROJECT(projectname [CXX] [C])
 显式定义变量
 SET(VAR">
-<meta property="og:updated_time" content="2017-01-14T00:09:29.019Z">
+<meta property="og:updated_time" content="2017-05-31T14:18:56.040Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="用CMake搭建一个高质量的C/C++工程">
 <meta name="twitter:description" content="准备工作
@@ -138,10 +138,21 @@ SET(VAR">
 <pre><code><span class="function"><span class="title">ADD_SUBDIRECTORY</span><span class="params">(source_dir [binary_dir])</span></span>
 </code></pre><p>定义工程头文件目录</p>
 <pre><code><span class="function">INCLUDE_DIRECTORIES</span>(<span class="attr_selector">[AFTER|BEFORE]</span><span class="attr_selector">[SYSTEM]</span> ${INC_DIR})
-</code></pre><p>为目标添加共享库</p>
-<pre><code><span class="keyword">LINK_DIRECTORIES</span>(<span class="envvar">${LIB_DIR}</span>)  <span class="comment"># 工程共享库搜索路径</span>
-<span class="keyword">TARGET_LINK_LIBRARIES</span>(target library1 &lt;debug | optimized&gt; library2 ...)
-</code></pre><h2 id="常用环境变量">常用环境变量</h2><pre><code><span class="constant">PROJECT_BINARY_DIR</span>  <span class="comment"># 工程生成目录（通常是当前目录）</span>
+</code></pre><h2 id="链接动态库">链接动态库</h2><p>链接动态库名称（gcc中的-l）</p>
+<pre><code><span class="function"><span class="title">TARGET_LINK_LIBRARIES</span><span class="params">(target library1 &lt;debug | optimized&gt; library2 ...)</span></span>
+</code></pre><p>链接时路径ling-time path（gcc中的-L）</p>
+<pre><code><span class="function"><span class="title">LINK_DIRECTORIES</span><span class="params">(${LIB_DIR})</span></span>
+</code></pre><p>运行时路径run-time path（gcc中的-rpath）</p>
+<pre><code><span class="keyword">set</span>(CMAKE_SKIP_BUILD_RPATH <span class="keyword">FALSE</span>)    <span class="comment"># 决定编译时是否添加rpath信息</span>
+<span class="keyword">set</span>(CMAKE_BUILD_WITH_INSTALL_RPATH <span class="keyword">TRUE</span>)    <span class="comment"># 使编译安装使用同一rpath</span>
+<span class="keyword">set</span>(CMAKE_INSTALL_RPATH $ORIGIN) <span class="comment"># ORIGIN为当前目录，很有用的一个宏</span>
+<span class="keyword">set</span>(CMAKE_INSTALL_RPATH_USE_LINK_PATH <span class="keyword">FALSE</span>) <span class="comment"># 设为FALSE可以将编译和运行时的路径分开</span>
+</code></pre><h3 id="查看链接库信息命令">查看链接库信息命令</h3><ul>
+<li><strong>ldd</strong>列出动态库依赖信息</li>
+<li><strong>readelf -d</strong>查看动态库的信息</li>
+<li><strong>file</strong>查看文件信息</li>
+</ul>
+<h2 id="常用环境变量">常用环境变量</h2><pre><code><span class="constant">PROJECT_BINARY_DIR</span>  <span class="comment"># 工程生成目录（通常是当前目录）</span>
 <span class="constant">PROJECT_SOURCE_DIR</span>  <span class="comment"># 工程根目录</span>
 <span class="constant">SET</span>(<span class="constant">EXECUTABLE_OUTPUT_PATH</span> <span class="variable">${</span><span class="constant">PROJECT_BINARY_DIR</span>}/bin)
 <span class="constant">SET</span>(<span class="constant">LIBRARY_OUTPUT_PATH</span> <span class="variable">${</span><span class="constant">PROJECT_BINARY_DIR</span>}/<span class="class"><span class="keyword">lib</span>)</span>
