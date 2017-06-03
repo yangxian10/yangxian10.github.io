@@ -65,6 +65,116 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-caffe-yolo" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/07/13/caffe-yolo/" class="article-date">
+  <time datetime="2016-07-13T14:29:26.000Z" itemprop="datePublished">2016-07-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/07/13/caffe-yolo/">caffe学习（七）caffe-YOLO模型</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>原本YOLO是一个darknet的独立代码，网上有些大神把其网络用caffe实现了。贴一个传送门<a href="https://github.com/xingwangsfu/caffe-yolo" target="_blank" rel="external">https://github.com/xingwangsfu/caffe-yolo</a>。这里参考这个代码实现一下，没有训练代码，需要将darknet训练好的参数转换成caffe格式。</p>
+<h2 id="修改deploy">修改deploy</h2><p>要把<code>yolo_deploy.prototxt</code>里的<code>fc26</code>层中的<code>num_output</code>参数改为实际需要的。</p>
+<h2 id="参数模型格式转换">参数模型格式转换</h2><p>用darknet训练好的网络参数通过<code>create_yolo_caffemodel.py</code>用caffe读进来。darknet的权重保存格式很简单，前4个数是int型，分别表示major、minor、revision和net.seen，第五个参数开始就是一个一维浮点数组，存成二进制文件。读入之后，根据网络结构得到net的各层weights和bias的size大小，并按顺序传入。调用格式如下：</p>
+<pre><code>python create_yolo_caffemodel<span class="class">.py</span> -m ./prototxt/yolo_deploy<span class="class">.prototxt</span> -w yolo_final<span class="class">.weights</span> -o yolo.caffemodel
+</code></pre><h2 id="YOLO检测">YOLO检测</h2><pre><code>python yolo_main<span class="class">.py</span> -m ./prototxt/yolo_deploy<span class="class">.prototxt</span> -w yolo<span class="class">.caffemodel</span> -<span class="tag">i</span> xxx.jpg
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="cj3hb067h003a3cfhltpq1sss" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-guides-japan" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/07/06/guides-japan/" class="article-date">
+  <time datetime="2016-07-06T11:54:34.000Z" itemprop="datePublished">2016-07-06</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/life/">life</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/07/06/guides-japan/">日本攻略</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="调研">调研</h2><p>日本旅游局官网<a href="http://www.welcome2japan.cn/" target="_blank" rel="external">http://www.welcome2japan.cn/</a>，介绍的还挺好的，比天朝的官方网站做的高到不知道哪里去了</p>
+<h2 id="出国准备注意事项">出国准备注意事项</h2><ul>
+<li>签证：注意单次签证虽然给15天，建议不要排的太满，10天以内即可。</li>
+<li>签证申请：<strong>必须通过旅行社</strong>，单次签，年收入10万以上，按旅行社的要求即可。签证搞到后，会给一份<strong>归国报告书</strong>，回国办理登记手续的时候给柜台盖章，寄给旅行社。</li>
+<li>免费wifi，下载Japan Connected-Free Wifi的app</li>
+</ul>
+<h2 id="景点关键词">景点关键词</h2><ul>
+<li>京都：寺庙</li>
+<li>大阪：环球影城</li>
+<li>东京：迪斯尼</li>
+</ul>
+<h2 id="现金">现金</h2><p>按每日每人1万日元准备吧~</p>
+<h2 id="购物">购物</h2><p>超过1万日元消费可以在店内退税，带一张银联卡，便宜，好用</p>
+<h1 id="东京攻略">东京攻略</h1><ul>
+<li>公交卡：PASMO或者西瓜卡（SUICA）</li>
+<li>皇家御所<a href="http://sankan.kunaicho.go.jp/" target="_blank" rel="external">http://sankan.kunaicho.go.jp/</a></li>
+<li>宫崎骏吉卜力美术馆<a href="http://www.lawson.co.jp/ghibli/museum/ticket/" target="_blank" rel="external">http://www.lawson.co.jp/ghibli/museum/ticket/</a></li>
+<li>公园：新宿御苑、浅草寺、上野公园</li>
+<li>周边小镇：镰仓、箱根</li>
+<li>地标：东京铁塔、东京天空树</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="cj3hb0627002k3cfh03kd905v" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-python-spider" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/06/22/python-spider/" class="article-date">
@@ -179,7 +289,7 @@ images = re.<span class="function"><span class="title">findall</span><span class
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cj1t09rf5001p8sfhmhmzc0h5" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cj3hb05yy001p3cfhubaosjp5" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -236,7 +346,7 @@ params = params.<span class="function"><span class="title">item</span><span clas
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cj1t09rf2001h8sfhv2f86d2a" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cj3hb05y0001h3cfhi7byo9fr" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -302,7 +412,7 @@ label_n
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cj1t09rej00128sfhn07icj3j" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cj3hb05vl00123cfh54em42og" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -569,7 +679,7 @@ init = tf.initialize_all_variables()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-captcha/" data-id="cj1t09rez001e8sfh2zx6llyf" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-captcha/" data-id="cj3hb05xb001e3cfhdcg180hw" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -821,7 +931,7 @@ init = tf.initialize_all_variables()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/28/tensorflow-cnn/" data-id="cj1t09rej001b8sfhcdasacbs" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/28/tensorflow-cnn/" data-id="cj3hb05wp001b3cfh818ewyzp" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -907,7 +1017,7 @@ tf<span class="class">.summary</span><span class="class">.merge_all</span>(key=<
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cj1t09rdo000n8sfhtfhyb2ap" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cj3hb05u2000n3cfhsryrqe5y" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1048,7 +1158,7 @@ saver.<span class="function"><span class="title">save</span><span class="params"
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cj1t09rej00188sfhglgc1o05" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cj3hb05vt00183cfhd3f6oyya" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1152,174 +1262,10 @@ pip install /tmp/tensorflow_pkg/tensorflow-<span class="number">0.10</span>.<spa
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cj1t09re4000z8sfhoxdfhgij" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cj3hb05v9000z3cfhi0khc2q2" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-panns-nnsearch" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/04/11/panns-nnsearch/" class="article-date">
-  <time datetime="2016-04-11T13:01:36.000Z" itemprop="datePublished">2016-04-11</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/04/11/panns-nnsearch/">高维海量数据快速检索库</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="falconn">falconn</h1><p>这个库使用的是局部敏感哈希构建索引。效率较高。</p>
-<h3 id="python实现">python实现</h3><p>官方的api文档<a href="https://falconn-lib.org/pdoc/falconn/" target="_blank" rel="external">https://falconn-lib.org/pdoc/falconn/</a>其实非常详细，这里把其中关键的地方再提炼一下。<br>安装非常简单</p>
-<pre><code>pip <span class="keyword">install</span> falconn
-</code></pre><p>数据准备，需要将所有的索引特征存储到一个numpy的二维array中，其中每行代表一个数据，行数表示数据点数，列表示特征维度。注意，最好把数据转换为float32数据类型，提高算法性能，并将数据归一化减去均值，提高算法性能。具体操作如下</p>
-<pre><code>dataset = dataset.<span class="function"><span class="title">astype</span><span class="params">(numpy.float32)</span></span>
-dataset -= numpy.<span class="function"><span class="title">mean</span><span class="params">(dataset, axis=<span class="number">0</span>)</span></span>
-</code></pre><p>构建哈希超参数，将数据维度和点数传入<code>get_default_parameters</code>获得合适的超参数，得到的超参数可以通过手动微调或者<code>compute_number_of_hash_functions</code>来对其中细节进行微调。</p>
-<pre><code>num_points, dim = dataset<span class="class">.shape</span>
-parms = falconn.<span class="function"><span class="title">get_default_parameters</span><span class="params">(num_points, dim)</span></span>
-falconn.<span class="function"><span class="title">compute_number_of_hash_functions</span><span class="params">(<span class="number">7</span>, parms)</span></span>
-</code></pre><p>创建索引实例<code>LSHIndex</code>，并通过方法<code>setup</code>构建索引。</p>
-<pre><code>lsh_index = falconn.<span class="function"><span class="title">LSHIndex</span><span class="params">(parms)</span></span>
-lsh_index.<span class="function"><span class="title">setup</span><span class="params">(dataset)</span></span>
-</code></pre><p>查询的函数有很多，可以根据需要进行选择</p>
-<pre><code><span class="function"><span class="title">find_k_nearest_neighbors</span><span class="params">()</span></span>
-<span class="function"><span class="title">find_near_neighbors</span><span class="params">()</span></span>
-<span class="function"><span class="title">find_nearest_neighbor</span><span class="params">()</span></span>
-<span class="function"><span class="title">get_candidates_with_duplicates</span><span class="params">()</span></span>
-<span class="function"><span class="title">get_unique_candidates</span><span class="params">()</span></span>
-</code></pre><h3 id="C++实现">C++实现</h3><p>TBD</p>
-<h1 id="Panns">Panns</h1><p><a href="https://github.com/ryanrhymes/panns" target="_blank" rel="external">https://github.com/ryanrhymes/panns</a>这是一个用python写的针对高维数据的approximate k-nearest neighbors算法包，目前支持欧式距离和余弦距离两种度量。对500维以上的高维特征进行了优化。虽然性能弱于Annoy，但是更加轻量，比FLANN和scikit-learn更为好用</p>
-<h3 id="安装">安装</h3><pre><code>sudo pip <span class="operator"><span class="keyword">install</span> panns <span class="comment">--upgrade</span></span>
-</code></pre><h3 id="使用示例">使用示例</h3><pre><code><span class="keyword">from</span> panns import *
-
-# <span class="keyword">create</span> an <span class="keyword">index</span> <span class="keyword">of</span> Euclidean distance
-p = PannsIndex(dimension=<span class="number">100</span>, metric=<span class="string">'euclidean'</span>)
-
-# generate a <span class="number">1000</span> x <span class="number">100</span> dataset
-<span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="number">1000</span>):
-    v = gaussian_vector(<span class="number">100</span>)
-    p.add_vector(v)
-
-p.parallelize(<span class="keyword">True</span>)        # 多核并行，默认是<span class="keyword">False</span>
-# build an <span class="keyword">index</span> <span class="keyword">of</span> <span class="number">128</span> trees <span class="keyword">and</span> save <span class="keyword">to</span> a file
-p.build(<span class="number">128</span>)    # <span class="number">64</span> <span class="keyword">is</span> <span class="keyword">default</span>
-</code></pre><p>build之后调用save函数保存生成的索引，会生成两个文件<em>.idx保存索引树和</em>.idx.npy保存数据库向量矩阵，这个向量矩阵可以保存成内存文件或者mmap文件，根据如下注释选取保存类型。这两个文件要放在同一个目录下面，加载模型的时候才不会出错。</p>
-<pre><code># save the index as an in-memory file if the raw dataset is small or medium size
-# later panns will <span class="operator"><span class="keyword">load</span> the entire .npy <span class="keyword">file</span> <span class="keyword">in</span> <span class="keyword">to</span> the <span class="keyword">physical</span> <span class="keyword">memory</span>
-<span class="keyword">p</span>.<span class="keyword">save</span>(<span class="string">'test.idx'</span>, mmap=<span class="literal">False</span>)
-
-# <span class="keyword">save</span> the <span class="keyword">index</span> <span class="keyword">as</span> mmap <span class="keyword">file</span> <span class="keyword">if</span> the <span class="keyword">raw</span> dataset <span class="keyword">is</span> huge
-# usually, your OS will handle the dynamic loading
-<span class="keyword">p</span>.<span class="keyword">save</span>(<span class="string">'test.idx'</span>, mmap=<span class="literal">True</span>)</span>
-</code></pre><p>加载模型，查询索引，返回最近邻的前10个查询结果</p>
-<pre><code>p1 = <span class="function"><span class="title">PannsIndex</span><span class="params">(metric=<span class="string">'euclidean'</span>)</span></span>
-p1.<span class="function"><span class="title">load</span><span class="params">(<span class="string">'test.idx'</span>)</span></span>
-v1 = <span class="function"><span class="title">a_new_vector</span><span class="params">(<span class="number">100</span>)</span></span>
-n = p1.<span class="function"><span class="title">query</span><span class="params">(v1, <span class="number">10</span>)</span></span>
-</code></pre><h1 id="Annoy">Annoy</h1><p><a href="https://github.com/spotify/annoy" target="_blank" rel="external">https://github.com/spotify/annoy</a>这是一个用C++编写的python打包的最近邻搜索算法包，应该是目前性能最好的算法包。</p>
-<h3 id="安装-1">安装</h3><pre><code>pip <span class="keyword">install</span> annoy
-</code></pre><h3 id="实例">实例</h3><p>tbd</p>
-<h2 id="参考资料">参考资料</h2><p><a href="http://yongyuan.name/blog/index-billion-deep-descriptors.html" target="_blank" rel="external">机器视觉：十亿规模的深度描述子如何有效索引</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cj1t09rf5001w8sfhrmovlg0p" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nnsearch/">nnsearch</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-data-visualization" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/04/07/data-visualization/" class="article-date">
-  <time datetime="2016-04-07T14:39:17.000Z" itemprop="datePublished">2016-04-07</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/04/07/data-visualization/">数据可视化</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>经常看到网上一些样本分布图画的非常漂亮，不知道是怎么画出来的，在网上找到了一个好资料<a href="http://colah.github.io/posts/2014-10-Visualizing-MNIST/#raw_mnist" target="_blank" rel="external">http://colah.github.io/posts/2014-10-Visualizing-MNIST/#raw_mnist</a>，代码参考的这个<a href="https://www.oreilly.com/learning/an-illustrated-introduction-to-the-t-sne-algorithm" target="_blank" rel="external">https://www.oreilly.com/learning/an-illustrated-introduction-to-the-t-sne-algorithm</a>研究了一番总结一下。</p>
-<p>我们经常要分析一些高维特征的表现能力，由于我们人类只能理解二维、三维的东西，所以要把高维数据降到三维以内展示出来。</p>
-<h3 id="直观想法">直观想法</h3><p>最直观的想法，比如原数据有1000维，从中任意选择两维，然后画图，结果可想而知。</p>
-<h3 id="PCA">PCA</h3><p>一种改进办法就是选择更为合适的两个维度进行展示，于是选择PCA主成分分析，然后选择前两个主成分对应的维度作为可视化的两个维度。</p>
-<h2 id="降维优化算法">降维优化算法</h2><p>可视化的目标就是希望两个向量实际的距离能够跟显示的距离接近，本来向量距离远的显示的距离也远。这就变成了一个优化问题，这也是很多流形学习方法的目标。比较常用解决这个优化问题的方法有MDS和t-SNE</p>
-<h3 id="MDS">MDS</h3><p>结合代码分析，首先，加载必要模块</p>
-<pre><code>from sklearn <span class="preprocessor"><span class="keyword">import</span> manifold</span>
-<span class="preprocessor"><span class="keyword">import</span> matplotlib.pyplot as plt</span>
-<span class="preprocessor"><span class="keyword">import</span> seaborn</span>
-<span class="preprocessor"><span class="keyword">import</span> numpy as np</span>
-</code></pre><p>首先加载数据，用array存储数据以及对应标签。这里用scikit-learn中的digits手写字符数据集作为演示数据，加载之后，其data维度为1797<em>64，图片是8</em>8=64，target维度为1797*1，为0~9的整数。同时加载seaborn模块中的调色板，用这个模板生成的颜色比自己设计的要好看一些</p>
-<pre><code>from sklearn<span class="class">.datasets</span> import load_digits
-digits = <span class="function"><span class="title">load_digits</span><span class="params">()</span></span>
-palette = np.<span class="function"><span class="title">array</span><span class="params">(seaborn.color_palette(<span class="string">'hls'</span>, <span class="number">10</span>)</span></span>)
-x = digits<span class="class">.data</span>
-y = digits.target
-</code></pre><p>加载mds模型</p>
-<pre><code>mds = manifold.<span class="function"><span class="title">MDS</span><span class="params">(n_components=<span class="number">2</span>, max_iter=<span class="number">300</span>, eps=<span class="number">1</span>e-<span class="number">5</span>)</span></span>
-x_mds = mds.<span class="function"><span class="title">fit_transform</span><span class="params">(x)</span></span>
-</code></pre><p>画图</p>
-<pre><code>fig = plt.<span class="function"><span class="title">figure</span><span class="params">()</span></span>
-plt.<span class="function"><span class="title">scatter</span><span class="params">(x_mds[:,<span class="number">0</span>], x_mds[:,<span class="number">1</span>], c=palette[y])</span></span>
-plt.<span class="function"><span class="title">show</span><span class="params">()</span></span>
-</code></pre><h3 id="t-SNE">t-SNE</h3><p>加载数据与上一种方法相同，加载模型代码如下</p>
-<pre><code>tsne = manifold.<span class="function"><span class="title">TSNE</span><span class="params">(n_components=<span class="number">2</span>, learning_rate=<span class="number">1000.0</span>)</span></span>
-x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><span class="params">(x)</span></span>
-</code></pre><h2 id="显示动态流形变化图像">显示动态流形变化图像</h2><p>TBD</p>
-<h2 id="可视化参考资料">可视化参考资料</h2><p><a href="http://distill.pub/2016/misread-tsne/" target="_blank" rel="external">how to use t-SNE effectively</a><a href="https://yq.aliyun.com/articles/62946" target="_blank" rel="external">中文翻译</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cj1t09rgg002w8sfhw4bso6op" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/visualization/">visualization</a></li></ul>
 
     </footer>
   </div>
@@ -1341,7 +1287,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">24</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">25</span></li></ul>
     </div>
   </div>
 
@@ -1350,7 +1296,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
     </div>
   </div>
 
@@ -1359,7 +1305,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 12.5px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 17.5px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 12.5px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
+      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 12.5px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 17.5px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 12.5px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 12.5px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
     </div>
   </div>
 
@@ -1368,7 +1314,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -1380,6 +1326,14 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
       <ul>
         
           <li>
+            <a href="/2017/06/03/caffe-forward/">caffe学习（九）inference代码优化</a>
+          </li>
+        
+          <li>
+            <a href="/2017/06/03/interview/">试题整理</a>
+          </li>
+        
+          <li>
             <a href="/2017/04/22/tensorflow-gpu/">tensorflow学习（十三）GPU使用技巧整理</a>
           </li>
         
@@ -1389,14 +1343,6 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
         
           <li>
             <a href="/2017/03/26/tensorflow-saver/">tensorflow学习（十一）保存和恢复模型</a>
-          </li>
-        
-          <li>
-            <a href="/2017/02/27/tensorflow-update/">tensorflow学习（十）实用工具介绍</a>
-          </li>
-        
-          <li>
-            <a href="/2017/02/19/tensorflow1-0-install/">tensorflow学习（九）1.0正式版安装配置</a>
           </li>
         
       </ul>

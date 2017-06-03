@@ -65,6 +65,133 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-caffe-forward" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/06/03/caffe-forward/" class="article-date">
+  <time datetime="2017-06-03T13:15:54.000Z" itemprop="datePublished">2017-06-03</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/06/03/caffe-forward/">caffe学习（九）inference代码优化</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="多线程inference问题">多线程inference问题</h2><p>对于caffe前向算法的使用，通常会遇到一种情况：一次初始化，多次进行predict方法，按照caffe的设计，shared_ptr是线程不安全的，如果同时起多个线程同时进行predict，会导致数据参数共享，进而出错。为此需要修改caffe教程中的实现，在每次predict的时候在内存中复制一份网络。</p>
+<pre><code><span class="comment">// old init</span>
+shared_ptr&lt;Net&lt;<span class="keyword">float</span>&gt; &gt; net_;
+net_.reset(<span class="keyword">new</span> Net&lt;<span class="keyword">float</span>&gt;(deploy_file, TEST));
+net_-&gt;CopyTrainedLayersFrom(trained_file);
+
+<span class="comment">// new init</span>
+shared_ptr&lt;Net&lt;<span class="keyword">float</span>&gt; &gt; net_;
+NetParameter param_;
+ReadNetParamsFromTextFileOrDie(deploy_file, &amp;param_);
+param_.mutable_state()-&gt;set_phase(TEST);
+net_.reset(<span class="keyword">new</span> Net&lt;<span class="keyword">float</span>&gt;(param_));
+net_-&gt;CopyTrainedLayersFrom(trained_file);
+
+<span class="comment">// old predict</span>
+net_-&gt;Forward();
+
+<span class="comment">// new predict</span>
+shared_ptr&lt;Net&lt;<span class="keyword">float</span>&gt; &gt; net_tmp;
+net_tmp.reset(<span class="keyword">new</span> Net&lt;<span class="keyword">float</span>&gt;(param_));
+net_tmp-&gt;ShareTrainedLayersWith(net_.get());
+net_-&gt;Forward();
+</code></pre><h2 id="网络复制优化">网络复制优化</h2><p>上面这段代码基本可以解决问题，由于<code>ShareTrainedLayersWith</code>是从内存中将网络参数复制过来，效率很高。但<code>new Net&lt;float&gt;(param_)</code>这个方法由于要基于param_重新构建一个网络并初始化参数，这个性能是很低的，而且对于predict来说也是没有意义的，因为后面还会用ShareTrainedLayersWith方法再次重新赋值。通常<code>weight_filler</code>还使用<code>xavier</code>或者<code>gauss</code>初始化，更加重了初始化的计算量，即使忽略这个参数，也还是会用<code>constant</code>进行初始化。为此，我们只能更改caffe的源码来屏蔽weight和bias初始化的动作。</p>
+<pre><code>vim src/caffe/layers/inner_product_layer.cpp
+<span class="comment">######</span><span class="comment">######</span><span class="comment">######</span>
+<span class="regexp">//</span>weight_filler-&gt;Fill(<span class="keyword">this</span>-&gt;blobs_[<span class="number">0</span>].get());
+<span class="regexp">//</span>bias_filler-&gt;Fill(<span class="keyword">this</span>-&gt;blobs_[<span class="number">1</span>].get());
+<span class="comment">######</span><span class="comment">######</span><span class="comment">######</span>
+vim src/caffe/layers/base_conv_layer.cpp
+<span class="comment">######</span><span class="comment">######</span><span class="comment">######</span>
+<span class="regexp">//</span>weight_filler-&gt;Fill(<span class="keyword">this</span>-&gt;blobs_[<span class="number">0</span>].get());
+<span class="regexp">//</span>bias_filler-&gt;Fill(<span class="keyword">this</span>-&gt;blobs_[<span class="number">1</span>].get());
+</code></pre><p>而且predict的过程，由于没有backward方法，也不需要使用net中的diff参数。所以在初始化的过程中也可以屏蔽。</p>
+<pre><code>vim src/caffe/blob.cpp
+<span class="comment">######</span><span class="comment">######</span><span class="comment">######</span>
+<span class="regexp">//</span>diff_.reset(<span class="keyword">new</span> SyncedMemory(capacity_ * sizeof(Dtype)));
+</code></pre><h2 id="vtune使用">vtune使用</h2><p>上述这种优化都是通过vtune工具分析代码的运行时间分析了程序初始化过程中的耗时的点，从而进行的优化。vtune大法好，vtune是intel的代码性能优化工具。</p>
+<pre><code>vtune_amplifier_xe<span class="regexp">/bin64/</span>amplxe-gui
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/06/03/caffe-forward/" data-id="cj3hb068q003n3cfhg0zncpmp" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-interview" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/06/03/interview/" class="article-date">
+  <time datetime="2017-06-03T13:12:48.000Z" itemprop="datePublished">2017-06-03</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/study/">study</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/06/03/interview/">试题整理</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="mAP指标的含义">mAP指标的含义</h2><p>平均准确率均值mAP(Mean Average Precision)<br>对于每类事件根据每个样本得到的预测分值绘制准确率-召回率(precision-recall)曲线<br>计算曲线下区域面积即AP(Average precision)<br>对所有事件类别计算AP的均值，即mAP</p>
+<h2 id="caffe实现中使用了大量的虚函数、类模板，请介绍一下虚函数、类模板以及虚基类的使用场景">caffe实现中使用了大量的虚函数、类模板，请介绍一下虚函数、类模板以及虚基类的使用场景</h2><p>虚函数：是使基类指针指向派生类，用来方便通过基类调用不同派生类的函数实现，例如caffe中各种layer的forward方法。<br>类模板：多个类有共同操作，只是数据类型不同时候使用类模板。<br>虚基类：主要用在多重继承的派生类中，使派生类只保留间接基类的一份成员，多重继承较为复杂容易出错，不推荐这种用法</p>
+<h2 id="softmaxloss在深度学习中为何最为流行，有哪些优势；为何将softmax和交叉熵损失放在一起，有什么好处">softmaxloss在深度学习中为何最为流行，有哪些优势；为何将softmax和交叉熵损失放在一起，有什么好处</h2><p><a href="https://zhuanlan.zhihu.com/p/25723112" target="_blank" rel="external">https://zhuanlan.zhihu.com/p/25723112</a><br><a href="http://freemind.pluskid.org/machine-learning/softmax-vs-softmax-loss-numerical-stability/" target="_blank" rel="external">http://freemind.pluskid.org/machine-learning/softmax-vs-softmax-loss-numerical-stability/</a><br>这两篇文章对于softmax解释的非常好，在深度学习中使用最为广泛，有两个原因，一是其输出为类别的概率值，二是因为其梯度求导特别简单。交叉熵的函数形式为</p>
+<pre><code>Loss = -<span class="function"><span class="title">sum</span><span class="params">(y_i*ln(z_i)</span></span>) <span class="comment">// z_i为softmax输出，y_i为ground_truth</span>
+</code></pre><p>由于softmax的特点，其导数特别友好，非常方便计算。如果将softmax和交叉熵分成两部分，就会多计算一个乘z_j再除z_j的过程，由于z_j为softmax输出，很可能非常小，会有可能导致float数据类型溢出，从而结果错误。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/06/03/interview/" data-id="cj3hb061y002g3cfhdplph5we" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-tensorflow-gpu" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/04/22/tensorflow-gpu/" class="article-date">
@@ -99,7 +226,7 @@ sess = tf.<span class="function"><span class="title">Session</span><span class="
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/04/22/tensorflow-gpu/" data-id="cj1t09rej00158sfhgda1nd0k" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/04/22/tensorflow-gpu/" data-id="cj3hb05vp00153cfh47r5gxgh" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -238,7 +365,7 @@ sess.close()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/03/29/tensorflow-mydata/" data-id="cj1t09re4000t8sfhxqlxlzg2" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/03/29/tensorflow-mydata/" data-id="cj3hb05up000t3cfh23q3tuaw" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -335,7 +462,7 @@ saver.<span class="function"><span class="title">restore</span><span class="para
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/03/26/tensorflow-saver/" data-id="cj1t09rdo000q8sfhp0awzwe7" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/03/26/tensorflow-saver/" data-id="cj3hb05ue000q3cfh435bjlon" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -388,7 +515,7 @@ tf_upgrade.py --intree <span class="variable">&lt;input_dir&gt;</span> -outtree 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/02/27/tensorflow-update/" data-id="cj1t09rdo000k8sfh1r1ipmyl" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/02/27/tensorflow-update/" data-id="cj3hb05ty000k3cfhadtkn1uv" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -453,7 +580,7 @@ pip <span class="keyword">install</span> tensorflow    <span class="comment"># c
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/02/19/tensorflow1-0-install/" data-id="cj1t09rdo000g8sfhfm48raar" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/02/19/tensorflow1-0-install/" data-id="cj3hb05ts000g3cfhcnhgvki4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -537,7 +664,7 @@ pip <span class="keyword">install</span> tensorflow    <span class="comment"># c
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/12/30/cmake-learn/" data-id="cj1t09rgg00348sfhzvtb0x3a" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/12/30/cmake-learn/" data-id="cj3hb067a00373cfhm9fy43ma" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
@@ -735,7 +862,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/08/28/caffe-add-jni-example/" data-id="cj1t09rhb003t8sfhmo4cywl8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/08/28/caffe-add-jni-example/" data-id="cj3hb069o003z3cfhpg5iblg9" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -783,120 +910,10 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/22/tensorflow-modelresource/" data-id="cj1t09re4000w8sfh9te2pgqv" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/22/tensorflow-modelresource/" data-id="cj3hb05uu000w3cfhuo3yihpu" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-caffe-yolo" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/07/13/caffe-yolo/" class="article-date">
-  <time datetime="2016-07-13T14:29:26.000Z" itemprop="datePublished">2016-07-13</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/07/13/caffe-yolo/">caffe学习（七）caffe-YOLO模型</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>原本YOLO是一个darknet的独立代码，网上有些大神把其网络用caffe实现了。贴一个传送门<a href="https://github.com/xingwangsfu/caffe-yolo" target="_blank" rel="external">https://github.com/xingwangsfu/caffe-yolo</a>。这里参考这个代码实现一下，没有训练代码，需要将darknet训练好的参数转换成caffe格式。</p>
-<h2 id="修改deploy">修改deploy</h2><p>要把<code>yolo_deploy.prototxt</code>里的<code>fc26</code>层中的<code>num_output</code>参数改为实际需要的。</p>
-<h2 id="参数模型格式转换">参数模型格式转换</h2><p>用darknet训练好的网络参数通过<code>create_yolo_caffemodel.py</code>用caffe读进来。darknet的权重保存格式很简单，前4个数是int型，分别表示major、minor、revision和net.seen，第五个参数开始就是一个一维浮点数组，存成二进制文件。读入之后，根据网络结构得到net的各层weights和bias的size大小，并按顺序传入。调用格式如下：</p>
-<pre><code>python create_yolo_caffemodel<span class="class">.py</span> -m ./prototxt/yolo_deploy<span class="class">.prototxt</span> -w yolo_final<span class="class">.weights</span> -o yolo.caffemodel
-</code></pre><h2 id="YOLO检测">YOLO检测</h2><pre><code>python yolo_main<span class="class">.py</span> -m ./prototxt/yolo_deploy<span class="class">.prototxt</span> -w yolo<span class="class">.caffemodel</span> -<span class="tag">i</span> xxx.jpg
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="cj1t09rgg00378sfhtoitl7vj" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-guides-japan" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/07/06/guides-japan/" class="article-date">
-  <time datetime="2016-07-06T11:54:34.000Z" itemprop="datePublished">2016-07-06</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/life/">life</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/07/06/guides-japan/">日本攻略</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="调研">调研</h2><p>日本旅游局官网<a href="http://www.welcome2japan.cn/" target="_blank" rel="external">http://www.welcome2japan.cn/</a>，介绍的还挺好的，比天朝的官方网站做的高到不知道哪里去了</p>
-<h2 id="出国准备注意事项">出国准备注意事项</h2><ul>
-<li>签证：注意单次签证虽然给15天，建议不要排的太满，10天以内即可。</li>
-<li>签证申请：<strong>必须通过旅行社</strong>，单次签，年收入10万以上，按旅行社的要求即可。签证搞到后，会给一份<strong>归国报告书</strong>，回国办理登记手续的时候给柜台盖章，寄给旅行社。</li>
-<li>免费wifi，下载Japan Connected-Free Wifi的app</li>
-</ul>
-<h2 id="景点关键词">景点关键词</h2><ul>
-<li>京都：寺庙</li>
-<li>大阪：环球影城</li>
-<li>东京：迪斯尼</li>
-</ul>
-<h2 id="现金">现金</h2><p>按每日每人1万日元准备吧~</p>
-<h2 id="购物">购物</h2><p>超过1万日元消费可以在店内退税，带一张银联卡，便宜，好用</p>
-<h1 id="东京攻略">东京攻略</h1><ul>
-<li>公交卡：PASMO或者西瓜卡（SUICA）</li>
-<li>皇家御所<a href="http://sankan.kunaicho.go.jp/" target="_blank" rel="external">http://sankan.kunaicho.go.jp/</a></li>
-<li>宫崎骏吉卜力美术馆<a href="http://www.lawson.co.jp/ghibli/museum/ticket/" target="_blank" rel="external">http://www.lawson.co.jp/ghibli/museum/ticket/</a></li>
-<li>公园：新宿御苑、浅草寺、上野公园</li>
-<li>周边小镇：镰仓、箱根</li>
-<li>地标：东京铁塔、东京天空树</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="cj1t09rg1002h8sfh8we2i0v0" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
 
     </footer>
   </div>
@@ -918,7 +935,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">24</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">25</span></li></ul>
     </div>
   </div>
 
@@ -927,7 +944,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
     </div>
   </div>
 
@@ -936,7 +953,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 12.5px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 17.5px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 10px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 12.5px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
+      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 12.5px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 17.5px;">caffe</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 10px;">face</a> <a href="/tags/machine-learning/" style="font-size: 12.5px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 12.5px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
     </div>
   </div>
 
@@ -945,7 +962,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -957,6 +974,14 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       <ul>
         
           <li>
+            <a href="/2017/06/03/caffe-forward/">caffe学习（九）inference代码优化</a>
+          </li>
+        
+          <li>
+            <a href="/2017/06/03/interview/">试题整理</a>
+          </li>
+        
+          <li>
             <a href="/2017/04/22/tensorflow-gpu/">tensorflow学习（十三）GPU使用技巧整理</a>
           </li>
         
@@ -966,14 +991,6 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
         
           <li>
             <a href="/2017/03/26/tensorflow-saver/">tensorflow学习（十一）保存和恢复模型</a>
-          </li>
-        
-          <li>
-            <a href="/2017/02/27/tensorflow-update/">tensorflow学习（十）实用工具介绍</a>
-          </li>
-        
-          <li>
-            <a href="/2017/02/19/tensorflow1-0-install/">tensorflow学习（九）1.0正式版安装配置</a>
           </li>
         
       </ul>
