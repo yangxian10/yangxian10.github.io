@@ -21,7 +21,7 @@ c">
 cd ~/opencv
 mkdir release
 c">
-<meta property="og:updated_time" content="2017-03-09T14:14:37.293Z">
+<meta property="og:updated_time" content="2017-06-07T12:33:28.993Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="tensorflow学习（九）1.0正式版安装配置">
 <meta name="twitter:description" content="近期tensorflow发布了正式版，我们也赶快更新起来。
@@ -128,6 +128,28 @@ option(CUDA_USE_STATIC_CUDA_RUNTIME "<span class="operator"><span class="keyword
 pip <span class="keyword">install</span> tensorflow    <span class="comment"># cpu version</span>
 </code></pre><h2 id="tips">tips</h2><p>安装好之后可能会遇到can’t find libmkl_avx.so的问题，应该是anaconda和tensorflow的安装顺序导致的，可以通过下面的办法暂时解决</p>
 <pre><code><span class="built_in">export</span> LD_PRELOAD=libmkl_rt.so
+</code></pre><h2 id="安装bazel">安装bazel</h2><h3 id="安装jdk8">安装jdk8</h3><p>bazel需要java8的支持，由于系统本身有一套jdk7的环境，我这套jdk8的环境只想对我生效，配置如下：</p>
+<pre><code>download jdk-<span class="number">8</span>u131-linux-x64.tar.gz
+tar xzvf jdk-<span class="number">8</span>u131-linux-x64.tar.gz
+vim ~/.bashrc
+    export JAVA_HOME=<span class="variable">$HOME</span>/software_bak/jdk1.<span class="number">8.0_131</span>
+    export PATH=<span class="variable">$JAVA</span>_HOME/bin:<span class="variable">$PATH</span>
+    export CLASSPATH=.:<span class="variable">$JAVA</span>_HOME/lib/dt.jar:<span class="variable">$JAVA</span>_HOME/lib/tools.jar
+source ~/.bashrc
+java -version
+</code></pre><h3 id="安装bazel-1">安装bazel</h3><pre><code>wget https:<span class="comment">//github.com/bazelbuild/bazel/releases/download/0.5.1/bazel-0.5.1-installer-linux-x86_64.sh</span>
+chmod +x bazel-<span class="number">0.5</span>.<span class="number">1</span>-installer-linux-x86_64<span class="class">.sh</span>
+./bazel-<span class="number">0.5</span>.<span class="number">1</span>-installer-linux-x86_64<span class="class">.sh</span> --user
+vim ~/<span class="class">.bashrc</span>
+    export PATH=<span class="variable">$PATH</span>:<span class="variable">$HOME</span>/bin
+source ~/<span class="class">.bashrc</span>
+bazel version
+</code></pre><h2 id="源码安装tensorflow">源码安装tensorflow</h2><pre><code>git    clone --recurse-submodules <span class="string">https:</span><span class="comment">//github.com/tensorflow/tensorflow</span>
+cd tensorflow
+.<span class="regexp">/configure /</span>/ 大部分都使用默认选项，注意GPU选项要打开
+bazel build -c opt --config=cuda <span class="comment">//tensorflow/tools/pip_package:build_pip_package</span>
+bazel-bin<span class="regexp">/tensorflow/</span>tools<span class="regexp">/pip_package/</span>build_pip_package <span class="regexp">/tmp/</span>tensorflow_pkg
+pip install <span class="regexp">/tmp/</span>tensorflow_pkg/tensorflow-<span class="number">0.10</span><span class="number">.0</span>-py2-none-any.whl
 </code></pre>
       
     </div>

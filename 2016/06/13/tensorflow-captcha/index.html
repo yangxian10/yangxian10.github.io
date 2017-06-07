@@ -13,7 +13,7 @@
 <meta property="og:site_name" content="杨现的个人博客">
 <meta property="og:description" content="验证码的识别是OCR中的一个重要内容，特别是对于爬虫系统意义重大，传统方法都是单个字符识别，包括二值化处理、字符分割、字符识别的过程。由于现在深度学习的火爆，end-to-end的方法流行起来。这里就用tensorflow实现一个端到端的CNN验证码识别功能。
 本文的想法是把验证码看成一个多标签学习的问题，相当于几个有标签的图像识别。这里没有考虑使用LSTM对验证码序列进行学习，因为我个人觉得验证">
-<meta property="og:updated_time" content="2016-06-13T11:53:39.512Z">
+<meta property="og:updated_time" content="2017-06-07T12:42:49.235Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="tensorflow学习（五）基于CNN的验证码识别">
 <meta name="twitter:description" content="验证码的识别是OCR中的一个重要内容，特别是对于爬虫系统意义重大，传统方法都是单个字符识别，包括二值化处理、字符分割、字符识别的过程。由于现在深度学习的火爆，end-to-end的方法流行起来。这里就用tensorflow实现一个端到端的CNN验证码识别功能。
@@ -277,7 +277,7 @@ biases = {
     fc24 = tf.nn.relu(tf.matmul(fc1, _weights[<span class="string">'out4'</span>]) + _biases[<span class="string">'out4'</span>], name=<span class="string">'fc24'</span>)
     print_activations(fc24)
 
-    out = tf.concat(<span class="number">1</span>, [fc21, fc22, fc23, fc24], name=<span class="string">'out'</span>)
+    out = tf.concat(axis=<span class="number">1</span>, values=[fc21, fc22, fc23, fc24], name=<span class="string">'out'</span>)
     print_activations(out)
     <span class="keyword">return</span> out
 
@@ -290,16 +290,19 @@ biases = {
 
 pred = ocr_net(x, weights, biases)
 
-cost = tf.reduce_mean(y*tf.log(pred))
+cost = -tf.reduce_mean(y*tf.log(pred))
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
 <span class="comment">#correct_pred = tf.equal(tf.argmax(pred,2), tf.argmax(y,2))</span>
 <span class="comment">#accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))</span>
 accuracy = accuracy_func(pred, y)
 
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 
-<span class="keyword">with</span> tf.Session() <span class="keyword">as</span> sess:
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = <span class="keyword">True</span>
+
+<span class="keyword">with</span> tf.Session(config=config) <span class="keyword">as</span> sess:
     sess.run(init)
     step = <span class="number">1</span><span class="comment"># Keep training until reach max iterations</span>
     <span class="keyword">while</span> step * batch_size &lt; training_iters:

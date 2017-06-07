@@ -576,6 +576,28 @@ option(CUDA_USE_STATIC_CUDA_RUNTIME "<span class="operator"><span class="keyword
 pip <span class="keyword">install</span> tensorflow    <span class="comment"># cpu version</span>
 </code></pre><h2 id="tips">tips</h2><p>安装好之后可能会遇到can’t find libmkl_avx.so的问题，应该是anaconda和tensorflow的安装顺序导致的，可以通过下面的办法暂时解决</p>
 <pre><code><span class="built_in">export</span> LD_PRELOAD=libmkl_rt.so
+</code></pre><h2 id="安装bazel">安装bazel</h2><h3 id="安装jdk8">安装jdk8</h3><p>bazel需要java8的支持，由于系统本身有一套jdk7的环境，我这套jdk8的环境只想对我生效，配置如下：</p>
+<pre><code>download jdk-<span class="number">8</span>u131-linux-x64.tar.gz
+tar xzvf jdk-<span class="number">8</span>u131-linux-x64.tar.gz
+vim ~/.bashrc
+    export JAVA_HOME=<span class="variable">$HOME</span>/software_bak/jdk1.<span class="number">8.0_131</span>
+    export PATH=<span class="variable">$JAVA</span>_HOME/bin:<span class="variable">$PATH</span>
+    export CLASSPATH=.:<span class="variable">$JAVA</span>_HOME/lib/dt.jar:<span class="variable">$JAVA</span>_HOME/lib/tools.jar
+source ~/.bashrc
+java -version
+</code></pre><h3 id="安装bazel-1">安装bazel</h3><pre><code>wget https:<span class="comment">//github.com/bazelbuild/bazel/releases/download/0.5.1/bazel-0.5.1-installer-linux-x86_64.sh</span>
+chmod +x bazel-<span class="number">0.5</span>.<span class="number">1</span>-installer-linux-x86_64<span class="class">.sh</span>
+./bazel-<span class="number">0.5</span>.<span class="number">1</span>-installer-linux-x86_64<span class="class">.sh</span> --user
+vim ~/<span class="class">.bashrc</span>
+    export PATH=<span class="variable">$PATH</span>:<span class="variable">$HOME</span>/bin
+source ~/<span class="class">.bashrc</span>
+bazel version
+</code></pre><h2 id="源码安装tensorflow">源码安装tensorflow</h2><pre><code>git    clone --recurse-submodules <span class="string">https:</span><span class="comment">//github.com/tensorflow/tensorflow</span>
+cd tensorflow
+.<span class="regexp">/configure /</span>/ 大部分都使用默认选项，注意GPU选项要打开
+bazel build -c opt --config=cuda <span class="comment">//tensorflow/tools/pip_package:build_pip_package</span>
+bazel-bin<span class="regexp">/tensorflow/</span>tools<span class="regexp">/pip_package/</span>build_pip_package <span class="regexp">/tmp/</span>tensorflow_pkg
+pip install <span class="regexp">/tmp/</span>tensorflow_pkg/tensorflow-<span class="number">0.10</span><span class="number">.0</span>-py2-none-any.whl
 </code></pre>
       
     </div>
@@ -922,9 +944,1221 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
 
 
   
+    <article id="post-caffe-yolo" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/07/13/caffe-yolo/" class="article-date">
+  <time datetime="2016-07-13T14:29:26.000Z" itemprop="datePublished">2016-07-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/07/13/caffe-yolo/">caffe学习（七）caffe-YOLO模型</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>原本YOLO是一个darknet的独立代码，网上有些大神把其网络用caffe实现了。贴一个传送门<a href="https://github.com/xingwangsfu/caffe-yolo" target="_blank" rel="external">https://github.com/xingwangsfu/caffe-yolo</a>。这里参考这个代码实现一下，没有训练代码，需要将darknet训练好的参数转换成caffe格式。</p>
+<h2 id="修改deploy">修改deploy</h2><p>要把<code>yolo_deploy.prototxt</code>里的<code>fc26</code>层中的<code>num_output</code>参数改为实际需要的。</p>
+<h2 id="参数模型格式转换">参数模型格式转换</h2><p>用darknet训练好的网络参数通过<code>create_yolo_caffemodel.py</code>用caffe读进来。darknet的权重保存格式很简单，前4个数是int型，分别表示major、minor、revision和net.seen，第五个参数开始就是一个一维浮点数组，存成二进制文件。读入之后，根据网络结构得到net的各层weights和bias的size大小，并按顺序传入。调用格式如下：</p>
+<pre><code>python create_yolo_caffemodel<span class="class">.py</span> -m ./prototxt/yolo_deploy<span class="class">.prototxt</span> -w yolo_final<span class="class">.weights</span> -o yolo.caffemodel
+</code></pre><h2 id="YOLO检测">YOLO检测</h2><pre><code>python yolo_main<span class="class">.py</span> -m ./prototxt/yolo_deploy<span class="class">.prototxt</span> -w yolo<span class="class">.caffemodel</span> -<span class="tag">i</span> xxx.jpg
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="cj3hb067h003a3cfhltpq1sss" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-guides-japan" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/07/06/guides-japan/" class="article-date">
+  <time datetime="2016-07-06T11:54:34.000Z" itemprop="datePublished">2016-07-06</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/life/">life</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/07/06/guides-japan/">日本攻略</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="调研">调研</h2><p>日本旅游局官网<a href="http://www.welcome2japan.cn/" target="_blank" rel="external">http://www.welcome2japan.cn/</a>，介绍的还挺好的，比天朝的官方网站做的高到不知道哪里去了</p>
+<h2 id="出国准备注意事项">出国准备注意事项</h2><ul>
+<li>签证：注意单次签证虽然给15天，建议不要排的太满，10天以内即可。</li>
+<li>签证申请：<strong>必须通过旅行社</strong>，单次签，年收入10万以上，按旅行社的要求即可。签证搞到后，会给一份<strong>归国报告书</strong>，回国办理登记手续的时候给柜台盖章，寄给旅行社。</li>
+<li>免费wifi，下载Japan Connected-Free Wifi的app</li>
+</ul>
+<h2 id="景点关键词">景点关键词</h2><ul>
+<li>京都：寺庙</li>
+<li>大阪：环球影城</li>
+<li>东京：迪斯尼</li>
+</ul>
+<h2 id="现金">现金</h2><p>按每日每人1万日元准备吧~</p>
+<h2 id="购物">购物</h2><p>超过1万日元消费可以在店内退税，带一张银联卡，便宜，好用</p>
+<h1 id="东京攻略">东京攻略</h1><ul>
+<li>公交卡：PASMO或者西瓜卡（SUICA）</li>
+<li>皇家御所<a href="http://sankan.kunaicho.go.jp/" target="_blank" rel="external">http://sankan.kunaicho.go.jp/</a></li>
+<li>宫崎骏吉卜力美术馆<a href="http://www.lawson.co.jp/ghibli/museum/ticket/" target="_blank" rel="external">http://www.lawson.co.jp/ghibli/museum/ticket/</a></li>
+<li>公园：新宿御苑、浅草寺、上野公园</li>
+<li>周边小镇：镰仓、箱根</li>
+<li>地标：东京铁塔、东京天空树</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="cj3hb0627002k3cfh03kd905v" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-python-spider" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/22/python-spider/" class="article-date">
+  <time datetime="2016-06-22T13:02:36.000Z" itemprop="datePublished">2016-06-22</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/study/">study</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/22/python-spider/">python爬虫入门笔记</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="写在前面">写在前面</h1><p>爬虫其实内容的爬取不是最为困难的地方，真正难点在于如何混在群众之中不被发现。由于我在爬虫界还处于幼儿园水平，所以简单写几个脚本爬点美女图片还勉强，想跟亚一爬谈笑风生就不指望了。</p>
+<h1 id="urllib基础">urllib基础</h1><h3 id="html抓取">html抓取</h3><pre><code>import urllib2
+
+request = urllib2.<span class="function"><span class="title">Request</span><span class="params">(<span class="string">"http://www.baidu.com"</span>)</span></span>
+response = urllib2.<span class="function"><span class="title">urlopen</span><span class="params">(request)</span></span>
+data = response.<span class="function"><span class="title">read</span><span class="params">()</span></span>
+</code></pre><p>data就得到了百度主页的html信息。</p>
+<h3 id="html解析">html解析</h3><p>主要就是用<code>re</code>模块来正则匹配</p>
+<pre><code>import re
+
+#返回pattern对象
+re.<span class="function"><span class="title">compile</span><span class="params">(string[,flag])</span></span>  
+#以下为匹配所用函数
+re.<span class="function"><span class="title">match</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">search</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">split</span><span class="params">(pattern, string[, maxsplit])</span></span>
+re.<span class="function"><span class="title">findall</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">finditer</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">sub</span><span class="params">(pattern, repl, string[, count])</span></span>
+re.<span class="function"><span class="title">subn</span><span class="params">(pattern, repl, string[, count])</span></span>
+</code></pre><p>比较常用的findall，用列表的形式返回全部能匹配的子串。</p>
+<h1 id="反爬伪装">反爬伪装</h1><p>现在主流的反爬策略基本基于三个层面：</p>
+<ul>
+<li>IP层，同一ip访问过多会被封杀</li>
+<li>HTTP协议层，判断是否真实的浏览器行为</li>
+<li>行为层，判断是否真实用户行为<br>上述的程序通常在<code>response.read()</code>的时候会报错10054、10060之类的错误。</li>
+</ul>
+<h3 id="伪装浏览器Header">伪装浏览器Header</h3><p>用chrome打开浏览器，调试模式，然后打开Network模块，选择其中一个页面，打开Headers页面，其中最后的agent就是请求的身份，不填写身份的话，很容易被反爬策略封杀掉。</p>
+<pre><code>user_agent = <span class="comment">'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'</span>
+headers = {<span class="comment">'User-Agent' : user_agent}</span>
+#    <span class="built_in">request</span> = urllib2.<span class="built_in">Request</span>(url, headers)
+<span class="built_in">request</span> = urllib2.<span class="built_in">Request</span>(url)
+<span class="built_in">request</span>.add_header(<span class="comment">'User-Agent', user_agent)</span>
+<span class="built_in">response</span> = urllib2.urlopen(<span class="built_in">request</span>)
+page = <span class="built_in">response</span>.read()
+</code></pre><p>除此之外，有些反爬策略还有反盗链的设计，需要在headers中传入referer</p>
+<pre><code>request.<span class="function"><span class="title">add_header</span><span class="params">(<span class="string">'Referer'</span>, <span class="string">'http://www.taobao.com'</span>)</span></span>
+</code></pre><h3 id="proxy代理设置">proxy代理设置</h3><p>如果ip访问次数过多也会被封杀，采用代理服务器的方法来定期更换代理。</p>
+<pre><code>enable_proxy = True
+proxy_handler = urllib2.<span class="function"><span class="title">ProxyHandler</span><span class="params">({<span class="string">"http"</span> : <span class="string">'http://192.168.0.1:8080'</span>})</span></span>
+null_proxy_handler = urllib2.<span class="function"><span class="title">ProxyHandler</span><span class="params">({})</span></span>
+<span class="keyword">if</span> enable_proxy:
+    opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(proxy_handler)</span></span>
+<span class="keyword">else</span>:
+    opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(null_proxy_handler)</span></span>
+urllib2.<span class="function"><span class="title">install_opener</span><span class="params">(opener)</span></span>
+</code></pre><h3 id="超时设置Timeout">超时设置Timeout</h3><p>在urlopen的时候可以通过设置timeout参数解决网站相应过慢造成的影响。</p>
+<pre><code>response = urllib2.<span class="function"><span class="title">urlopen</span><span class="params">(<span class="string">'http://www.baidu.com'</span>, timeout=<span class="number">10</span>)</span></span>
+</code></pre><h3 id="发送数据">发送数据</h3><p>用来实现和浏览器之间的行为交互</p>
+<pre><code><span class="keyword">data</span> = urllib.parse.urlencode({<span class="string">"act"</span>: <span class="string">"login"</span>, <span class="string">"email"</span>: <span class="string">"xxxxx@qq.com"</span>, <span class="string">"password"</span>: <span class="string">"123456"</span>}).encode(<span class="string">'utf-8'</span>)
+request1 = urllib2.Request(url, <span class="keyword">data</span>=<span class="keyword">data</span>)           <span class="comment"># POST方法</span>
+request2 = urllib2.Request(url+<span class="string">"?%s"</span> % <span class="keyword">data</span>)         <span class="comment"># GET方法</span>
+response = urllib2.urlopen(request1)
+</code></pre><h3 id="常用超时异常">常用超时异常</h3><pre><code>try:
+    urllib2.<span class="function"><span class="title">urlopen</span><span class="params">(request)</span></span>
+except urllib2<span class="class">.HTTPError</span> as e:
+    <span class="function"><span class="title">print</span><span class="params">(e.code, e.reason)</span></span>
+except urllib2<span class="class">.URLError</span> as e:
+    <span class="function"><span class="title">print</span><span class="params">(e.errno, e.reason)</span></span>
+</code></pre><h3 id="服务器cookie检查">服务器cookie检查</h3><pre><code>import <span class="keyword">http</span>.cookiejar
+cookie_jar = <span class="keyword">http</span>.cookiejar.CookieJar()
+cookie_jar_handler = urllib.request.HTTPCookieProcessor(cookiejar=cookie_jar)
+opener = urllib2.build_opener(cookie_jar_handler)        <span class="comment"># add_handler</span>
+response = opener.<span class="built_in">open</span>(url)
+</code></pre><h3 id="获取cookie">获取cookie</h3><p>两种方式，1）直接贴到headers中</p>
+<pre><code>request = urllib2.<span class="function"><span class="title">Request</span><span class="params">(url)</span></span>
+request.<span class="function"><span class="title">add_header</span><span class="params">(<span class="string">'Cookie'</span>, <span class="string">"PHPSESSID=btqkg9amjrtoeev8coq0m78396; USERINFO=n6nxTHTY%2BJA39z6CpNB4eKN8f0KsYLjAQTwPe%2BhLHLruEbjaeh4ulhWAS5RysUM%2B; "</span>)</span></span>
+</code></pre><p>2）构建cookie</p>
+<pre><code>import http<span class="class">.cookiejar</span>
+cookie = http<span class="class">.cookiejar</span><span class="class">.Cookie</span>(name=<span class="string">"xx"</span>, value=<span class="string">"xx"</span>, domain=<span class="string">"xx"</span>, ...)
+cookie_jar = http<span class="class">.cookiejar</span><span class="class">.CookieJar</span>()
+cookie_jar.<span class="function"><span class="title">set_cookie</span><span class="params">(cookie)</span></span>
+cookie_jar_handler = urllib<span class="class">.request</span><span class="class">.HTTPCookieProcessor</span>(cookiejar=cookie_jar)
+opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(cookie_jar_handler)</span></span>
+response = opener.<span class="function"><span class="title">open</span><span class="params">(url)</span></span>
+</code></pre><h3 id="HTTP身份认证">HTTP身份认证</h3><pre><code>password_mgr = urllib2.<span class="function"><span class="title">HTTPPasswordMgrWithDefaultRealm</span><span class="params">()</span></span>
+password_mgr.<span class="function"><span class="title">add_password</span><span class="params">(realm=None, uri=url, user=<span class="string">'username'</span>, passwd=<span class="string">'password'</span>)</span></span>
+handler = urllib2.<span class="function"><span class="title">HTTPBasicAuthHandler</span><span class="params">(password_mgr)</span></span>
+opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(handler)</span></span>
+response = opener.<span class="function"><span class="title">open</span><span class="params">(url)</span></span>
+</code></pre><h1 id="简易图片爬虫">简易图片爬虫</h1><p>关键的就是解析的时候匹配图片内容，得到了图片链接的话，用wget或者其他模块都能保存图片</p>
+<pre><code>patternImg = re.<span class="function"><span class="title">compile</span><span class="params">(<span class="string">'&lt;img.*?src="(.*?)"'</span>,re.S)</span></span>
+images = re.<span class="function"><span class="title">findall</span><span class="params">(patternImg, url_data)</span></span>
+</code></pre><h1 id="参考资料与推荐文章">参考资料与推荐文章</h1><p><a href="http://cuiqingcai.com/" target="_blank" rel="external">http://cuiqingcai.com/</a><br><a href="http://mp.weixin.qq.com/s?__biz=MjM5ODIzNDQ3Mw==&amp;mid=402180172&amp;idx=1&amp;sn=1db24327a15cea8fab6907069fbaabbf&amp;scene=0#wechat_redirect" target="_blank" rel="external">数据时代的反爬虫绝技</a><br><a href="https://zhuanlan.zhihu.com/p/22982208" target="_blank" rel="external">一个很“水”的Python爬虫入门代码文件</a><br><a href="https://zhuanlan.zhihu.com/p/23064000" target="_blank" rel="external">“史上最详细”的Python模拟登录新浪微博流程</a><br><a href="https://luzhijun.github.io/2016/10/29/%E5%BE%AE%E5%8D%9A%E8%AF%9D%E9%A2%98%E7%88%AC%E5%8F%96%E4%B8%8E%E5%AD%98%E5%82%A8%E5%88%86%E6%9E%90/" target="_blank" rel="external">微博话题爬取与存储分析</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cj3hb05yy001p3cfhubaosjp5" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-tensorflow-caffe2tensorflow" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/14/tensorflow-caffe2tensorflow/" class="article-date">
+  <time datetime="2016-06-14T13:28:21.000Z" itemprop="datePublished">2016-06-14</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/14/tensorflow-caffe2tensorflow/">tensorflow学习（七）caffe模型训练结果转换为tensorflow格式</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>tensorflow官方认定的转换工具为<a href="https://github.com/ethereon/caffe-tensorflow" target="_blank" rel="external">https://github.com/ethereon/caffe-tensorflow</a>。我们尝试一下转换一个caffe训练的图像识别模型</p>
+<h2 id="caffe-tensorflow安装">caffe-tensorflow安装</h2><pre><code>git clone <span class="string">https:</span><span class="comment">//github.com/ethereon/caffe-tensorflow</span>
+</code></pre><h2 id="生成模型训练代码">生成模型训练代码</h2><p>利用<code>convert.py</code>可以将caffe网络定义的deploy.prototxt文件转换为tensorflow的python实现，不过这种转换之后的模型代码还需要import kaffe模块，虽然<code>kaffe.tensorflow.Network</code>没有其他依赖，可以单独加载到新代码中即可使用，方便移植，我还是更倾向于转换之后参考这个代码重新写一份。调用方式如下：</p>
+<pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --code-output-path=./myNetTensorflow.py
+</code></pre><h2 id="转换训练好的模型">转换训练好的模型</h2><p>也可以将caffemodel的weights和biases参数读取出来转换为npy的格式，并通过<code>numpy.load()</code>读取数据。转换数据的脚本如下：</p>
+<pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --caffemodel=./mynet<span class="class">.caffemodel</span> --data-output-path=./myNetTensorflow.npy
+</code></pre><p>由于转换过来的npy数据的类型比奇怪，是0-d array，要将其取出来需要如下读取方式</p>
+<pre><code>params = np.<span class="function"><span class="title">load</span><span class="params">()</span></span>
+params = params.<span class="function"><span class="title">item</span><span class="params">()</span></span>
+</code></pre><h2 id="注意事项">注意事项</h2><ul>
+<li><p>caffe的模型应该是较新的版本，才能转换</p>
+</li>
+<li><p>并不是所有的caffe模型都能转换为tensorflow，比如caffe的padding支持很多方式，tensorflow目前只支持<code>SAME</code>和<code>VALID</code></p>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cj3hb05y0001h3cfhi7byo9fr" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-tensorflow-inception" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/13/tensorflow-inception/" class="article-date">
+  <time datetime="2016-06-13T11:57:11.000Z" itemprop="datePublished">2016-06-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/13/tensorflow-inception/">tensorflow学习（六）CNN网络Inception</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这次我们来上手一个大型网络,googLeNet。这篇讲一下Inception v3网络的训练和测试以及数据集的加载。</p>
+<h2 id="数据准备">数据准备</h2><p>将图片按照类别放入不同的文件夹下。格式如下：</p>
+<pre><code>data_dir/train/label_0/<span class="tag">a</span><span class="class">.jpg</span>
+data_dir/train/label_0/<span class="tag">b</span><span class="class">.jpg</span>
+...
+data_dir/train/label_1/f<span class="class">.jpg</span>
+...
+data_dir/validation/label_0/c<span class="class">.jpg</span>
+data_dir/validation/label_0/d<span class="class">.jpg</span>
+...
+data_dir/labels.txt
+</code></pre><p>同时将所有label的类别整理成一个txt放在data_dir/labels.txt文件中，行数代表该类别对应的整数值，从0开始计数，其文本内容如下：</p>
+<pre><code>label_0
+label_1
+label_2
+...
+label_n
+</code></pre><h3 id="转化成为TFRecord格式">转化成为TFRecord格式</h3><p>首先通过<code>_find_iamge_files</code>函数得到全量图片的文件名、标签、标签文本信息的对应关系，并打乱排序。然后按线程数将全量文件分块，分别执行<code>_process_image_files_batch</code>。将数据按分块分别写入对应的TFRecordWriter。这个操作的代码我整理保存在了<a href="https://github.com/yangxian10/tensorflow_code/blob/master/build_image_tfrecord_data.py" target="_blank" rel="external">build_image_tfrecord_data.py</a>。其中两个重要的参数，一个是进程数量的控制参数<code>num_threads</code>和Record数据分块的参数<code>num_shards</code>。我这里有个不同，原来代码是读文件之后直接压入Record，我是用OpenCV解码之后，将解码后数据变成string压入Record。代码调用格式如下：</p>
+<pre><code>python build_image_tfrecord_data.py \
+  -<span class="ruby">-train_directory=mydata/train \
+</span>  -<span class="ruby">-validation_directory=mydata/validation \
+</span>  -<span class="ruby">-output_directory=mydata/tf_record \
+</span>  -<span class="ruby">-labels_file=mydata/labels.txt</span>
+</code></pre><h2 id="网络模型">网络模型</h2><h2 id="单机训练">单机训练</h2><h2 id="分布式训练">分布式训练</h2><h2 id="测试评估">测试评估</h2><h3 id="参考文献">参考文献</h3><p><a href="https://github.com/tensorflow/models/tree/master/inception" target="_blank" rel="external">https://github.com/tensorflow/models/tree/master/inception</a><br><a href="http://arxiv.org/abs/1512.00567" target="_blank" rel="external">http://arxiv.org/abs/1512.00567</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cj3hb05vl00123cfh54em42og" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-tensorflow-captcha" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/13/tensorflow-captcha/" class="article-date">
+  <time datetime="2016-06-13T11:52:35.000Z" itemprop="datePublished">2016-06-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/13/tensorflow-captcha/">tensorflow学习（五）基于CNN的验证码识别</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>验证码的识别是OCR中的一个重要内容，特别是对于爬虫系统意义重大，传统方法都是单个字符识别，包括二值化处理、字符分割、字符识别的过程。由于现在深度学习的火爆，end-to-end的方法流行起来。这里就用tensorflow实现一个端到端的CNN验证码识别功能。</p>
+<p>本文的想法是把验证码看成一个多标签学习的问题，相当于几个有标签的图像识别。这里没有考虑使用LSTM对验证码序列进行学习，因为我个人觉得验证码字符之间的相关性不强，没必要用这种大杀器。</p>
+<h2 id="验证码数据集">验证码数据集</h2><p>用<a href="https://pypi.python.org/pypi/captcha/0.1.1" target="_blank" rel="external">python-captcha</a>生成验证码数据集，这个库可以生成声音和图像的验证码，安装过程非常简单</p>
+<pre><code>pip <span class="keyword">install</span> captcha
+</code></pre><p>使用示例如下：</p>
+<pre><code>from captcha<span class="class">.image</span> import ImageCaptcha
+
+image = <span class="function"><span class="title">ImageCaptcha</span><span class="params">(fonts=[<span class="string">'/path/A.ttf'</span>, <span class="string">'/path/B.ttf'</span>])</span></span>
+image.<span class="function"><span class="title">write</span><span class="params">(<span class="string">'1234'</span>, <span class="string">'out.png'</span>)</span></span>
+</code></pre><h2 id="数据输入">数据输入</h2><p>验证码图片生成后是通过字节流生成的，可以随机生成，所以训练样本量可以无穷大。我们这里使用定长的4位验证码，包含0~9、a~z、A~Z。图像大小缩放到(30, 80, 3)。代码如下：</p>
+<pre><code><span class="keyword">import</span> numpy <span class="keyword">as</span> np
+<span class="keyword">import</span> cv2
+<span class="keyword">import</span> random
+<span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf
+<span class="keyword">from</span> captcha.image <span class="keyword">import</span> ImageCaptcha
+
+<span class="class"><span class="keyword">class</span> <span class="title">OCR_data</span><span class="params">(object)</span>:</span>
+    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, num, data_dir, batch_size=<span class="number">50</span>, len_code=<span class="number">4</span>, height=<span class="number">30</span>, width=<span class="number">80</span>)</span>:</span>
+        self.num = num
+        self.data_dir = data_dir
+        self.batch_size = batch_size
+        self.len_code = len_code
+        self.height = height
+        self.width = width
+        self.captcha = ImageCaptcha()
+        self.index_in_epoch = <span class="number">0</span>
+        self._imgs = []
+        self._labels = []
+        <span class="keyword">for</span> i <span class="keyword">in</span> range(self.num):
+            <span class="keyword">if</span> i % <span class="number">100</span> == <span class="number">0</span>:
+                <span class="keyword">print</span> <span class="string">'%s images have been created.'</span> % i
+            img, label = self.create_captcha()
+            self._imgs.append(img)
+            self._labels.append(label)
+        self._imgs = np.array(self._imgs)
+        self._labels = np.array(self._labels)
+
+
+    <span class="function"><span class="keyword">def</span> <span class="title">create_captcha</span><span class="params">(self)</span>:</span>
+        code, label = self.gen_rand()
+        img = self.captcha.generate(code)
+        img = np.fromstring(img.getvalue(), dtype=<span class="string">'uint8'</span>)
+        img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+        img = cv2.resize(img, (self.width, self.height))
+        <span class="keyword">return</span> (img, label)
+
+    <span class="function"><span class="keyword">def</span> <span class="title">gen_rand</span><span class="params">(self)</span>:</span>
+        buf = <span class="string">''</span>
+        label = []
+        <span class="keyword">for</span> i <span class="keyword">in</span> range(self.len_code):
+            rnd = random.randint(<span class="number">0</span>, <span class="number">61</span>)
+            label.append(rnd)
+            <span class="keyword">if</span> rnd &lt; <span class="number">10</span>:
+                ascii_code = chr(rnd+<span class="number">48</span>)
+            <span class="keyword">elif</span> rnd &lt; <span class="number">36</span>:
+                ascii_code = chr(rnd+<span class="number">65</span>)
+            <span class="keyword">else</span>:
+                ascii_code = chr(rnd+<span class="number">97</span>)
+            buf += ascii_code
+        label_one_hot = self.dense_to_one_hot(label, <span class="number">62</span>)
+        <span class="keyword">return</span> buf, label_one_hot
+
+    <span class="function"><span class="keyword">def</span> <span class="title">dense_to_one_hot</span><span class="params">(self, labels_dense, num_classes)</span>:</span>
+        num_labels = len(labels_dense)
+        index_offest = np.arange(num_labels) * num_classes
+        labels_one_hot = np.zeros((num_labels, num_classes))
+        labels_one_hot.flat[index_offest + labels_dense] = <span class="number">1</span>
+        labels_one_hot = labels_one_hot.reshape(num_labels*num_classes)
+        <span class="keyword">return</span> labels_one_hot
+
+    <span class="function"><span class="keyword">def</span> <span class="title">next_batch</span><span class="params">(self, batch_size)</span>:</span>
+        start = self.index_in_epoch
+        self.index_in_epoch += batch_size
+        <span class="keyword">if</span> self.index_in_epoch &gt; self.num:
+            perm = np.arange(self.num)
+            np.random.shuffle(perm)
+            self._imgs = self._imgs[perm]
+            self._labels = self._labels[perm]
+            start = <span class="number">0</span>
+            self.index_in_epoch = batch_size
+            <span class="keyword">assert</span> batch_size &lt;= self.num
+        end = self.index_in_epoch
+        <span class="keyword">return</span> self._imgs[start:end], self._labels[start:end]
+</code></pre><h2 id="训练">训练</h2><pre><code><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf
+<span class="keyword">from</span> captcha_data <span class="keyword">import</span> OCR_data
+<span class="comment"># Parameters</span>
+learning_rate = <span class="number">0.001</span>
+training_iters = <span class="number">200000</span>
+batch_size = <span class="number">64</span>
+display_step = <span class="number">20</span>
+
+<span class="comment"># Network Parameters</span>
+<span class="comment"># n_input = 7200  # 30*80*3</span>
+n_classes = <span class="number">62</span>  <span class="comment"># 10+26+26</span>
+
+data_train = OCR_data(<span class="number">1000</span>, <span class="string">'/data/captcha_data'</span>)
+data_test = OCR_data(<span class="number">500</span>, <span class="string">'/data/captcha_data'</span>)
+
+<span class="comment"># tf Graph input</span>
+x = tf.placeholder(tf.float32, [<span class="keyword">None</span>, <span class="number">30</span>, <span class="number">80</span>, <span class="number">3</span>])
+y = tf.placeholder(tf.float32, [<span class="keyword">None</span>, <span class="number">4</span>*n_classes])
+
+<span class="function"><span class="keyword">def</span> <span class="title">print_activations</span><span class="params">(t)</span>:</span>
+    print(t.op.name, t.get_shape().as_list())
+
+<span class="function"><span class="keyword">def</span> <span class="title">weight_variable</span><span class="params">(shape)</span>:</span>
+    initial = tf.truncated_normal(shape, dtype=tf.float32, stddev=<span class="number">0.1</span>)
+    <span class="keyword">return</span> tf.Variable(initial)
+
+<span class="function"><span class="keyword">def</span> <span class="title">bias_variable</span><span class="params">(shape)</span>:</span>
+    initial = tf.constant(<span class="number">0.0</span>, shape=shape)
+    <span class="keyword">return</span> tf.Variable(initial, trainable=<span class="keyword">True</span>)
+
+<span class="function"><span class="keyword">def</span> <span class="title">conv2d</span><span class="params">(x, W, B, name)</span>:</span>
+    <span class="keyword">with</span> tf.name_scope(name) <span class="keyword">as</span> scope:
+        conv = tf.nn.conv2d(x, W, strides=[<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>)
+        bias = tf.nn.bias_add(conv, B)
+        conv = tf.nn.relu(bias, name=scope)
+        <span class="keyword">return</span> conv
+
+<span class="function"><span class="keyword">def</span> <span class="title">max_pool</span><span class="params">(x, k, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.max_pool(x, ksize=[<span class="number">1</span>, k, k, <span class="number">1</span>], strides=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>, name=name)
+
+<span class="function"><span class="keyword">def</span> <span class="title">avg_pool</span><span class="params">(x, k, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.avg_pool(x, ksize=[<span class="number">1</span>, k, k, <span class="number">1</span>], strides=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>, name=name)
+
+<span class="function"><span class="keyword">def</span> <span class="title">norm</span><span class="params">(x, lsize, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.lrn(x, lsize, bias=<span class="number">1.0</span>, alpha=<span class="number">0.001</span> / <span class="number">9.0</span>, beta=<span class="number">0.75</span>, name=name)
+
+weights = {
+    <span class="string">'wc1'</span>: weight_variable([<span class="number">5</span>, <span class="number">5</span>, <span class="number">3</span>, <span class="number">32</span>]),
+    <span class="string">'wc2'</span>: weight_variable([<span class="number">5</span>, <span class="number">5</span>, <span class="number">32</span>, <span class="number">32</span>]),
+    <span class="string">'wc3'</span>: weight_variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">32</span>, <span class="number">32</span>]),
+    <span class="string">'wd1'</span>: weight_variable([<span class="number">4</span>*<span class="number">10</span>*<span class="number">32</span>, <span class="number">512</span>]),
+    <span class="string">'out1'</span>: weight_variable([<span class="number">512</span>, n_classes]),
+    <span class="string">'out2'</span>: weight_variable([<span class="number">512</span>, n_classes]),
+    <span class="string">'out3'</span>: weight_variable([<span class="number">512</span>, n_classes]),
+    <span class="string">'out4'</span>: weight_variable([<span class="number">512</span>, n_classes])
+}
+biases = {
+    <span class="string">'bc1'</span>: bias_variable([<span class="number">32</span>]),
+    <span class="string">'bc2'</span>: bias_variable([<span class="number">32</span>]),
+    <span class="string">'bc3'</span>: bias_variable([<span class="number">32</span>]),
+    <span class="string">'bd1'</span>: bias_variable([<span class="number">512</span>]),
+    <span class="string">'out1'</span>: bias_variable([n_classes]),
+    <span class="string">'out2'</span>: bias_variable([n_classes]),
+    <span class="string">'out3'</span>: bias_variable([n_classes]),
+    <span class="string">'out4'</span>: bias_variable([n_classes]),
+}
+
+<span class="function"><span class="keyword">def</span> <span class="title">ocr_net</span><span class="params">(_x, _weights, _biases)</span>:</span>
+    _x = tf.reshape(_x, shape=[-<span class="number">1</span>, <span class="number">30</span>, <span class="number">80</span>, <span class="number">3</span>])
+
+    conv1 = conv2d(_x, _weights[<span class="string">'wc1'</span>], _biases[<span class="string">'bc1'</span>], <span class="string">'conv1'</span>)
+    print_activations(conv1)
+    pool1 = max_pool(conv1, k=<span class="number">2</span>, name=<span class="string">'pool1'</span>)
+    print_activations(pool1)
+
+    conv2 = conv2d(pool1, _weights[<span class="string">'wc2'</span>], _biases[<span class="string">'bc2'</span>], <span class="string">'conv2'</span>)
+    print_activations(conv2)
+    pool2 = avg_pool(conv2, k=<span class="number">2</span>, name=<span class="string">'pool2'</span>)
+    print_activations(pool2)
+
+    conv3 = conv2d(pool2, _weights[<span class="string">'wc3'</span>], _biases[<span class="string">'bc3'</span>], <span class="string">'conv3'</span>)
+    print_activations(conv3)
+    pool3 = avg_pool(conv3, k=<span class="number">2</span>, name=<span class="string">'pool3'</span>)
+    print_activations(pool3)
+
+    pool3_flat = tf.reshape(pool3, [-<span class="number">1</span>, _weights[<span class="string">'wd1'</span>].get_shape().as_list()[<span class="number">0</span>]])
+    fc1 = tf.nn.relu(tf.matmul(pool3_flat, _weights[<span class="string">'wd1'</span>]) + _biases[<span class="string">'bd1'</span>], name=<span class="string">'fc1'</span>)
+    print_activations(fc1)
+
+    fc21 = tf.nn.relu(tf.matmul(fc1, _weights[<span class="string">'out1'</span>]) + _biases[<span class="string">'out1'</span>], name=<span class="string">'fc21'</span>)
+    print_activations(fc21)
+
+    fc22 = tf.nn.relu(tf.matmul(fc1, _weights[<span class="string">'out2'</span>]) + _biases[<span class="string">'out2'</span>], name=<span class="string">'fc22'</span>)
+    print_activations(fc22)
+
+    fc23 = tf.nn.relu(tf.matmul(fc1, _weights[<span class="string">'out3'</span>]) + _biases[<span class="string">'out3'</span>], name=<span class="string">'fc23'</span>)
+    print_activations(fc23)
+
+    fc24 = tf.nn.relu(tf.matmul(fc1, _weights[<span class="string">'out4'</span>]) + _biases[<span class="string">'out4'</span>], name=<span class="string">'fc24'</span>)
+    print_activations(fc24)
+
+    out = tf.concat(axis=<span class="number">1</span>, values=[fc21, fc22, fc23, fc24], name=<span class="string">'out'</span>)
+    print_activations(out)
+    <span class="keyword">return</span> out
+
+<span class="function"><span class="keyword">def</span> <span class="title">accuracy_func</span><span class="params">(_pred, _y)</span>:</span>
+    y = tf.reshape(_y, shape=[-<span class="number">1</span>, <span class="number">4</span>, <span class="number">62</span>])
+    pred = tf.reshape(_pred, shape=[-<span class="number">1</span>, <span class="number">4</span>, <span class="number">62</span>])
+    correct_pred = tf.equal(tf.argmax(pred,<span class="number">2</span>), tf.argmax(y,<span class="number">2</span>))
+    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+    <span class="keyword">return</span> accuracy
+
+pred = ocr_net(x, weights, biases)
+
+cost = -tf.reduce_mean(y*tf.log(pred))
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+
+<span class="comment">#correct_pred = tf.equal(tf.argmax(pred,2), tf.argmax(y,2))</span>
+<span class="comment">#accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))</span>
+accuracy = accuracy_func(pred, y)
+
+init = tf.global_variables_initializer()
+
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = <span class="keyword">True</span>
+
+<span class="keyword">with</span> tf.Session(config=config) <span class="keyword">as</span> sess:
+    sess.run(init)
+    step = <span class="number">1</span><span class="comment"># Keep training until reach max iterations</span>
+    <span class="keyword">while</span> step * batch_size &lt; training_iters:
+        batch = data_train.next_batch(batch_size)
+        <span class="comment"># Fit training using batch data</span>
+        sess.run(optimizer, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>]})
+        <span class="keyword">if</span> step % display_step == <span class="number">0</span>:
+            <span class="comment"># Calculate batch accuracy</span>
+            acc = sess.run(accuracy, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>]})
+            <span class="comment"># Calculate batch loss</span>
+            loss = sess.run(cost, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>]})
+            <span class="keyword">print</span> <span class="string">"Iter "</span> + str(step*batch_size) + <span class="string">", Minibatch Loss= "</span> + <span class="string">"{:.6f}"</span>.format(loss) + <span class="string">", Training Accuracy= "</span> + <span class="string">"{:.5f}"</span>.format(acc)
+        step += <span class="number">1</span>
+    <span class="keyword">print</span> <span class="string">"Optimization Finished!"</span>
+
+    test_batch = data_test.next_batch(<span class="number">500</span>)
+    <span class="keyword">print</span> <span class="string">"Testing Accuracy:"</span>, sess.run(accuracy, feed_dict={x: test_batch[<span class="number">0</span>], y: test_batch[<span class="number">1</span>]})
+</code></pre><h2 id="预测">预测</h2><p>tbd</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-captcha/" data-id="cj3hb05xb001e3cfhdcg180hw" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-tensorflow-cnn" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/28/tensorflow-cnn/" class="article-date">
+  <time datetime="2016-05-28T09:16:03.000Z" itemprop="datePublished">2016-05-28</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/05/28/tensorflow-cnn/">tensorflow学习（四）自己创建CNN网络</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>之前已经介绍过数据的加载和可视化的问题，这次该研究模型了。CNN网络应该是深度学习的一个经典了，话不多说，直接介绍核心模块。</p>
+<h2 id="权重初始化">权重初始化</h2><pre><code><span class="function"><span class="keyword">def</span> <span class="title">weight_variable</span><span class="params">(shape)</span>:</span>
+    initial = tf.truncated_normal(shape, dtype=tf.float32, stddev=<span class="number">0.1</span>)
+    <span class="keyword">return</span> tf.Variable(initial)
+
+<span class="function"><span class="keyword">def</span> <span class="title">bias_variable</span><span class="params">(shape)</span>:</span>
+    initial = tf.constant(<span class="number">0.1</span>, shape=shape)
+    <span class="keyword">return</span> tf.Variable(initial, trainable=<span class="keyword">True</span>)
+
+weights = {
+    <span class="string">'wc1'</span>: weight_variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">64</span>]),
+    <span class="string">'wc2'</span>: weight_variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">64</span>, <span class="number">128</span>]),
+    <span class="string">'wd1'</span>: weight_variable([<span class="number">4</span>*<span class="number">4</span>*<span class="number">12</span>, <span class="number">1024</span>]),
+    <span class="string">'wd2'</span>: weight_variable([<span class="number">1024</span>, <span class="number">1024</span>]),
+    <span class="string">'out'</span>: weight_variable([<span class="number">1024</span>, <span class="number">10</span>])
+}
+biases = {
+    <span class="string">'bc1'</span>: bias_variable([<span class="number">64</span>]),
+    <span class="string">'bc2'</span>: bias_variable([<span class="number">128</span>]),
+    <span class="string">'bd1'</span>: bias_variable([<span class="number">1024</span>]),
+    <span class="string">'bd2'</span>: bias_variable([<span class="number">1024</span>]),
+    <span class="string">'out'</span>: bias_variable([n_classes])
+}
+</code></pre><h2 id="卷积层">卷积层</h2><p>这里的卷积参数使用1步长（stride size），0边距（padding size）的模板，保证输出和输入是同一个大小。</p>
+<pre><code>def <span class="function"><span class="title">conv2d</span><span class="params">(x, W, B, name)</span></span>:
+    with tf.<span class="function"><span class="title">name_scope</span><span class="params">(name)</span></span> as scope:
+        conv = tf<span class="class">.nn</span><span class="class">.conv2d</span>(x, W, strides=[<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>], <span class="attribute">padding</span>=<span class="string">'SAME'</span>)
+        bias = tf<span class="class">.nn</span><span class="class">.bias_add</span>(conv, B)
+        conv = tf<span class="class">.nn</span><span class="class">.relu</span>(bias, name=scope)
+        return conv
+
+conv1 = <span class="function"><span class="title">conv2d</span><span class="params">(images, weights[<span class="string">'wc1'</span>], biases[<span class="string">'bc1'</span>], <span class="string">'conv1'</span>)</span></span>
+</code></pre><p>tensorflow里的padding参数支持<code>SAME</code>和<code>VALID</code>两种模式，设输入矩阵大小为<code>W*W</code>，卷积滤波器大小<code>F*F</code>，步长stride大小为<code>S</code>，则</p>
+<pre><code><span class="preprocessor"># padding = <span class="string">'VALID'</span></span>
+new_height = new_width = (W – F + <span class="number">1</span>) / S (结果向上取整)
+<span class="preprocessor"># padding = <span class="string">'SAME'</span></span>
+pad_needed_height = (new_height – <span class="number">1</span>) × S + F - W (结果向上取整，并在四周添加像素)
+</code></pre><p>当new_height为奇数的时候，在顶部贴两个像素，在底部贴3个像素，而caffe和cuDNN是在两边各贴两个像素。这点不同，导致用caffe训练的模型转tensorflow的时候要慎用‘SAME’模式，切记！</p>
+<h2 id="池化">池化</h2><p>池化分为均值池化<code>tf.nn.avg_pool</code>和max池化<code>tf.nn.max_pool</code>。这里的池化用简单传统的2x2大小的模板做max pooling。</p>
+<pre><code><span class="function"><span class="keyword">def</span> <span class="title">max_pool</span><span class="params">(x, k, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.max_pool(x, ksize=[<span class="number">1</span>, k, k, <span class="number">1</span>], strides=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>, name=name)
+
+<span class="function"><span class="keyword">def</span> <span class="title">avg_pool</span><span class="params">(x, k, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.avg_pool(x, ksize=[<span class="number">1</span>, k, k, <span class="number">1</span>], strides=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>, name=name)
+
+pool1 = max_pool(conv1, k=<span class="number">2</span>, <span class="string">'pool1'</span>)
+</code></pre><h2 id="归一化">归一化</h2><pre><code><span class="function"><span class="keyword">def</span> <span class="title">norm</span><span class="params">(x, lsize, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.lrn(x, lsize, bias=<span class="number">1.0</span>, alpha=<span class="number">0.001</span> / <span class="number">9.0</span>, beta=<span class="number">0.75</span>, name=name)
+
+norm1 = norm(pool1, lsize=<span class="number">4</span>, <span class="string">'norm1'</span>)
+</code></pre><h2 id="全连接层">全连接层</h2><p>现在加一个1024维的全连接层，在池化层和全连接层连接处要将池化层输出的张量reshape成一向量</p>
+<pre><code>pool2_flat = tf.<span class="function"><span class="title">reshape</span><span class="params">(pool2, [-<span class="number">1</span>, weights[<span class="string">'wd1'</span>].get_shape()</span></span>.<span class="function"><span class="title">as_list</span><span class="params">()</span></span>[<span class="number">0</span>]])
+</code></pre><p>乘上权重矩阵，加上偏置，然后对其使用ReLU。</p>
+<pre><code>fc1 = tf<span class="class">.nn</span><span class="class">.relu</span>(tf.<span class="function"><span class="title">matmul</span><span class="params">(pool2_flat, weights[<span class="string">'wd1'</span>])</span></span> + biases[<span class="string">'bd1'</span>])
+</code></pre><h2 id="Dropout">Dropout</h2><p>用一个placeholder来代表一个神经元的输出在dropout中保持不变的概率。这样我们可以在训练过程中启用dropout，在测试过程中关闭dropout。 tensorflow学习（四）创建自己的CNN网络及可视化<code>tf.nn.dropout</code>操作除了可以屏蔽神经元的输出外，还会自动处理神经元输出值的scale。所以用dropout的时候可以不用考虑scale。</p>
+<pre><code>keep_prob = tf.<span class="function"><span class="title">placeholder</span><span class="params">(<span class="string">"float"</span>)</span></span>
+fc1_drop = tf<span class="class">.nn</span><span class="class">.dropout</span>(fc1, keep_prob)
+</code></pre><h2 id="Batch_Normalization">Batch Normalization</h2><p>《Batch Normalization: Accelerating Deep Network Training by  Reducing Internal Covariate Shift》文章中的batch normalization可以提高训练的收敛速度，甚至可以不使用dropout和L2正则就能取得很好的泛化能力，参考中文资料<a href="http://blog.csdn.net/happynear/article/details/44238541" target="_blank" rel="external">http://blog.csdn.net/happynear/article/details/44238541</a>。具体需要计算每个batch在该层所有特征图的均值和标准差，然后将上一层的输出归一化之后再送入下一层。</p>
+<p>具体在tensorflow中，用<code>tf.nn.moments</code>求出axes对应的特征图维度的均值<code>mean</code>和标准差<code>variance</code>，然后用<code>tf.nn.batch_normalization</code>进行归一化，其中<code>offset</code>一般初始化为0，<code>scale</code>初始化为1，另外offset、scale的shape与mean相同，<code>variance_epsilon</code>这个参数设为一个很小的数就行，比如0.001。<br>需要强调一点的是，BN在神经网络进行training和testing的时候，所用的mean、variance是不一样的！以上的batch_normalization在训练的时候有效，测试阶段，只有一个样本输入，这时候网络参数固定，用之前训练好的均值和标准差作为参数传入即可。类似图片样本测试时候需要先减去均值，而这个均值文件是由训练样本生成的，差不多的道理。有一个不错的代码实现<a href="http://r2rt.com/implementing-batch-normalization-in-tensorflow.html" target="_blank" rel="external">http://r2rt.com/implementing-batch-normalization-in-tensorflow.html</a></p>
+<pre><code>def <span class="function"><span class="title">batch_norm_wrapper</span><span class="params">(inputs, is_training, decay = <span class="number">0.999</span>)</span></span>:
+    scale = tf.<span class="function"><span class="title">Variable</span><span class="params">(tf.ones([inputs.get_shape()</span></span>[-<span class="number">1</span>]]))
+    beta = tf.<span class="function"><span class="title">Variable</span><span class="params">(tf.zeros([inputs.get_shape()</span></span>[-<span class="number">1</span>]]))
+    pop_mean = tf.<span class="function"><span class="title">Variable</span><span class="params">(tf.zeros([inputs.get_shape()</span></span>[-<span class="number">1</span>]]), trainable=False)
+    pop_var = tf.<span class="function"><span class="title">Variable</span><span class="params">(tf.ones([inputs.get_shape()</span></span>[-<span class="number">1</span>]]), trainable=False)
+
+    <span class="keyword">if</span> is_training:
+        batch_mean, batch_var = tf<span class="class">.nn</span><span class="class">.moments</span>(inputs,[<span class="number">0</span>])
+        train_mean = tf.<span class="function"><span class="title">assign</span><span class="params">(pop_mean, pop_mean * decay + batch_mean * (<span class="number">1</span> - decay)</span></span>)
+        train_var = tf.<span class="function"><span class="title">assign</span><span class="params">(pop_var, pop_var * decay + batch_var * (<span class="number">1</span> - decay)</span></span>)
+        with tf.<span class="function"><span class="title">control_dependencies</span><span class="params">([train_mean, train_var])</span></span>:
+            return tf<span class="class">.nn</span><span class="class">.batch_normalization</span>(inputs, batch_mean, batch_var, beta, scale, epsilon)
+    <span class="keyword">else</span>:
+        return tf<span class="class">.nn</span><span class="class">.batch_normalization</span>(inputs, pop_mean, pop_var, beta, scale, epsilon)
+
+bn_z1 = <span class="function"><span class="title">batch_norm_wrapper</span><span class="params">(z1, is_training)</span></span>
+</code></pre><h2 id="输出层">输出层</h2><p>普通输出层</p>
+<pre><code>out = tf.<span class="function"><span class="title">matmul</span><span class="params">(fc2_drop, _weights[<span class="string">'out'</span>])</span></span> + _biases[<span class="string">'out'</span>]
+</code></pre><p>使用softmax层</p>
+<pre><code>out = tf<span class="class">.nn</span><span class="class">.softmax</span>(tf.<span class="function"><span class="title">matmul</span><span class="params">(fc2_drop, weights[<span class="string">'out'</span>])</span></span> + biases[<span class="string">'out'</span>])
+</code></pre><h2 id="训练">训练</h2><p>定义损失函数，这里要注意在输出层是否使用了softmax，这里不要重复使用。这里使用的损失函数是真实值y与预测值y_pred之间的交叉熵。注意<code>tf.reduce_sum</code>是把minibatch里的每张图的交叉熵都加进来的。</p>
+<pre><code>y_pred = tf<span class="class">.nn</span><span class="class">.softmax</span>(pred)
+cost = -tf.<span class="function"><span class="title">reduce_sum</span><span class="params">(y * tf.log(y_pred)</span></span>)
+</code></pre><p>或者调用系统函数更为方便，如下</p>
+<pre><code>cost = tf.<span class="function"><span class="title">reduce_mean</span><span class="params">(tf.nn.softmax_cross_entropy_with_logits(pred, y)</span></span>)
+</code></pre><p>tensorflow有大量的微分迭代优化算法，来对交叉熵进行梯度下降。</p>
+<pre><code>optimizer = tf<span class="class">.train</span><span class="class">.GradientDescentOptimizer</span>(learning_rate=learning_rate).<span class="function"><span class="title">minimize</span><span class="params">(cost)</span></span>
+optimizer = tf<span class="class">.train</span><span class="class">.AdamOptimizer</span>(learning_rate=learning_rate).<span class="function"><span class="title">minimize</span><span class="params">(cost)</span></span>
+</code></pre><p>模型训练通过反复执行optimizer来更新参数：</p>
+<pre><code>with tf.<span class="function"><span class="title">Session</span><span class="params">()</span></span> as sess:
+    sess.<span class="function"><span class="title">run</span><span class="params">(init)</span></span>
+    <span class="keyword">for</span> <span class="tag">i</span> <span class="keyword">in</span> <span class="function"><span class="title">range</span><span class="params">(<span class="number">1000</span>)</span></span>:
+        batch = mnist<span class="class">.train</span><span class="class">.next_batch</span>(<span class="number">50</span>)
+        sess.<span class="function"><span class="title">run</span><span class="params">(optimizer, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>], keep_prob: dropout})</span></span>
+</code></pre><p>tensorflow的<code>Session</code>和<code>InteractiveSession</code>方式不同。前者是构建完图对象后，通过run()整体执行全部操作，并通过close()释放资源。后者更为方便的进行交互，使用<code>Tensor.eval()</code>和<code>Operation.run()</code>方法代替<code>Session.run()</code>。在DQN这类算法中由于每次迭代都需要交互，所以使用<code>InteractiveSession</code>。</p>
+<h2 id="评估模型">评估模型</h2><p>通过<code>tf.argmax</code>函数获得输出层中的最大值的索引位置，并将所有的测试样本的结果取平均值得到测试集上的准确率。注意在测试集中dropout参数设置为1，也就是没有dropout。</p>
+<pre><code>correct_pred = tf.<span class="function"><span class="title">equal</span><span class="params">(tf.argmax(pred,<span class="number">1</span>)</span></span>, tf.<span class="function"><span class="title">argmax</span><span class="params">(y,<span class="number">1</span>)</span></span>)
+accuracy = tf.<span class="function"><span class="title">reduce_mean</span><span class="params">(tf.cast(correct_pred, tf.float32)</span></span>)
+acc = sess.<span class="function"><span class="title">run</span><span class="params">(accuracy, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>], keep_prob: <span class="number">1</span>.})</span></span>
+</code></pre><h2 id="MyNet网络完整训练代码">MyNet网络完整训练代码</h2><pre><code><span class="keyword">from</span> tensorflow.examples.tutorials.mnist <span class="keyword">import</span> input_data
+mnist = input_data.read_data_sets(<span class="string">'MNIST_data'</span>, one_hot=<span class="keyword">True</span>)
+
+<span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf
+<span class="comment"># Parameters</span>
+learning_rate = <span class="number">0.001</span>
+training_iters = <span class="number">200000</span>
+batch_size = <span class="number">64</span>
+display_step = <span class="number">20</span>
+
+<span class="comment"># Network Parameters</span>
+n_input = <span class="number">784</span> <span class="comment"># MNIST data input (img shape: 28*28)</span>
+n_classes = <span class="number">10</span> <span class="comment"># MNIST total classes (0-9 digits)</span>
+dropout = <span class="number">0.8</span> <span class="comment"># Dropout, probability to keep units</span>
+
+<span class="comment"># tf Graph input</span>
+x = tf.placeholder(tf.float32, [<span class="keyword">None</span>, n_input])
+y = tf.placeholder(tf.float32, [<span class="keyword">None</span>, n_classes])
+keep_prob = tf.placeholder(tf.float32) <span class="comment"># dropout (keep probability)</span>
+
+<span class="function"><span class="keyword">def</span> <span class="title">weight_variable</span><span class="params">(shape)</span>:</span>
+    initial = tf.truncated_normal(shape, dtype=tf.float32, stddev=<span class="number">0.1</span>)
+    <span class="keyword">return</span> tf.Variable(initial)
+
+<span class="function"><span class="keyword">def</span> <span class="title">bias_variable</span><span class="params">(shape)</span>:</span>
+    initial = tf.constant(<span class="number">0.1</span>, shape=shape)
+    <span class="keyword">return</span> tf.Variable(initial, trainable=<span class="keyword">True</span>)
+
+<span class="function"><span class="keyword">def</span> <span class="title">conv2d</span><span class="params">(x, W, B, name)</span>:</span>
+    <span class="keyword">with</span> tf.name_scope(name) <span class="keyword">as</span> scope:
+        conv = tf.nn.conv2d(x, W, strides=[<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>)
+        bias = tf.nn.bias_add(conv, B)
+        conv = tf.nn.relu(bias, name=scope)
+        <span class="keyword">return</span> conv
+
+<span class="function"><span class="keyword">def</span> <span class="title">max_pool</span><span class="params">(x, k, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.max_pool(x, ksize=[<span class="number">1</span>, k, k, <span class="number">1</span>], strides=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>, name=name)
+
+<span class="function"><span class="keyword">def</span> <span class="title">avg_pool</span><span class="params">(x, k, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.avg_pool(x, ksize=[<span class="number">1</span>, k, k, <span class="number">1</span>], strides=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>, name=name)
+
+<span class="function"><span class="keyword">def</span> <span class="title">norm</span><span class="params">(x, lsize, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.lrn(x, lsize, bias=<span class="number">1.0</span>, alpha=<span class="number">0.001</span> / <span class="number">9.0</span>, beta=<span class="number">0.75</span>, name=name)
+
+<span class="function"><span class="keyword">def</span> <span class="title">my_net</span><span class="params">(_x, _weights, _biases, _dropout)</span>:</span>
+    _x = tf.reshape(_x, shape=[-<span class="number">1</span>, <span class="number">28</span>, <span class="number">28</span>, <span class="number">1</span>])
+
+    conv1 = conv2d(_x, _weights[<span class="string">'wc1'</span>], _biases[<span class="string">'bc1'</span>], <span class="string">'conv1'</span>)
+    pool1 = max_pool(conv1, k=<span class="number">2</span>, name=<span class="string">'pool1'</span>)
+    norm1 = norm(pool1, lsize=<span class="number">4</span>, name=<span class="string">'norm1'</span>)
+
+    conv2 = conv2d(norm1, _weights[<span class="string">'wc2'</span>], _biases[<span class="string">'bc2'</span>], <span class="string">'conv2'</span>)
+    pool2 = max_pool(conv2, k=<span class="number">2</span>, name=<span class="string">'pool2'</span>)
+    norm2 = norm(pool2, lsize=<span class="number">4</span>, name=<span class="string">'norm2'</span>)
+
+    pool2_flat = tf.reshape(norm2, [-<span class="number">1</span>, _weights[<span class="string">'wd1'</span>].get_shape().as_list()[<span class="number">0</span>]])
+    fc1 = tf.nn.relu(tf.matmul(pool2_flat, _weights[<span class="string">'wd1'</span>]) + _biases[<span class="string">'bd1'</span>])
+    fc1_drop = tf.nn.dropout(fc1, _dropout)
+
+    fc2 = tf.nn.relu(tf.matmul(fc1_drop, _weights[<span class="string">'wd2'</span>]) + _biases[<span class="string">'bd2'</span>])
+    fc2_drop = tf.nn.dropout(fc2, _dropout)
+
+    out = tf.matmul(fc2_drop, _weights[<span class="string">'out'</span>]) + _biases[<span class="string">'out'</span>]
+    <span class="keyword">return</span> out
+
+weights = {
+    <span class="string">'wc1'</span>: weight_variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">64</span>]),
+    <span class="string">'wc2'</span>: weight_variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">64</span>, <span class="number">128</span>]),
+    <span class="string">'wd1'</span>: weight_variable([<span class="number">7</span>*<span class="number">7</span>*<span class="number">128</span>, <span class="number">1024</span>]),
+    <span class="string">'wd2'</span>: weight_variable([<span class="number">1024</span>, <span class="number">1024</span>]),
+    <span class="string">'out'</span>: weight_variable([<span class="number">1024</span>, <span class="number">10</span>])
+}
+biases = {
+    <span class="string">'bc1'</span>: bias_variable([<span class="number">64</span>]),
+    <span class="string">'bc2'</span>: bias_variable([<span class="number">128</span>]),
+    <span class="string">'bd1'</span>: bias_variable([<span class="number">1024</span>]),
+    <span class="string">'bd2'</span>: bias_variable([<span class="number">1024</span>]),
+    <span class="string">'out'</span>: bias_variable([n_classes])
+}
+
+<span class="comment"># Construct model</span>
+pred = my_net(x, weights, biases, keep_prob)
+
+<span class="comment"># Define loss and optimizer</span>
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(pred, y))
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+
+<span class="comment"># Evaluate model</span>
+correct_pred = tf.equal(tf.argmax(pred,<span class="number">1</span>), tf.argmax(y,<span class="number">1</span>))
+accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
+<span class="comment"># Initializing the variables</span>
+init = tf.initialize_all_variables()
+
+<span class="comment"># Launch the graph</span>
+<span class="keyword">with</span> tf.Session() <span class="keyword">as</span> sess:
+    sess.run(init)
+    step = <span class="number">1</span><span class="comment"># Keep training until reach max iterations</span>
+    <span class="keyword">while</span> step * batch_size &lt; training_iters:
+        batch = mnist.train.next_batch(batch_size)
+        <span class="comment"># Fit training using batch data</span>
+        sess.run(optimizer, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>], keep_prob: dropout})
+        <span class="keyword">if</span> step % display_step == <span class="number">0</span>:
+            <span class="comment"># Calculate batch accuracy</span>
+            acc = sess.run(accuracy, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>], keep_prob: <span class="number">1.</span>})
+            <span class="comment"># Calculate batch loss</span>
+            loss = sess.run(cost, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>], keep_prob: <span class="number">1.</span>})
+            <span class="keyword">print</span> <span class="string">"Iter "</span> + str(step*batch_size) + <span class="string">", Minibatch Loss= "</span> + <span class="string">"{:.6f}"</span>.format(loss) + <span class="string">", Training Accuracy= "</span> + <span class="string">"{:.5f}"</span>.format(acc)
+        step += <span class="number">1</span>
+    <span class="keyword">print</span> <span class="string">"Optimization Finished!"</span>
+    <span class="comment"># Calculate accuracy for 256 mnist test images</span>
+    <span class="keyword">print</span> <span class="string">"Testing Accuracy:"</span>, sess.run(accuracy, feed_dict={x: mnist.test.images[:<span class="number">256</span>], y: mnist.test.labels[:<span class="number">256</span>], keep_prob: <span class="number">1.</span>})
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/05/28/tensorflow-cnn/" data-id="cj3hb05wp001b3cfh818ewyzp" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-tensorflow-tensorboard" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/23/tensorflow-tensorboard/" class="article-date">
+  <time datetime="2016-05-23T14:30:31.000Z" itemprop="datePublished">2016-05-23</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/05/23/tensorflow-tensorboard/">tensorflow学习（三）TensorBoard可视化</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>利用TensorBoard可以更好的了解深度学习训练过程以及参数的变化。思想是将tensorflow中的图的节点通过summary操作汇总到一起，再通过Ssummary.FileWriter写进protobuf，最后通过TensorBoard展示可视化结果。</p>
+<h2 id="Summary操作">Summary操作</h2><pre><code>tf<span class="class">.summary</span><span class="class">.scalar</span>(name, values, collections=None)
+tf<span class="class">.summary</span><span class="class">.image</span>(name, tensor, max_outputs=None, collections=None)
+tf<span class="class">.summary</span><span class="class">.histogram</span>(name, values, collections=None)
+tf<span class="class">.summary</span><span class="class">.merge</span>(inputs, collections=None, name=None)
+tf<span class="class">.summary</span><span class="class">.merge_all</span>(key=<span class="string">'summaries'</span>)
+</code></pre><p>其中<code>summary.scalar</code>显示任意一个向量的数据，比如学习率或者loss。<br>其中<code>summary.image</code>可以显示节点中的4维的ndarray的数据。<br>其中<code>summary.histogram</code>用来显示多个数据的分布情况<br>以上创建的节点通过<code>merge_all</code>进行汇总合并。</p>
+<h2 id="SummaryWriter类">SummaryWriter类</h2><p>通过合并汇总后的protobuf对象传递给<code>tf.summary.FileWriter</code>。其参数<code>logdir</code>指定事件存储路径，<code>add_graph</code>方法控制显示的图像。并通过session.run和<code>add_summary</code><br>写入。</p>
+<h2 id="Demo">Demo</h2><p>这里我们用一个loss accuracy做一个summary的TensorBoard的demo，代码如下：</p>
+<pre><code># normal step
+<span class="label">...</span>
+<span class="label">init</span> = tf.global_variables_initializer()
+
+<span class="label">tf.summary.scalar</span>(<span class="string">'loss'</span>, cost)
+<span class="label">tf.summary.scalar</span>(<span class="string">'accuracy'</span>, accuracy)
+<span class="label">merged_summary_op</span> = tf.summary.merge_all()
+
+<span class="label">with</span> tf.Seesion() as sess:
+    sess.run(init)
+
+    summary_writer = tf.summary.FileWriter(<span class="string">'/tmp/logs'</span>)
+    summary_writer.<span class="keyword">add_graph(sess.graph)
+</span>
+    <span class="preprocessor">while</span> step * <span class="keyword">batch_size </span>&lt; training_iters:
+        <span class="keyword">batch_xs, </span><span class="keyword">batch_ys </span>= mnist.train.next_batch(<span class="keyword">batch_size)
+</span>        sess.run(optimizer, feed_dict={x: <span class="keyword">batch_xs, </span>y: <span class="keyword">batch_ys, </span>keep_prob: dropout})
+        <span class="preprocessor">if</span> step % display_step == <span class="number">0</span>:
+            acc = sess.run(accuracy, feed_dict={x: <span class="keyword">batch_xs, </span>y: <span class="keyword">batch_ys, </span>keep_prob: <span class="number">1</span>.})
+            loss = sess.run(cost, feed_dict={x: <span class="keyword">batch_xs, </span>y: <span class="keyword">batch_ys, </span>keep_prob: <span class="number">1</span>.})
+
+            summary_str = sess.run(merged_summary_op, feed_dict={x: <span class="keyword">batch_xs, </span>y: <span class="keyword">batch_ys, </span>keep_prob: <span class="number">1</span>.})
+            summary_writer.<span class="keyword">add_summary(summary_str, </span>step)
+
+        step += <span class="number">1</span>
+</code></pre><h2 id="启动TensorBoard">启动TensorBoard</h2><p>执行命令：</p>
+<pre><code>python tensorflow<span class="regexp">/tensorboard/</span>tensorboard.py --logdir=<span class="regexp">/tmp/</span>logs
+</code></pre><p>或者直接执行</p>
+<pre><code>tensorboard <span class="comment">--logdir=/tmp/logs</span>
+</code></pre><p>然后通过浏览器打开<code>localhost:6006</code>，出来可视化界面后，就简单直观了，enjoy it！</p>
+<h2 id="tips">tips</h2><ul>
+<li>之前我的cnn代码里有valid_prediction，所以画出来的graph有两条分支，不太清晰，所以只留了train一个分支</li>
+<li>多用with，进行包裹，这样才好看，正如官网说的，你的summary代码决定了你的图结构</li>
+<li>不是所有的tensor都有必要记录，但是Variable和placeholder最好都用summary记录一下，也是为了好看</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cj3hb05u2000n3cfhsryrqe5y" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-tensorflow-data" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/19/tensorflow-data/" class="article-date">
+  <time datetime="2016-05-19T12:50:29.000Z" itemprop="datePublished">2016-05-19</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/05/19/tensorflow-data/">tensorflow学习（二）数据接口</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>网上的教程、官方的资料大多关注的都是如何使用模型，对于数据源的说明都比较简单。基本资料都是用的MNIST数据集做的实验。</p>
+<h2 id="供给数据概述">供给数据概述</h2><p>tensorflow的模型数据读取还是非常友好的，最适合大量的数据的变量操作的形式应该是feed机制，利用<code>tf.placeholder()</code>为操作的变量创建占位符，在<code>run()</code>或<code>eval()</code>的时候调用参数，将变量x和其真实标签y_传入模型。代码如下：</p>
+<pre><code>mnist = input_data.<span class="function"><span class="title">read_data_sets</span><span class="params">(<span class="string">'MNIST_data'</span>, one_hot=True)</span></span>
+
+...
+
+x = tf.<span class="function"><span class="title">placeholder</span><span class="params">(<span class="string">"float"</span>, shape=[None, <span class="number">784</span>])</span></span>
+y_ = tf.<span class="function"><span class="title">placeholder</span><span class="params">(<span class="string">"float"</span>, shape=[None, <span class="number">10</span>])</span></span>
+
+...
+
+<span class="keyword">for</span> <span class="tag">i</span> <span class="keyword">in</span> <span class="function"><span class="title">range</span><span class="params">(<span class="number">1000</span>)</span></span>:
+    batch = mnist<span class="class">.train</span><span class="class">.next_batch</span>(<span class="number">50</span>)
+    train_step.<span class="function"><span class="title">run</span><span class="params">(feed_dict={x:batch[<span class="number">0</span>], y_: batch[<span class="number">1</span>]})</span></span>
+</code></pre><p>上述代码解析：<br>首先将图像数据转换到4维的uint8的ndarray类型数组<code>[index, y, x, depth]</code>。标签数据根据是否为one_hot，转换为一个uint8的整型数值或者变成一个只有一个数值为1，其他维度为0的向量。然后将这样的数据标签对保存为tensorflow的DataSet类中。本例中这样的操作通过<code>mnist = input_data.read_data_sets(&#39;MNIST_data&#39;, one_hot=True)</code>实现。然后将这样的数据通过占位符feed进模型。</p>
+<h2 id="读取文件列表">读取文件列表</h2><p>我们可以通过一个文件列表来读入数据，之前都是通过python的glob来读取文件列表，也可以通过<code>tf.train.match_filenames_once</code>产生文件列表，然后交给<code>tf.train.string_input_producer</code>产生合适大小和是否乱序的文件名队列。</p>
+<h2 id="读取文件">读取文件</h2><h3 id="图片文件">图片文件</h3><p>读入后为numpy的<code>array</code>格式，范围<code>[-1,1]</code>，通道为<code>[H,W,channels]</code>，代码如下</p>
+<pre><code><span class="function"><span class="keyword">def</span> <span class="title">imread</span><span class="params">(self, file_name)</span>:</span>
+    <span class="comment">#    image : an image with type np.float32 in range [-1, 1]</span>
+    <span class="comment">#    of size (H x W x 3) in RGB or</span>
+    <span class="comment">#    of size (H x W x 1) in grayscale.</span>
+    img = skimage.img_as_float(skimage.io.imread(file_name, as_grey=<span class="keyword">False</span>)).astype(np.float32)
+    img = img*<span class="number">2.0</span> - <span class="number">1.0</span>
+    img_resize = skimage.transform.resize(img, (width, height, <span class="number">3</span>))
+    img_resize = img_resize[:, :, (<span class="number">2</span>,<span class="number">1</span>,<span class="number">0</span>)]
+    <span class="keyword">return</span> img_resize
+</code></pre><h3 id="csv文件">csv文件</h3><p>使用<code>tf.TextLineReader</code>读取文件的一行内容，然后通过<code>tf.decode_csv</code>来解析这一行内容并将其转为张量列表</p>
+<h3 id="二进制文件读取固定长度">二进制文件读取固定长度</h3><p>从二进制文件中读取固定长度纪录， 可以使用<code>tf.FixedLengthRecordReader</code>的<code>tf.decode_raw</code>操作。<code>decode_raw</code>操作可以讲一个字符串转换为一个uint8的张量。例程中的cifar-10的数据集的读入就是通过这个方式。</p>
+<h3 id="标准TensorFlow格式TFRecords文件">标准TensorFlow格式TFRecords文件</h3><p>将数据填入到Example协议内存块(protocol buffer)，将协议内存块序列化为一个字符串，并且通过<code>tf.python_io.TFRecordWriter</code>写入到TFRecords文件。通过传参images和labels将数据和标签数据保存到tfrecords中，代码如下：</p>
+<pre><code><span class="function"><span class="keyword">def</span> <span class="title">_int64_feature</span><span class="params">(value)</span>:</span>
+    <span class="keyword">return</span> tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+
+<span class="function"><span class="keyword">def</span> <span class="title">_bytes_feature</span><span class="params">(value)</span>:</span>
+    <span class="keyword">return</span> tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+
+<span class="function"><span class="keyword">def</span> <span class="title">convert_to</span><span class="params">(images, labels, name)</span>:</span>
+    num_examples = labels.shape[<span class="number">0</span>]
+    <span class="keyword">if</span> images.shape[<span class="number">0</span>] != num_examples:
+        <span class="keyword">raise</span> ValueError(<span class="string">"Images size %d does not match label size %d."</span> % (images.shape[<span class="number">0</span>], num_examples))
+    rows = images.shape[<span class="number">1</span>]
+    cols = images.shape[<span class="number">2</span>]
+    depth = images.shape[<span class="number">3</span>]
+
+    filename = os.path.join(FLAGS.directory, name + <span class="string">'.tfrecords'</span>)
+    print(<span class="string">'Writing'</span>, filename)
+    writer = tf.python_io.TFRecordWriter(filename)
+    <span class="keyword">for</span> index <span class="keyword">in</span> range(num_examples):
+        image_raw = images[index].tostring()
+        example = tf.train.Example(features=tf.train.Features(feature={
+            <span class="string">'height'</span>: _int64_feature(rows),
+            <span class="string">'width'</span>: _int64_feature(cols),
+            <span class="string">'depth'</span>: _int64_feature(depth),
+            <span class="string">'label'</span>: _int64_feature(int(labels[index])),
+            <span class="string">'image_raw'</span>: _bytes_feature(image_raw)}))
+        writer.write(example.SerializeToString())
+    writer.close()
+</code></pre><p>从TFRecords文件中读取数据，可以使用<code>tf.TFRecordReader</code>的<code>tf.parse_single_example</code>解析器。这个<code>parse_single_example</code>操作可以将Example协议内存块(protocol buffer)解析为张量。通过train参数传入TFRecords文件返回值是图像标签对。代码如下：</p>
+<pre><code><span class="function"><span class="keyword">def</span> <span class="title">read_and_decode</span><span class="params">(filename_queue)</span>:</span>
+    reader = tf.TFRecordReader()
+    _, serialized_example = reader.read(filename_queue)
+    features = tf.parse_single_example(
+        serialized_example,
+        <span class="comment"># Defaults are not specified since both keys are required.</span>
+        features={
+            <span class="string">'image_raw'</span>: tf.FixedLenFeature([], tf.string),
+            <span class="string">'label'</span>: tf.FixedLenFeature([], tf.int64),
+        })
+
+    <span class="comment"># Convert from a scalar string tensor (whose single string has</span>
+    <span class="comment"># length mnist.IMAGE_PIXELS) to a uint8 tensor with shape</span>
+    <span class="comment"># [mnist.IMAGE_PIXELS].</span>
+    image = tf.decode_raw(features[<span class="string">'image_raw'</span>], tf.uint8)
+    image.set_shape([mnist.IMAGE_PIXELS])
+
+    <span class="comment"># Convert from [0, 255] -&gt; [-0.5, 0.5] floats.</span>
+    image = tf.cast(image, tf.float32) * (<span class="number">1.</span> / <span class="number">255</span>) - <span class="number">0.5</span>
+    <span class="comment"># Convert label from a scalar uint8 tensor to an int32 scalar.</span>
+    label = tf.cast(features[<span class="string">'label'</span>], tf.int32)
+
+    <span class="keyword">return</span> image, label
+
+
+<span class="function"><span class="keyword">def</span> <span class="title">inputs</span><span class="params">(train, batch_size, num_epochs)</span>:</span>
+    <span class="keyword">if</span> <span class="keyword">not</span> num_epochs: num_epochs = <span class="keyword">None</span>
+    filename = os.path.join(FLAGS.train_dir, TRAIN_FILE <span class="keyword">if</span> train <span class="keyword">else</span> VALIDATION_FILE)
+
+    <span class="keyword">with</span> tf.name_scope(<span class="string">'input'</span>):
+        filename_queue = tf.train.string_input_producer([filename], num_epochs=num_epochs)
+        image, label = read_and_decode(filename_queue)
+
+        <span class="keyword">return</span> image, label
+</code></pre><h2 id="批处理">批处理</h2><p>TBD</p>
+<h2 id="创建线程并使用QueueRunner对象来预取">创建线程并使用QueueRunner对象来预取</h2><p>TBD</p>
+<h2 id="训练模型保存和恢复">训练模型保存和恢复</h2><p>通过实例化一个<code>tf.train.Saver</code>来实现模型的保存。</p>
+<pre><code>saver = tf<span class="class">.train</span><span class="class">.Saver</span>()
+saver.<span class="function"><span class="title">save</span><span class="params">(sess, FLAGS.train_dir, global_step=step)</span></span>
+</code></pre><p>在训练循环中，将定期调用<code>saver.save()</code>方法，向训练文件夹中写入包含了当前所有可训练参数的检查点文件。<br>恢复检查点的时候使用<code>saver.restore()</code>方法，重载模型的参数，继续训练。</p>
+<pre><code>saver.<span class="function"><span class="title">restore</span><span class="params">(sess, FLAGS.train_dir)</span></span>
+</code></pre><h2 id="参考资料">参考资料</h2><p><a href="http://wiki.jikexueyuan.com/project/tensorflow-zh/how_tos/reading_data.html" target="_blank" rel="external">http://wiki.jikexueyuan.com/project/tensorflow-zh/how_tos/reading_data.html</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cj3hb05vt00183cfhd3f6oyya" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-tensorflow-install" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/20/tensorflow-install/" class="article-date">
+  <time datetime="2016-04-20T12:46:00.000Z" itemprop="datePublished">2016-04-20</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/04/20/tensorflow-install/">tensorflow学习（一）安装配置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>tensorflow是google开源的深度学习平台，由于其性能比较差，一开始我是拒绝的，不过由于google强大的影响力和执行力，版本迭代更新很快，现在性能已经很快了，而且最新的版本也支持了分布式。而且tensorflow的中文文档也是所有开源框架里最完善的，所以近期抽空学习一下。还是先从安装搞起。<br>虽然其有比较完善的官方文档<a href="https://www.tensorflow.org/" target="_blank" rel="external">https://www.tensorflow.org/</a>以及其中文版本<a href="http://wiki.jikexueyuan.com/project/tensorflow-zh/" target="_blank" rel="external">http://wiki.jikexueyuan.com/project/tensorflow-zh/</a>，但使用的时候还是发现存在一些坑，还是记录一下学习过程中遇到的问题。<br>tensorflow支持pip、virtualenv、Docker三种安装方式。我这里只尝试了最简单方便的pip安装。</p>
+<h2 id="安装环境">安装环境</h2><p>我的电脑是centOS 7.0，k40双卡</p>
+<h2 id="CUDA和cudnn">CUDA和cudnn</h2><p>参考之前教程，安装CUDA和cudnn。我这里的CUDA版本是7.0，cudnn版本是v3。<br>再安装six和protobuf到对应版本，tensorflow要求’six &gt;= 1.10.0, protobuf &gt;= 3.0.0b2’，网上下载对应的whl包，执行</p>
+<pre><code><span class="tag">pip</span> <span class="tag">install</span> <span class="tag">six-1</span><span class="class">.10</span><span class="class">.0-py2</span><span class="class">.py3-none-any</span><span class="class">.whl</span>
+<span class="tag">pip</span> <span class="tag">install</span> <span class="tag">protobuf</span>
+</code></pre><h2 id="pip安装tensorflow">pip安装tensorflow</h2><p>根据官方教程，应该执行如下命令</p>
+<pre><code><span class="comment"># 仅使用 CPU 的版本</span>
+pip install <span class="symbol">https:</span>/<span class="regexp">/storage.googleapis.com/tensorflow</span><span class="regexp">/linux/cpu</span><span class="regexp">/tensorflow-0.7.1-cp27-none-linux_x86_64.whl
+# 开启 GPU 支持的版本 (安装该版本的前提是已经安装了 CUDA sdk)
+pip install https:/</span><span class="regexp">/storage.googleapis.com/tensorflow</span><span class="regexp">/linux/gpu</span><span class="regexp">/tensorflow-0.7.1-cp27-none-linux_x86_64.whl</span>
+</code></pre><p>但是由于GFW原因，上述命令可能会超时失败，于是寻找其他whl包的位置。<br>在官方的github上很容易找到其对应的安装版本。<a href="https://github.com/tensorflow/tensorflow" target="_blank" rel="external">https://github.com/tensorflow/tensorflow</a>，我这里使用的版本是python2的GPU版本。</p>
+<pre><code># 开启 GPU 支持的版本 (安装该版本的前提是已经安装了 CUDA sdk)
+pip <span class="operator"><span class="keyword">install</span> <span class="keyword">http</span>://ci.tensorflow.org/<span class="keyword">view</span>/Nightly/job/nigntly-matrix-linux-gpu/TF_BUILD_CONTAINER_TYPE=GPU,TF_BUILD_IS_OPT=OPT,TF_BUILD_IS_PIP=PIP,TF_BUILD_PYTHON_VERSION=PYTHON2,label=gpu-<span class="keyword">slave</span>/lastSuccessfulBuild/artifact/pip_test/whl/tensorflow-<span class="number">0.7</span><span class="number">.1</span>-cp27-<span class="keyword">none</span>-linux_x86_64.whl</span>
+</code></pre><p>安装成功。<br>但是在<code>import tensorflow</code>的时候会报错说ImportError: libcudart.so.7.5: cannot open shared object file: No such file or directory，可恶，我明明装的是CUDA7.0，竟然报错找不到7.5，解决这个问题也很简单，只需要把7.0做个软链接弄个名7.5骗过tensorflow就行，代码如下：</p>
+<pre><code>sudo ln -s <span class="regexp">/usr/</span>local<span class="regexp">/cuda/</span>lib64<span class="regexp">/libcudart.so.7.0 /u</span>sr<span class="regexp">/local/</span>cuda<span class="regexp">/lib64/</span>libcudart.so.<span class="number">7.5</span>
+sudo ln -s <span class="regexp">/usr/</span>local<span class="regexp">/cuda/</span>lib64<span class="regexp">/libcublas.so.7.0 /u</span>sr<span class="regexp">/local/</span>cuda<span class="regexp">/lib64/</span>libcublas.so.<span class="number">7.5</span>
+</code></pre><h2 id="运行tensorflow">运行tensorflow</h2><p>在python终端执行如下代码：</p>
+<pre><code>import tensorflow as tf
+hello = tf.<span class="function"><span class="title">constant</span><span class="params">(<span class="string">'Hello, TensorFlow!'</span>)</span></span>
+sess = tf.<span class="function"><span class="title">Session</span><span class="params">()</span></span>
+print sess.<span class="function"><span class="title">run</span><span class="params">(hello)</span></span>
+<span class="tag">a</span> = tf.<span class="function"><span class="title">constant</span><span class="params">(<span class="number">10</span>)</span></span>
+<span class="tag">b</span> = tf.<span class="function"><span class="title">constant</span><span class="params">(<span class="number">32</span>)</span></span>
+print sess.<span class="function"><span class="title">run</span><span class="params">(a+b)</span></span>
+</code></pre><p>顺利运行表明tensorflow安装完成。</p>
+<h2 id="源码路径以及示例">源码路径以及示例</h2><p>由于我的python是anaconda版本，所以tensorflow会安装在’$HOME/anaconda/lib/python2.7/site-packages/tensorflow’。<br>运行第一个示例，如下：</p>
+<pre><code>cd <span class="variable">$HOME</span>/anaconda/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">tensorflow</span></span>
+python ./models/image/mnist/convolutional.py
+</code></pre><p>程序会下载mnist数据集，迭代训练，显示当前loss、学习率以及误差。</p>
+<h2 id="GLIBC的版本问题解决方案">GLIBC的版本问题解决方案</h2><p>在CentOS/RHEL 6的操作系统中，GLIBC的版本可能不满足tensorflow的要求，在<code>import tensorflow</code>的时候会报错</p>
+<pre><code>ImportError: /lib64/libc.<span class="keyword">so</span>.6: <span class="keyword">version</span> `GLIBC_2.15' not found (required <span class="keyword">by</span> /home/15072585/anaconda/lib/python2.7/site-packages/tensorflow/python/_pywrap_tensorflow.<span class="keyword">so</span>)
+</code></pre><p>通过命令查看<code>/lib64/libc.so.6</code>的GLIBC版本：</p>
+<pre><code>strings <span class="regexp">/lib64/</span>libc.so.<span class="number">6</span> |<span class="keyword">grep</span> GLIBC
+</code></pre><p>可以看到其只支持到2.12，不能支持高版本。解决方案：</p>
+<pre><code>mkdir ~/my_libc_env
+cd ~/my_libc_env
+wget http:<span class="comment">//launchpadlibrarian.net/137699828/libc6_2.17-0ubuntu5_amd64.deb</span>
+wget http:<span class="comment">//launchpadlibrarian.net/137699829/libc6-dev_2.17-0ubuntu5_amd64.deb</span>
+wget ftp:<span class="comment">//rpmfind.net/linux/sourceforge/m/ma/magicspecs/apt/3.0/x86_64/RPMS.lib/libstdc++-4.8.2-7mgc30.x86_64.rpm</span>
+ar p libc6_2<span class="number">.17</span>-<span class="number">0u</span>buntu5_amd64.deb data.tar.gz | tar zx
+ar p libc6-dev_2<span class="number">.17</span>-<span class="number">0u</span>buntu5_amd64.deb data.tar.gz | tar zx
+rpm2cpio libstdc++-<span class="number">4.8</span><span class="number">.2</span>-<span class="number">7</span>mgc30.x86_64.rpm| cpio -idmv
+</code></pre><p>以后想执行支持tensorflow的python版本的时候需要执行命令：</p>
+<pre><code><span class="constant">LD_LIBRARY_PATH</span>=<span class="string">"$HOME/my_libc_env/lib/x86_64-linux-gnu/:$HOME/my_libc_env/usr/lib64/"</span> <span class="variable">$HOME</span>/my_libc_env/<span class="class"><span class="keyword">lib</span>/<span class="title">x86_64</span>-<span class="title">linux</span>-<span class="title">gnu</span>/<span class="title">ld</span>-2.17.<span class="title">so</span> `<span class="title">which</span> <span class="title">python</span>`</span>
+</code></pre><h3 id="GLIBC版本升级注意事项">GLIBC版本升级注意事项</h3><p>注意GLIBC这是一个根本的库，不能轻易升级。非要升级的话，首先查看当前的libc的指向</p>
+<pre><code>ll /lib64/libc<span class="class">.so</span>.<span class="number">6</span>
+</code></pre><p>获取高级版本的libc.so，比如/lib64/libc-2.15.so，这个步骤非常繁琐，编译生成很麻烦。我是通过从另外高级版本的机器copy过来使用的，所以没有生成，过程隐去。<br>接下来就是将软链接指向新的libc，实际操作注意rm原来的链接之后，系统的大部分命令都无法使用了，要用<code>LD_PRELOAD=/lib64/libc-2.15.so</code>指定所使用的libc才能运行shell命令。代码如下：</p>
+<pre><code>rm -rf /lib64/libc.so.<span class="number">6</span>
+LD_PRELOAD=<span class="regexp">/lib64/libc</span>-<span class="number">2.15</span>.so ln -<span class="regexp">s/lib64/libc-2.15.so  lib64/libc</span>.so.<span class="number">6</span>
+</code></pre><h1 id="基于源码安装(不建议)">基于源码安装(不建议)</h1><h2 id="安装jdk">安装jdk</h2><p>bazel依赖于jdk，网上都是安装JDK 8，由于centos默认是JDK 7，并且我们项目用的java版本也是1.7，所以去bazel官网看了一下，也是支持JDK 7的。所以这里没安装java</p>
+<h2 id="安装bazel">安装bazel</h2><pre><code>git clone http<span class="variable">s:</span>//github.<span class="keyword">com</span>/bazelbuild/bazel.git
+<span class="keyword">cd</span> bazel
+./compile.<span class="keyword">sh</span>
+sudo
+<span class="keyword">cp</span> output/bazel /usr/local/bin/
+</code></pre><h2 id="编译tensorflow">编译tensorflow</h2><pre><code>git clone <span class="symbol">https:</span>/<span class="regexp">/github.com/tensorflow</span><span class="regexp">/tensorflow
+cd tensorflow
+./configure</span>
+<span class="comment"># choose with Google Cloud Platform / with GPU</span>
+bazel build -c opt --config=cuda /<span class="regexp">/tensorflow/tools</span><span class="regexp">/pip_package:build_pip_package
+bazel-bin/tensorflow</span><span class="regexp">/tools/pip</span>_package/build_pip_package /tmp/tensorflow_pkg
+pip install /tmp/tensorflow_pkg/tensorflow-<span class="number">0.10</span>.<span class="number">0</span>-py2-none-any.whl
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cj3hb05v9000z3cfhi0khc2q2" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
   
 </section>

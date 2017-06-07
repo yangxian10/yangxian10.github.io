@@ -65,174 +65,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-panns-nnsearch" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-单反拍摄入门" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/04/11/panns-nnsearch/" class="article-date">
-  <time datetime="2016-04-11T13:01:36.000Z" itemprop="datePublished">2016-04-11</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/04/11/panns-nnsearch/">高维海量数据快速检索库</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="falconn">falconn</h1><p>这个库使用的是局部敏感哈希构建索引。效率较高。</p>
-<h3 id="python实现">python实现</h3><p>官方的api文档<a href="https://falconn-lib.org/pdoc/falconn/" target="_blank" rel="external">https://falconn-lib.org/pdoc/falconn/</a>其实非常详细，这里把其中关键的地方再提炼一下。<br>安装非常简单</p>
-<pre><code>pip <span class="keyword">install</span> falconn
-</code></pre><p>数据准备，需要将所有的索引特征存储到一个numpy的二维array中，其中每行代表一个数据，行数表示数据点数，列表示特征维度。注意，最好把数据转换为float32数据类型，提高算法性能，并将数据归一化减去均值，提高算法性能。具体操作如下</p>
-<pre><code>dataset = dataset.<span class="function"><span class="title">astype</span><span class="params">(numpy.float32)</span></span>
-dataset -= numpy.<span class="function"><span class="title">mean</span><span class="params">(dataset, axis=<span class="number">0</span>)</span></span>
-</code></pre><p>构建哈希超参数，将数据维度和点数传入<code>get_default_parameters</code>获得合适的超参数，得到的超参数可以通过手动微调或者<code>compute_number_of_hash_functions</code>来对其中细节进行微调。</p>
-<pre><code>num_points, dim = dataset<span class="class">.shape</span>
-parms = falconn.<span class="function"><span class="title">get_default_parameters</span><span class="params">(num_points, dim)</span></span>
-falconn.<span class="function"><span class="title">compute_number_of_hash_functions</span><span class="params">(<span class="number">7</span>, parms)</span></span>
-</code></pre><p>创建索引实例<code>LSHIndex</code>，并通过方法<code>setup</code>构建索引。</p>
-<pre><code>lsh_index = falconn.<span class="function"><span class="title">LSHIndex</span><span class="params">(parms)</span></span>
-lsh_index.<span class="function"><span class="title">setup</span><span class="params">(dataset)</span></span>
-</code></pre><p>查询的函数有很多，可以根据需要进行选择</p>
-<pre><code><span class="function"><span class="title">find_k_nearest_neighbors</span><span class="params">()</span></span>
-<span class="function"><span class="title">find_near_neighbors</span><span class="params">()</span></span>
-<span class="function"><span class="title">find_nearest_neighbor</span><span class="params">()</span></span>
-<span class="function"><span class="title">get_candidates_with_duplicates</span><span class="params">()</span></span>
-<span class="function"><span class="title">get_unique_candidates</span><span class="params">()</span></span>
-</code></pre><h3 id="C++实现">C++实现</h3><p>TBD</p>
-<h1 id="Panns">Panns</h1><p><a href="https://github.com/ryanrhymes/panns" target="_blank" rel="external">https://github.com/ryanrhymes/panns</a>这是一个用python写的针对高维数据的approximate k-nearest neighbors算法包，目前支持欧式距离和余弦距离两种度量。对500维以上的高维特征进行了优化。虽然性能弱于Annoy，但是更加轻量，比FLANN和scikit-learn更为好用</p>
-<h3 id="安装">安装</h3><pre><code>sudo pip <span class="operator"><span class="keyword">install</span> panns <span class="comment">--upgrade</span></span>
-</code></pre><h3 id="使用示例">使用示例</h3><pre><code><span class="keyword">from</span> panns import *
-
-# <span class="keyword">create</span> an <span class="keyword">index</span> <span class="keyword">of</span> Euclidean distance
-p = PannsIndex(dimension=<span class="number">100</span>, metric=<span class="string">'euclidean'</span>)
-
-# generate a <span class="number">1000</span> x <span class="number">100</span> dataset
-<span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="number">1000</span>):
-    v = gaussian_vector(<span class="number">100</span>)
-    p.add_vector(v)
-
-p.parallelize(<span class="keyword">True</span>)        # 多核并行，默认是<span class="keyword">False</span>
-# build an <span class="keyword">index</span> <span class="keyword">of</span> <span class="number">128</span> trees <span class="keyword">and</span> save <span class="keyword">to</span> a file
-p.build(<span class="number">128</span>)    # <span class="number">64</span> <span class="keyword">is</span> <span class="keyword">default</span>
-</code></pre><p>build之后调用save函数保存生成的索引，会生成两个文件<em>.idx保存索引树和</em>.idx.npy保存数据库向量矩阵，这个向量矩阵可以保存成内存文件或者mmap文件，根据如下注释选取保存类型。这两个文件要放在同一个目录下面，加载模型的时候才不会出错。</p>
-<pre><code># save the index as an in-memory file if the raw dataset is small or medium size
-# later panns will <span class="operator"><span class="keyword">load</span> the entire .npy <span class="keyword">file</span> <span class="keyword">in</span> <span class="keyword">to</span> the <span class="keyword">physical</span> <span class="keyword">memory</span>
-<span class="keyword">p</span>.<span class="keyword">save</span>(<span class="string">'test.idx'</span>, mmap=<span class="literal">False</span>)
-
-# <span class="keyword">save</span> the <span class="keyword">index</span> <span class="keyword">as</span> mmap <span class="keyword">file</span> <span class="keyword">if</span> the <span class="keyword">raw</span> dataset <span class="keyword">is</span> huge
-# usually, your OS will handle the dynamic loading
-<span class="keyword">p</span>.<span class="keyword">save</span>(<span class="string">'test.idx'</span>, mmap=<span class="literal">True</span>)</span>
-</code></pre><p>加载模型，查询索引，返回最近邻的前10个查询结果</p>
-<pre><code>p1 = <span class="function"><span class="title">PannsIndex</span><span class="params">(metric=<span class="string">'euclidean'</span>)</span></span>
-p1.<span class="function"><span class="title">load</span><span class="params">(<span class="string">'test.idx'</span>)</span></span>
-v1 = <span class="function"><span class="title">a_new_vector</span><span class="params">(<span class="number">100</span>)</span></span>
-n = p1.<span class="function"><span class="title">query</span><span class="params">(v1, <span class="number">10</span>)</span></span>
-</code></pre><h1 id="Annoy">Annoy</h1><p><a href="https://github.com/spotify/annoy" target="_blank" rel="external">https://github.com/spotify/annoy</a>这是一个用C++编写的python打包的最近邻搜索算法包，应该是目前性能最好的算法包。</p>
-<h3 id="安装-1">安装</h3><pre><code>pip <span class="keyword">install</span> annoy
-</code></pre><h3 id="实例">实例</h3><p>tbd</p>
-<h2 id="参考资料">参考资料</h2><p><a href="http://yongyuan.name/blog/index-billion-deep-descriptors.html" target="_blank" rel="external">机器视觉：十亿规模的深度描述子如何有效索引</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cj3hb05zt001w3cfh86ht4xos" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nnsearch/">nnsearch</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-data-visualization" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/04/07/data-visualization/" class="article-date">
-  <time datetime="2016-04-07T14:39:17.000Z" itemprop="datePublished">2016-04-07</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/04/07/data-visualization/">数据可视化</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>经常看到网上一些样本分布图画的非常漂亮，不知道是怎么画出来的，在网上找到了一个好资料<a href="http://colah.github.io/posts/2014-10-Visualizing-MNIST/#raw_mnist" target="_blank" rel="external">http://colah.github.io/posts/2014-10-Visualizing-MNIST/#raw_mnist</a>，代码参考的这个<a href="https://www.oreilly.com/learning/an-illustrated-introduction-to-the-t-sne-algorithm" target="_blank" rel="external">https://www.oreilly.com/learning/an-illustrated-introduction-to-the-t-sne-algorithm</a>研究了一番总结一下。</p>
-<p>我们经常要分析一些高维特征的表现能力，由于我们人类只能理解二维、三维的东西，所以要把高维数据降到三维以内展示出来。</p>
-<h3 id="直观想法">直观想法</h3><p>最直观的想法，比如原数据有1000维，从中任意选择两维，然后画图，结果可想而知。</p>
-<h3 id="PCA">PCA</h3><p>一种改进办法就是选择更为合适的两个维度进行展示，于是选择PCA主成分分析，然后选择前两个主成分对应的维度作为可视化的两个维度。</p>
-<h2 id="降维优化算法">降维优化算法</h2><p>可视化的目标就是希望两个向量实际的距离能够跟显示的距离接近，本来向量距离远的显示的距离也远。这就变成了一个优化问题，这也是很多流形学习方法的目标。比较常用解决这个优化问题的方法有MDS和t-SNE</p>
-<h3 id="MDS">MDS</h3><p>结合代码分析，首先，加载必要模块</p>
-<pre><code>from sklearn <span class="preprocessor"><span class="keyword">import</span> manifold</span>
-<span class="preprocessor"><span class="keyword">import</span> matplotlib.pyplot as plt</span>
-<span class="preprocessor"><span class="keyword">import</span> seaborn</span>
-<span class="preprocessor"><span class="keyword">import</span> numpy as np</span>
-</code></pre><p>首先加载数据，用array存储数据以及对应标签。这里用scikit-learn中的digits手写字符数据集作为演示数据，加载之后，其data维度为1797<em>64，图片是8</em>8=64，target维度为1797*1，为0~9的整数。同时加载seaborn模块中的调色板，用这个模板生成的颜色比自己设计的要好看一些</p>
-<pre><code>from sklearn<span class="class">.datasets</span> import load_digits
-digits = <span class="function"><span class="title">load_digits</span><span class="params">()</span></span>
-palette = np.<span class="function"><span class="title">array</span><span class="params">(seaborn.color_palette(<span class="string">'hls'</span>, <span class="number">10</span>)</span></span>)
-x = digits<span class="class">.data</span>
-y = digits.target
-</code></pre><p>加载mds模型</p>
-<pre><code>mds = manifold.<span class="function"><span class="title">MDS</span><span class="params">(n_components=<span class="number">2</span>, max_iter=<span class="number">300</span>, eps=<span class="number">1</span>e-<span class="number">5</span>)</span></span>
-x_mds = mds.<span class="function"><span class="title">fit_transform</span><span class="params">(x)</span></span>
-</code></pre><p>画图</p>
-<pre><code>fig = plt.<span class="function"><span class="title">figure</span><span class="params">()</span></span>
-plt.<span class="function"><span class="title">scatter</span><span class="params">(x_mds[:,<span class="number">0</span>], x_mds[:,<span class="number">1</span>], c=palette[y])</span></span>
-plt.<span class="function"><span class="title">show</span><span class="params">()</span></span>
-</code></pre><h3 id="t-SNE">t-SNE</h3><p>加载数据与上一种方法相同，加载模型代码如下</p>
-<pre><code>tsne = manifold.<span class="function"><span class="title">TSNE</span><span class="params">(n_components=<span class="number">2</span>, learning_rate=<span class="number">1000.0</span>)</span></span>
-x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><span class="params">(x)</span></span>
-</code></pre><h2 id="显示动态流形变化图像">显示动态流形变化图像</h2><p>TBD</p>
-<h2 id="可视化参考资料">可视化参考资料</h2><p><a href="http://distill.pub/2016/misread-tsne/" target="_blank" rel="external">how to use t-SNE effectively</a><a href="https://yq.aliyun.com/articles/62946" target="_blank" rel="external">中文翻译</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cj3hb062q002z3cfh6hey2zv0" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/visualization/">visualization</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-good-site" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/03/30/good-site/" class="article-date">
-  <time datetime="2016-03-30T11:18:48.000Z" itemprop="datePublished">2016-03-30</time>
+    <a href="/2015/04/12/单反拍摄入门/" class="article-date">
+  <time datetime="2015-04-12T13:06:30.000Z" itemprop="datePublished">2015-04-12</time>
 </a>
     
   <div class="article-category">
@@ -247,7 +83,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/30/good-site/">good_site</a>
+      <a class="article-title" href="/2015/04/12/单反拍摄入门/">单反拍摄入门</a>
     </h1>
   
 
@@ -255,12 +91,83 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>在线简历生成网站<a href="https://cvmkr.com/" target="_blank" rel="external">https://cvmkr.com/</a><br>翻墙路由器的原理与实现<a href="http://drops.wooyun.org/papers/10177" target="_blank" rel="external">http://drops.wooyun.org/papers/10177</a></p>
+        <p><strong>单反相机拍摄入门技巧，各种环境拍摄参数设置</strong><br>大部分人之所以踏上摄影之路，几乎部是被单反相机及其附件的魅力所吸引。它完美神奇，使我们如获至宝，珍爱之极。我们通过它观察、取景、测光、测距、调焦，然后一按快门，“咔嗒”一声——瞬间的艺术就诞生了！ 甚至，不管单反相机多么昂贵，我们总是心甘情愿地增加投入。因此，经常留意各种广告，研究哪家商店出售什么产品，价格如何。我们凝视着照相器材商店的橱窗，宛如一个孩子驻足于玩具商店门前。我们还常常和摄影同伴们比镜头等等，体验着“我的比你的大”那种自我满足的心情。摄影家们常有这样一句话 “开始我们不过迷上了单反相机这个尤物， 而结果却爱上了摄影这门艺术。”</p>
+<h1 id="方法/步骤">方法/步骤</h1><h2 id="1-光圈优先大多用在拍人像以及风景时。">1.光圈优先大多用在拍人像以及风景时。</h2><p><strong>光圈优先就是手动定义光圈的大小，相机会根据这个光圈值确定快门速度。由于光圈的大小直接影响着景深，因此在平常的拍摄中此模式使用最为广泛。在拍摄人像时，我一般采用大光圈长焦距而达到虚化背景获取较浅景深的作用，这样可以突出主体。同时较大的光圈，也能得到较快的快门值，从而提高手持拍摄的稳定。在拍摄风景这一类的照片时，我往往采用较小的光圈，这样景深的范围比较广，可以使远处和近处的景物都清晰，同样这一点在拍摄夜景时也适用。</strong></p>
+<h2 id="2-快门优先多用于拍摄运动的物体上">2.快门优先多用于拍摄运动的物体上</h2><p>例如体育运动、行使中的车辆、瀑布、飞行中的物体、烟花、水滴等等。与光圈优先相反，快门优先是在手动定义快门的情况下通过相机测光而获取光圈值。快门优先多用于拍摄运动的物体上，特别是在体育运动拍摄中最常用。很多朋友在拍摄运动物体时发现，往往拍摄出来的主体是模糊的，这多半就是因为快门的速度不够快。在这种情况下你可以使用快门优先模式，大概确定一个快门值，然后进行拍摄。并且物体的运行一般都是有规律的，那么快门的数值也可以大概估计，例如拍摄行人，快门速度只需要1/125秒就差不多了，而拍摄下落的水滴则需要1/1000秒。</p>
+<h2 id="3-人像拍摄。">3.人像拍摄。</h2><p>首先，<strong>要用到长焦，3――4倍的长焦非常适合拍人像</strong>，广角端会使得人像有些变形，不好看，超过4倍甚至更长焦会使得人脸过于扁平，不够生动。<br>其次，<strong>光圈优先，选择大光圈，大光圈可以使得快门变快，减少晃动，并且使得背景尽可能的虚化。最好选择点测光，对人脸点测光，并使用曝光锁定</strong>。因为其他测光方式容易受到衣服颜色的影响，使得人脸曝光不正常。<br>最后，构图。<strong>人像最好占到1/3-1/2，并且脸部在上方1/3处（从下看是处）</strong>。这样拍出的人像片就会生动，有视觉的冲击力，让人看着好看。</p>
+<h2 id="4-怎样拍好微距。">4.怎样拍好微距。</h2><p>拍好微距，需要用光、构图讲究技巧。我们要掌握的是怎么把微距拍清楚，不要拍糊呢？注意以下两点就行了。首先，用三角架。手持不稳，放大之后总看到片糊，所以第一条，用三角架。其次，用自拍机。我们发现，即使用架，在按动快门时仍然带入了晃动，最好的办法，启动自拍机</p>
+<h2 id="5-曝光补偿的使用。">5.曝光补偿的使用。</h2><p>按动+ -键，就会出现曝光补偿调节条，左右键调整正负补偿及大小，一次1/3级。调整好后再按一次+ -键确定。那么，曝光补偿怎么应用呢？总起来讲，是白加黑减，白的环境下，测光有偏低的状况，需要增加，反之亦然。</p>
+<ol>
+<li>拍摄环境比较昏暗，需要增加亮度，而闪光灯无法起作用时，可对曝光进行补偿，适当增加曝光量。</li>
+<li><strong>被拍摄的白色物体在照片里看起来是灰色或不够白的时候，要增加曝光量，简单的说就是“越白越加”</strong>，这似乎与曝光的基本原则和习惯是背道而驰的，其实不然，这是因为相机的测光往往以中心的主体为偏重，白色的主体会让相机误以为很环境很明亮，因而曝光不足，这也是多数初学者易犯的通病.</li>
+<li>当你在一个很亮的背景前拍摄的时候，比如向阳的窗户前，逆光的景物等要增加曝光量或使用闪光灯。</li>
+<li>当你在海滩、雪地、阳光充足或一个白色背景前，拍摄人物的时候，要增加曝光量并使用闪光灯，否则主体反而偏暗。</li>
+<li>拍摄雪景的时候，背景光线被雪反射得特别强，相机的测光偏差特别大，此时要增加曝光量，否则白雪将变成灰色。</li>
+<li>拍摄黑色的物体，在照片里看和色变色发灰的时候，应该减小曝光量，使黑色更纯。</li>
+<li>当你在一个黑色背景前拍摄的时候，也需要降低一点曝光量以免主体曝光过度。</li>
+<li><strong>夜景拍摄，应该关闭闪光灯，提高曝光值，靠延长相机的曝光时间来取得灯火辉煌的效果，很多人感觉夜景拍摄能力很差，其实没有正确使用相机的曝光方法是重要原因之一。</strong></li>
+<li>阴天和大雾的时候，环境仍然是明亮的，但是实际物体的照度明显不足，如果不加曝光补偿则可能造成照片昏暗，适当的曝光补偿，加0.3到0.7可以使得景物亮度更加自然。<br>善于应用、合理使用曝光补偿，可以大大改善你的摄影作品的成功率，拍出画面清晰，亮度合适，观看舒适的照片，提高拍摄质量。</li>
+</ol>
+<h2 id="6-巧用屏幕上的网格线构图。">6.巧用屏幕上的网格线构图。</h2><p>我们知道，的黄金分割比例能给人美感。所以安排片中的兴趣点在4个焦点上，或在分割线上，就会给人视觉的美感。网格线就方便的给我们提供了这样的参照。除了以上注意黄金点构图外，还应注意以下几点：</p>
+<ol>
+<li>避免贯穿两边的直线，尤其要避免将照片分割成两部分的贯穿横线或竖线。</li>
+<li>地平线的处理。在风光作品里，地平线是经常出现的，为避免上下分割的效果，应设法打破地平线的平直，如利用云彩、远山、日出、日落或其它建筑物。此外，地平线的位置也应安排在趣味中心的分割线上，并且CX1应保持水平（有特殊创意另当别论）。</li>
+<li>拍摄运动的物体要给运动的前方留有一定的空间。当被摄体是运动的，观赏者的目光会习惯性地沿被摄体运动方向移动，如果运动的前方没有空间会给人压迫感。此外，通常被摄体注视的方向也应留有相对较大的空间。</li>
+</ol>
+<h2 id="7-太阳落山前或者阴天的拍摄。">7.太阳落山前或者阴天的拍摄。</h2><p>白天或者夜晚，都可以得到我们想要的效果，自动白平衡很准确。但只有太阳落山前后那段时间，或者阴云天气下，拍出的片子雾朦朦，很不理想。在这种情况下，需要调节白平衡，先扳到P档开始的手动档，按功能键，选到阴天，按功能键确定。如果还仍然不理想，请设置手动白平衡。</p>
+<h1 id="几种现场拍摄技巧">几种现场拍摄技巧</h1><h2 id="1-怎么在室内给孩子拍片。">1.怎么在室内给孩子拍片。</h2><p>首先用光圈优先，将光圈调整到最大；其次布置光线，虽然不能用闪光灯，我们可以将孩子带到窗户旁比较明亮的地方，如果晚上我们可以用台灯等光；孩子常会乱动，可以考虑手动调焦，先将点测光锁定，将焦距调整好后，然后半按住快门移动步伐，等待孩子出现有趣的可爱的表情时快速按下快门。</p>
+<h2 id="2-怎么做才能将背景虚化">2.怎么做才能将背景虚化</h2><p><strong>首先光圈优先，光圈调整到最大（即F后面的数值最小，比如F2.8）；焦距调大，越大虚化越好；安排前景的人或物离的背景远一些，越远虚化越好</strong>；如果以上仍然不理想，可以通过后期处理的方法做的直到满意。</p>
+<h2 id="3-怎样给婴儿拍片。">3.怎样给婴儿拍片。</h2><p>拍摄婴儿要记住，用婴儿感兴趣的东西吸引他，可以拍摄到更自然的表情。为保护婴儿的眼睛最好不使用闪光灯，可以将调整感光度到200，并在顺光的情况下拍摄。最好把孩子抱到光线好的地方，如果天气不好，可以用台灯布光。如果一定要使用闪光灯，最好在闪光灯上蒙上一块薄纸或纱布。拍摄的距离，50厘米到150厘米为宜，最好用长焦。可以从不同角度观察孩子的脸，力求找到一个更好看的角度。</p>
+<h2 id="4-从旅游车中的拍摄。">4.从旅游车中的拍摄。</h2><p>我们旅行的时候，在车内的时间也是旅行的一个重要组成部分，所以也可以成为很好的拍摄时间。同样的风景，从移动的车内拍与在车外拍，往往给人不同的感觉。在行驶的车内向外拍摄的时候，要注意以下几点：</p>
+<ol>
+<li>在拍摄的时候，不要把手腕架在窗框或者座位的靠背上，因为车辆在行驶中总会有些震颤，这样很容易造成和手颤一样的虚像。</li>
+<li>不要在阳光射入的窗口边拍摄，因为这样很容易在窗玻璃上有白衣服等等的反光。你可以要求临时换一下座位，拍完之后再回来。</li>
+<li>对于观光大巴来说，进行拍摄最合适的座位是最前面的座位。一是因为视野广，二是因为前面的玻璃经常清洗，所以最干净。而且前面的座位震颤也相对比后面的座位轻微一些。</li>
+</ol>
+<h2 id="5-为了表现毛的质感，最好使用自然光。">5.为了表现毛的质感，最好使用自然光。</h2><p>直射光和顺光都不容易表现质感，最好是逆光拍摄，质感是最强烈的。当阴影太强的时候，可能会需要补光。在晚上补光的时候，要注意使用红眼消除功能。动物的警戒性很高，所以不能追着撵着拍。在拍摄的时候，动作要慢、要柔和，不能操之过急。如果有时间，要尽量获得动物的信任，以求尽量靠近拍摄。</p>
+<h2 id="6-怎样拍好瀑布。">6.怎样拍好瀑布。</h2><ol>
+<li>快门速度，一般需要一个比较慢的速度，在1/60――1/10秒之间。具体还需要根据水量的大小，水量大快门可以快些，水量小快门可以慢些。</li>
+<li>尽量用广角拍。广角才会拍出气势。</li>
+<li>一般由下往上拍，尽量用低角度仰拍。</li>
+<li>正确曝光。用点测光来测试拍摄场景中最暗并且我能辨得清细节的地方，然后通过提高快门速度来调整两级光值。举个例子，如果测光显示石头的曝光组合是1/60s以及光圈f/5.6，你可以调到全手动档，其调整为1/15秒与光圈f/5.6。然后重新拍摄，拍出的照片会较黑，但细节部位仍是清楚的。</li>
+</ol>
+<h2 id="7-花卉拍摄。">7.花卉拍摄。</h2><p>对于拍花要讲究点技巧才能拍得好看，我们以前说过要在拍之前喷点水可以增加花的层次感以及娇翠欲滴的感觉，此外还应注意以下几点：</p>
+<ol>
+<li>测光方式最好用点测光，测花最亮的部分，使得花整体细节都能表现清楚。</li>
+<li>拍摄模式最好光圈优先，可以适当控制背景的虚化或者控制景深。</li>
+<li>拍摄角度，不要只拍正面，可同时拍不同角度的7、8张片。从而可以选择最漂亮的角度。</li>
+<li>背景。选择背景是深色（如很浓密的树叶、深色墙等）的花作为拍摄的对象。<br>用一大块黑色的布摆在花的背后，离花要远一点，近了要看见布纹。黑布摆的方法，可以直接平放在地上，也可以挂在花的背后，也可以把黑布蒙在一块板上立在花的背后。</li>
+</ol>
+<h1 id="注意事项">注意事项</h1><h2 id="突出主体。">突出主体。</h2><p>在拍摄之前，心里要像绘画前那样首先“立意”，考虑照片画面中，主要表现什么，被摄主体安排在什么地方。然后通过光线、色彩、线条、形态等造型手段，来达到突出主体的目的。2<br>视觉平衡。一幅构图达到视觉平衡的照片、能给人以稳定、协调的感觉。平衡有对称平衡及非对称平衡两种、非对称平衡的构图，往往比对称平衡的构图更富有动感。景物的大小、形状、重量和方向、以及M8色彩等都对视觉平衡有重要影响。</p>
+<h2 id="虚实相映。">虚实相映。</h2><p>虚实是指被摄主WX1体与空间前、后景的清晰、模糊的程度。运用的手法不外乎藏虚露实、虚实相间、虚宾实主、以虚托实。其目的是为了突出主体，渲染气氛，增强空间纵深感。实，主要是表现被摄对象的主体；虚、主要是表现被摄对象的陪体，以衬托主体，它是构成画面意境的重要环节。<br>讲究节奏与旋律摄影构图，被摄对象以相同或近似的形式交替出现，有条理地重复，便形成节奏；节奏如果表现出线条、舒畅、和谐、起伏等动态变化，就成为旋律，从而使画面优美、抒情而流畅。节奏与旋律是深化主题的重要环节，它们包含在线条、色彩、光线的反差与色调中。</p>
+<h2 id="线条运用。">线条运用。</h2><p>线条是构图的骨架。任何形象化的作品，都离不开线条。通常起线条作用的有树、草、电线杆、河流、波浪等，不同的线条能给人以不同的视觉形象，如水平线能表示稳定和宁静，垂直线能表示庄重和力量，斜行线则具有生气，活力和动感，曲线和波浪线显得柔弱、悠闲，富有吸引力；浓线重，淡线轻，粗线强，细线弱，实线静，虚线动，构图时可灵活地加以运用。</p>
+<h1 id="各种环境拍摄参数设置">各种环境拍摄参数设置</h1><h2 id="1、拍静止的小东西的特写">1、拍静止的小东西的特写</h2><p>用Av档，光圈最好在f5.6或以下，焦距最好50以上，尽量在1m以内拍摄，使背景虚化！光线好的话，iso100，光线不好的话，iso最好400以内。</p>
+<h2 id="2、拍人">2、拍人</h2><p><strong>基本都是使用较大的光圈（f5.6以内）、50mm以上的焦距，拍拍摄距离视全身、半身、大头照而定，使背景虚化，使用Av档！光线好的话，iso100，光线不好，iso400以内。</strong></p>
+<h2 id="3、拍景">3、拍景</h2><p>Av档，使用适当的光圈，f8以上吧，焦距随便，但是一般广角端都有畸变，酌情使用。</p>
+<h2 id="4、拍夜景">4、拍夜景</h2><p>上三角架，Av档，自定义白平衡或白炽灯，f8以上的光圈，小光圈可以使灯光出现星光的效果，使用反光板预升功能，减少按快门后，反光板抬起引起的机震；并用背带上的那个方盖子，盖住取景器，以避免杂光从后面进入影响画质；iso200以内，尽量使曝光时间加长，这样可以使一些无意走过的人从画面消失，不留下痕迹，净化场景！</p>
+<h2 id="5、拍烟花">5、拍烟花</h2><p>使用快门线，B快门，可以拍出多烟花重叠的效果！</p>
+<h2 id="6、拍运行的东西">6、拍运行的东西</h2><p>光线好的情况：Av档，光圈大小酌情处理；使用f8以上的光圈得到大景深效果，使用小光圈得到浅景深的效果；想拍很有动感的效果，可以使用Tv档，快门1/30左右，对焦按快门的同时，镜头以合适的速度追着对象移动，会出现很动感的效果！<br>       光线不好的话，只能酌情处理了，再加上使用追拍！</p>
+<h2 id="7、拍流水或喷泉">7、拍流水或喷泉</h2><p>使用Tv档。1/50左右的快门速度，可以拍出缎子的效果，如果使用太快的快门，喷泉拍出来就都是不连续的水滴了！</p>
+<h2 id="8、夜间人像留影">8、夜间人像留影</h2><p>上三角架，调节白平衡，自动或自定义白平衡；iso100-400；Av档，光圈f8左右，使用慢速同步闪光，后帘闪光模式；此时，闪光灯会闪两次，按下快门闪一次，曝光结束前会再闪一次，所以在闪两次前，人不要离开。这样拍出来可以使人物清晰，背景霓虹也很漂亮，不至于背景曝光不足而过暗。</p>
+<h1 id="Av光圈优先技巧">Av光圈优先技巧</h1><ol>
+<li>不管拍啥，除非要保持安全快门，不然别开最大光圈拍。</li>
+<li>拍风景请尽量使用F8~F11的光圈。</li>
+<li>拍人物及静物特写可使用最大光圈1~2级之光圈。</li>
+<li>安全快门请尽量控制在焦距倒数以上，广角端快门也要在1/30秒以上比较保险，若快门不足请提高光圈或iso。</li>
+</ol>
+<h1 id="测光方式">测光方式</h1><ol>
+<li>测光不要对着天空，不要对着最暗的地方，要去抓中间值。</li>
+<li>依照你拍的题材，善用测光模式（权衡测光，点测光，中央重点测光）。</li>
+<li>若遇到测光抓不准的时候，请用AE lock 对身边灰色的东西曝光锁定后再来拍摄。</li>
+<li>尽量别对白色或黑色物体测光，不然就请记得黑要减EV，白要加EV。</li>
+</ol>
+<h1 id="EV即曝光补偿">EV即曝光补偿</h1><p>曝光补偿也是一种曝光控制方式，一般常见在正负2-3EV左右，如果环境光源偏暗，即可增加曝光值以突显画面的清晰度。<br>小型数码相机大多通过菜单来调节曝光补偿：数码相机在拍摄的过程中，如果按下半截快门，液晶屏上就会显示和最终效果图差不多的图片，对焦，曝光一切启动。这个时候的曝光，正是最终图片的曝光度。图片如果明显偏亮或偏暗，说明相机的自动测光准确度有较大偏差，要强制进行曝光补偿，不过有的时候，拍摄时显示的亮度与实际拍摄结果有一定的出入。数码相机可以在拍摄后立即浏览画面，此时，可以更加准确的看到拍摄出来的画面的明暗程度，不会再有出入。如果拍摄结果明显偏亮或偏暗，则要重新拍摄，强制进行曝光补偿。拍摄环境比较昏暗，需要增加亮度，而闪光灯无法起作用时，可对曝光进行补偿，适当增加曝光量。进行曝光补偿的时候，如果照片过暗，要增加EV值，EV值每增加1.0，相当于摄入的光线量增加一倍，如果照片过亮，要减少EV值，EV值每减少1.0，相当于摄入的光线量减小一倍。按照不同的相机的补偿间隔可以以1/2或1/3的单位来调节。<br>被拍摄的白色物体在照片里看起来是灰色或不够白的时候，要增加曝光量，简单地说就是“越白越加”，这似乎与曝光的基本原则和习惯是背道而驰的，其实不然，这是因为相机的测光往往以中心的主体为偏重，白色的主体会让相机误以为很环境很明亮，因而曝光不足，这也是多数初学者易犯的通病。<br>由于相机的快门时间或光圈大小是有限的，因此并非总是能达到2EV的调整范围，因此曝光补偿也不是万能的，在过于暗的环境下仍然可能曝光不足，此时要考虑配合闪光灯或增加相机的iso感光灵敏度来提高画面亮度。</p>
+<p>注：佳能说明书上的光圈是指F数值，光圈越大，景深越大。<br>一般人们所说的光圈是指光圈孔径，和F数值成反比，光圈（孔径）越大，景深越小。<br>Av–光圈优先自动曝光。<br>Tv–快门优先自动曝光<br>AE-自动曝光<br>AF-自动对焦<br>AF-S–和SAF应该一样，是单次自动对焦。相对的是连续自动对焦。<br>MAF-监控AF，这个模式可以缩短对焦所需的时间。相机在快门按钮按下一半之前就会调整焦点，让您以调整好的焦点进行构图。将快门按钮按下一半，而且af 锁定完成时，焦点会被锁定。<br>EV-曝光值，通常在进行曝光补偿时会用到这个术语。<br>ISO-感光度，感光度每差一档，相当于光圈或者快门相应的一档曝光值。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cj3hb062a002n3cfhwujshmm3" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cj3hb05te00053cfhho85ed2p" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -272,14 +179,14 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
 
 
   
-    <article id="post-darknet-yolo" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-三万元搞定两室两厅装修攻略" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/03/25/darknet-yolo/" class="article-date">
-  <time datetime="2016-03-25T13:54:01.000Z" itemprop="datePublished">2016-03-25</time>
+    <a href="/2015/04/04/三万元搞定两室两厅装修攻略/" class="article-date">
+  <time datetime="2015-04-04T00:37:28.000Z" itemprop="datePublished">2015-04-04</time>
 </a>
     
   <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+    <a class="article-category-link" href="/categories/life/">life</a>
   </div>
 
   </div>
@@ -290,7 +197,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/25/darknet-yolo/">darknet学习（一）YOLO目标检测</a>
+      <a class="article-title" href="/2015/04/04/三万元搞定两室两厅装修攻略/">三万元搞定两室两厅装修攻略</a>
     </h1>
   
 
@@ -298,654 +205,93 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="darknet安装">darknet安装</h1><p>darknet的安装还是非常简单的，依赖只有cuda和opencv，安装好之后执行以下命令即可安装编译成功</p>
-<pre><code>git clone <span class="attribute">https</span>:<span class="regexp">//gi</span>thub.com/pjreddie/darknet.git
-cd darknet
-vim Makefile
-<span class="comment">######</span><span class="comment">######</span><span class="comment">#####[modify Makefile]
-GPU=1
-OPENCV=1
-OPTS=-Ofast  # 如果gcc版本过低，这里可能需要改成-O3
-###</span><span class="comment">######</span><span class="comment">######</span><span class="comment">##[close]</span>
-make
-</code></pre><h1 id="YOLO训练">YOLO训练</h1><h2 id="准备训练数据">准备训练数据</h2><p>检测算法需要对图像中的目标区域进行标注，我这里实验只准备了5个类别的检测数据，我用python基于OpenCV做了一个简单的标注工具，可以得到矩形左上角、右下角的坐标位置，代码如下：</p>
-<pre><code><span class="keyword">import</span> os
-<span class="keyword">import</span> cv2
-<span class="keyword">import</span> numpy <span class="keyword">as</span> np
-<span class="keyword">import</span> copy
-<span class="keyword">import</span> glob
-<span class="keyword">import</span> sys
+        <h1 id="三万元搞定两室两厅装修攻略">三万元搞定两室两厅装修攻略</h1><p>客厅作为家庭的门面，可是马虎不得，宁可卧室不装，客厅也不能落下。三万元就轻松搞定，简洁大方的客厅装修，足以提升你的居住档次！</p>
+<h2 id="省钱攻略">省钱攻略</h2><h3 id="省钱一">省钱一</h3><p>装房子有人说首要是设计，一定要找装修公司，实际不然的，现在淘宝等网站上有很多有关装修的图片，你可以自己对比，进行选择再稍加改动就可以用了，效果未必比装修公司的差。所以一开始，是选择装修公司还是自己找装修工游击队呢？我建议是如果你太忙就选公司，如果你每天还有些挤出来的时间，就选没有公司的装修包工头，俗称装修游击队，因为这样省钱，可以算的，装修公司在承揽到工程后，如果是大公司他有固定的工人，但价钱肯定贵，如果小公司，他养不起那么多固定的工人，当他承揽到工程时是临时找装修工的，他们从中收取管理费、材料回扣、图纸设计费等，而这些你完全可以自己做，不就省钱了，我家装修时是我从前到后负责管理，找了一个别人介绍的包工头。再说包工头，包工头最好是木工，因为装修里最有难度和技术的就是木工的活，有他在，他可以参与其中替你把关。在开工前谈好工钱情况，一般是按件收的，如处理墙面时一平方的单价、木工做一个电视背景墙多少钱等等，这样一目了然，最后形成文字打印双方签字，形成合同。</p>
+<p>装修开始前，需要材料，建议自己在给包工头包工程的时候，声明包工不包料，因为材料里利润也很大，让他给你开好材料单子，你自己去跑市场，而且尽量在一家大一点的建材店，为了能将所有的材料配齐，这样也是比多家店买划算，买材料的时候不要带装修工人去，因为他们有行规：只要有工人跟着就会给他们回扣，而回扣就是你自己的腰包里的钱。至于材料的好坏，我不建议买太好的，根据自己的情况，适中就可以了。而且先了解材料的价格，这就多跑几家货比三家后你自然就清楚了。对于卫生间、厨房阳台的瓷砖，在购买时建议不要买得花色过于分散，因为种类越多，浪费越大，浪费的可是钱啊！材料备好后，就开始施工了，首先先改造水电线路，建议水电的管线等材料尽量要品牌的、好的，因为是要埋在墙里或地里的，维修很麻烦，所以一次到位。</p>
+<h3 id="省钱三">省钱三</h3><p>装修时少不了油漆，在建材市场里油漆的利润还是比较大的，要尽量在一家买，可以砍价。另外油漆的种类很多，我建议不要买他们的所谓高档货，没有必要，不要被卖家的介绍给忽悠了，什么可以擦洗几万次什么的，谁闲得没有事做天天擦。中档就很好了，只要是在国家质量检验局能查到的就可以，我用的是什么还是不在这里写了有做广告的嫌疑，有兴趣的可以直接旺我好了。而且一定要砍价。油漆可以省很多钱的。告诉大家可能不信，我家处理的墙面大概230平方，木工用的木器漆记不大清楚了，合起来一共只花了2600元</p>
+<h3 id="省钱四">省钱四</h3><p>厨房的橱柜建议让木工做柜体架子，自己到橱柜店订门，做出来既好看耐用又省钱，卖得整体橱柜，质量好的太贵、便宜的不耐用质量差。</p>
+<h3 id="省钱五">省钱五</h3><p>最后装的是地板，我家是直接到厂家订货，用的是竹地板，江西产的，至于牌子还是不能在这写，有需要旺我就好了。我家里有人认识厂老板105/平方含运费。如果你是偏南方的建议用竹地板，它与复合地板、实木地板相比最耐用、最好打理、最环保、较经济的，复合板中胶的含量较高，而胶中的有害物质较多，不利于挥发，对身体不好，当然，其他地板中也有胶，只不过要少一些。而实木地板价位较高而且不易打理。当然若用地板砖就另当别论了。</p>
+<h3 id="省钱六">省钱六</h3><p>装修中用到的有些东西可以淘宝淘的，如水龙头、洗菜盆、花洒、墙贴、壁纸、小摆件等</p>
+<h3 id="省钱七">省钱七</h3><p>最后一个建议：尽量借着过节的时机去订装修的用品，如卫生间的卫生洁具、厨房橱柜、厨具、灯具、室内门等用具，这样会有很高的折扣的，比如五一、十一、元旦、春节等大型节日，(<em>^__^</em>) 嘻嘻……</p>
+<h2 id="装修攻略">装修攻略</h2><p>春季是家庭装修比较好的时节，但是春季装修要特别注意防潮、防水等细节，初次装修的业主不妨先看看业内人士整理的春季装修攻略。</p>
+<h3 id="攻略1：装修公司的选择">攻略1：装修公司的选择</h3><p>选择装修公司是装修房子的重中之重，选择装修公司时要查三证，看他们有无承担家居装饰的资质证书，有无营业执照，有无装饰行业协会会员证。另外，针对个别有资质的公司往往把工程转包给“游击装修队”的做法，消费者还应考察装修人员的办公地点等。</p>
+<h3 id="攻略2：了解家装程序">攻略2：了解家装程序</h3><p>家庭装修工程可概括为结构工程、装修工程、装饰工程和安装工程四个类别，具体工序应当是：</p>
+<p>首先由瓦工对基层进行处理，清理顶、墙、地面，达到施工技术要求，同时进行电，水线路改造。基层处理达标后，木工进行吊顶作业，吊顶构造完工后，开始进行细木工作业，如制作木制暖气罩、门窗框套、木护墙等。当细木工装饰构造完成，并已涂刷一遍面漆进行保护后，才进行墙、顶面的装修工作。</p>
+<p>在进行墙面装饰时，应预留空调等电器安装孔洞及线路。地面装修应在墙面施工完成后进行，开始地板、石材、地砖等铺装，并安装踢脚板，铺装后应进行地面装修的养护。地面养护期后，再进行细木工装饰的油漆饰面作业，完工后装饰工程基本告一段落，再将配套电器、设施、家具等安装安放好，工程才算最后结束。</p>
+<h3 id="攻略3：如何科学防潮">攻略3：如何科学防潮</h3><p>家庭装修当中，木质材料使用比重较大，而木制品受气候影响较大，有热胀冷缩的特点。气候的干湿情况会影响木质材料的含水率，春季气候条件适宜将木质的含水率控制在 13%以内。木材含水率如果超过这个比例，其热胀冷缩的变化就很明显，从而影响施工质量。</p>
+<p>在选购木料时，一定要购买经过干燥处理的木料。因为这种木料可以直接用于居室的装修，减少了中间环节，就减少了木料受潮的机会。木料买回后放置两三天再进行必要的防潮处理。</p>
+<h3 id="攻略4：环保装饰装修">攻略4：环保装饰装修</h3><p>消费者对家庭装修环保问题的关注度日益上升。而要避免装修造成室内污染，尽量选择简洁的装修风格，选用环保的装修材料，并在装修合同中约定环保条款，以免装修过后出现污染而缺少投诉和诉讼时所需要的依据。</p>
+<p>合同不仅要注明所用乳胶漆、油漆的品牌名称，还要把是否会造成空气污染或者是否会产生有害气体超标等问题作为一个重要内容写入，以此来要求装修公司保证使用高质量的装修材料，保护消费者合法权益不受侵害。</p>
+<p>房子装修完毕后，可请室内环境监测的权威部门进行检测，了解空气中甲醛等有害物质是否超标，及早采取有效措施。另外需要注意的是，刚装修完毕的居室不宜马上入住。由于各种有害气体的释放量很高，立即入住会对身体造成伤害，所以要通风一段时间，以加快有害气体的释放扩散，降低室内有害气体浓度。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cj3hb05to000d3cfh5e43p7cf" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
 
 
-<span class="comment">#PT1 = (0,0)</span>
-<span class="comment">#PT2 = (0,0)</span>
-<span class="function"><span class="keyword">def</span> <span class="title">draw_box</span><span class="params">(event, x, y, flags, param)</span>:</span>
-    <span class="keyword">global</span> PT1
-    <span class="keyword">global</span> PT2
-    <span class="keyword">global</span> img_copy
-    <span class="keyword">if</span> event == cv2.EVENT_LBUTTONDOWN <span class="keyword">and</span> flags == cv2.EVENT_FLAG_LBUTTON:    
-        PT1 = (x,y)
-        PT2 = (x,y)
-    <span class="keyword">if</span> flags == cv2.EVENT_FLAG_LBUTTON:
-        PT2 = (x,y)
-    <span class="keyword">if</span> event == cv2.EVENT_LBUTTONUP:
-        PT2 = (x,y)
-    cv2.rectangle(img_copy, PT1, PT2, (<span class="number">0</span>,<span class="number">255</span>,<span class="number">0</span>), <span class="number">2</span>)
-    cv2.imshow(<span class="string">'image'</span>, img_copy)
-    img_copy = copy.deepcopy(img)
+  
+    <article id="post-五险一金" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/03/23/五险一金/" class="article-date">
+  <time datetime="2015-03-23T13:31:36.000Z" itemprop="datePublished">2015-03-23</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/life/">life</a>
+  </div>
 
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/03/23/五险一金/">五险一金</a>
+    </h1>
+  
 
-<span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:
-    img_path = <span class="string">'D:/test'</span>
-    img_list = glob.glob(os.path.join(img_path, <span class="string">'*.jpg'</span>))
-    img_list = sorted(img_list)
-<span class="comment">#    print img_list</span>
-    box_result_name = <span class="string">'box_result.txt'</span>
-    img_processed = []
-    <span class="keyword">try</span>:
-        <span class="keyword">with</span> open(os.path.join(img_path, box_result_name), <span class="string">'rb'</span>) <span class="keyword">as</span> f_box:
-            <span class="keyword">for</span> line <span class="keyword">in</span> f_box.readlines():
-                line = line.strip().split(<span class="string">','</span>)
-                img_processed.append(line[<span class="number">0</span>])
-    <span class="keyword">except</span> IOError:
-        <span class="keyword">pass</span>
-    img_processed = set(img_processed)
-
-    cv2.namedWindow(<span class="string">'image'</span>)
-    cv2.setMouseCallback(<span class="string">'image'</span>, draw_box)
-
-    f_box = open(os.path.join(img_path, box_result_name), <span class="string">'a'</span>)
-    <span class="keyword">for</span> img_name <span class="keyword">in</span> img_list:
-        <span class="keyword">print</span> img_name
-        <span class="keyword">if</span> img_name <span class="keyword">in</span> img_processed:
-            <span class="keyword">continue</span>
-        img = cv2.imread(img_name)
-        img_copy = copy.deepcopy(img)
-        PT1 = (<span class="number">0</span>,<span class="number">0</span>)
-        PT2 = (<span class="number">0</span>,<span class="number">0</span>)
-
-        <span class="keyword">while</span> (<span class="number">1</span>):
-            key = cv2.waitKey(<span class="number">0</span>)
-            <span class="keyword">if</span> key == <span class="number">27</span>:
-                cv2.destroyAllWindows()
-                f_box.close()
-                sys.exit(<span class="number">0</span>)
-            <span class="keyword">elif</span> key == <span class="number">32</span>:
-                <span class="keyword">if</span> PT1[<span class="number">0</span>]==<span class="number">0</span> <span class="keyword">or</span> PT1[<span class="number">1</span>]==<span class="number">0</span> <span class="keyword">or</span> PT2[<span class="number">0</span>]==<span class="number">0</span> <span class="keyword">or</span> PT2[<span class="number">1</span>]==<span class="number">0</span> <span class="keyword">or</span> abs(PT2[<span class="number">0</span>]-PT1[<span class="number">0</span>])&lt;<span class="number">10</span> <span class="keyword">or</span> abs(PT2[<span class="number">1</span>]-PT1[<span class="number">1</span>])&lt;<span class="number">10</span>:
-                    <span class="keyword">continue</span>
-                <span class="keyword">if</span> PT1[<span class="number">0</span>] &lt; PT2[<span class="number">0</span>]:
-                    x1 = PT1[<span class="number">0</span>]
-                    x2 = PT2[<span class="number">0</span>]
-                <span class="keyword">else</span>:
-                    x1 = PT2[<span class="number">0</span>]
-                    x2 = PT1[<span class="number">0</span>]
-                <span class="keyword">if</span> PT1[<span class="number">1</span>] &lt; PT2[<span class="number">1</span>]:
-                    y1 = PT1[<span class="number">1</span>]
-                    y2 = PT2[<span class="number">1</span>]
-                <span class="keyword">else</span>:
-                    y1 = PT2[<span class="number">1</span>]
-                    y2 = PT1[<span class="number">1</span>]
-                f_box.write(<span class="string">'%s,%d,%d,%d,%d\n'</span> % (img_name, x1, y1, x2, y2))
-                <span class="comment">#print 'next image'</span>
-                <span class="keyword">break</span>
-            <span class="keyword">elif</span> key == <span class="number">122</span>:
-                f_box.close()
-                f_box = open(os.path.join(img_path, box_result_name), <span class="string">'rb'</span>)
-                lines = f_box.readlines()
-                f_box.close()
-                curr = lines[:-<span class="number">1</span>]
-                f_box = open(os.path.join(img_path, box_result_name), <span class="string">'w'</span>)
-                <span class="keyword">for</span> line <span class="keyword">in</span> lines:
-                    line = line.strip()
-                    f_box.write(<span class="string">'%s'</span> % line)
-                <span class="keyword">print</span> <span class="string">'delete last image box'</span>
-                cv2.destroyAllWindows()
-                f_box.close()
-                sys.exit(<span class="number">0</span>)
-        <span class="keyword">else</span>:
-            <span class="keyword">break</span>
-    cv2.destroyAllWindows()
-    f_box.close()
-</code></pre><p>这个标注工具代码比较繁琐，不过还算鲁棒，可以有效处理误标注并实现自动跳转下一张图的功能。每一个待检测的类别用这个标注工具可以生成一个对应的文本文件说明每一张图的矩形坐标位置。</p>
-<h2 id="生成用于darknet的标注">生成用于darknet的标注</h2><p>darknet要求每一张图片<code>a.jpg</code>对应一个<code>a.txt</code>，文本里面一行信息说明groundtruth的类别和图像原始宽高的相对坐标，如下：</p>
-<pre><code><span class="preprocessor"># &lt;object-class&gt; &lt;x&gt; &lt;y&gt; &lt;width&gt; &lt;height&gt;</span>
-<span class="number">1</span> <span class="number">0.526875</span> <span class="number">0.499375</span> <span class="number">0.30875</span> <span class="number">0.80375</span>
-</code></pre><p>我基于darknet自带的<code>scripts\voc_label.py</code>写了一个脚本把图像以及标注工具生成的矩形坐标转换成满足darknet的标注信息</p>
-<pre><code><span class="keyword">import</span> pickle
-<span class="keyword">import</span> os
-from os <span class="keyword">import</span> listdir, getcwd
-from os.path <span class="keyword">import</span> <span class="built_in">join</span>
-
-sets = [<span class="string">'men_jacket'</span>, <span class="string">'men_bottem'</span>, <span class="string">'underwear'</span>, <span class="string">'women_bottem'</span>, <span class="string">'women_jacket'</span>]
-classes = [<span class="string">'men_jacket'</span>, <span class="string">'men_bottem'</span>, <span class="string">'underwear'</span>, <span class="string">'women_bottem'</span>, <span class="string">'women_jacket'</span>]
-
-
-def convert(<span class="built_in">size</span>, <span class="built_in">box</span>):
-    dw = <span class="number">1.</span>/<span class="built_in">size</span>[<span class="number">0</span>]
-    dh = <span class="number">1.</span>/<span class="built_in">size</span>[<span class="number">1</span>]
-    x = (<span class="built_in">box</span>[<span class="number">0</span>] + <span class="built_in">box</span>[<span class="number">2</span>])/<span class="number">2.0</span>
-    y = (<span class="built_in">box</span>[<span class="number">1</span>] + <span class="built_in">box</span>[<span class="number">3</span>])/<span class="number">2.0</span>
-    w = <span class="built_in">box</span>[<span class="number">2</span>] - <span class="built_in">box</span>[<span class="number">0</span>]
-    h = <span class="built_in">box</span>[<span class="number">3</span>] - <span class="built_in">box</span>[<span class="number">1</span>]
-    x = x*dw
-    w = w*dw
-    y = y*dh
-    h = h*dh
-    <span class="keyword">return</span> (x,y,w,h)
-
-def convert_annotation(<span class="built_in">line</span>, image_id, set_id):
-    out_file = <span class="built_in">open</span>(<span class="string">'box_labels/%s/%s.txt'</span>%(set_id, image_id), <span class="string">'w'</span>)
-
-    w = <span class="number">800</span>
-    h = <span class="number">800</span>
-    cls = <span class="built_in">line</span>[<span class="number">0</span>].<span class="built_in">split</span>(<span class="string">'/'</span>)[<span class="number">1</span>]
-    <span class="keyword">if</span> cls not in classes:
-        <span class="keyword">return</span>
-    cls_id = classes.index(cls)
-
-    b = (<span class="built_in">float</span>(<span class="built_in">line</span>[<span class="number">1</span>]), <span class="built_in">float</span>(<span class="built_in">line</span>[<span class="number">2</span>]), <span class="built_in">float</span>(<span class="built_in">line</span>[<span class="number">3</span>]), <span class="built_in">float</span>(<span class="built_in">line</span>[<span class="number">4</span>]))
-    bb = convert((w,h), b)
-    out_file.write(<span class="built_in">str</span>(cls_id) + <span class="string">" "</span> + <span class="string">" "</span>.<span class="built_in">join</span>([<span class="built_in">str</span>(a) <span class="keyword">for</span> a in bb]) + <span class="string">'\n'</span>)
-    out_file.close
-
-wd = getcwd()
-list_file = <span class="built_in">open</span>(<span class="string">'train.txt'</span>, <span class="string">'w'</span>)
-<span class="keyword">for</span> set_id in sets:
-    <span class="keyword">if</span> not os.path.exists(<span class="string">'box_labels/%s'</span> % (set_id)):
-        os.makedirs(<span class="string">'box_labels/%s'</span> % (set_id))
-    images_info = <span class="built_in">open</span>(<span class="string">'box_imgs/%s.txt'</span> % (set_id)).readlines()
-    <span class="keyword">for</span> <span class="built_in">line</span> in images_info:
-        <span class="built_in">line</span> = <span class="built_in">line</span>.strip().<span class="built_in">split</span>(<span class="string">','</span>)
-        image_id = <span class="built_in">line</span>[<span class="number">0</span>].<span class="built_in">split</span>(<span class="string">'/'</span>)[<span class="number">2</span>].<span class="built_in">split</span>(<span class="string">'.'</span>)[<span class="number">0</span>]
-        list_file.write(<span class="string">'%s/box_imgs/%s/%s.jpg\n'</span> % (wd, set_id, image_id))
-        convert_annotation(<span class="built_in">line</span>, image_id, set_id)
-list_file.close()
-</code></pre><p>执行这个脚本会生成一个<code>box_labels</code>文件夹，并在里面生成对应的darknet标签信息。同时生成一个<code>train.txt</code>说明用于训练的图片的路径。</p>
-<h2 id="更改YOLO模型参数">更改YOLO模型参数</h2><p>对<code>cfg/yolo.cfg</code>的配置文件进行调整</p>
-<pre><code>subdivisions=<span class="number">2</span> <span class="preprocessor"># 原来为<span class="number">64</span>，改小可以提高训练速度，同时增加显存使用</span>
-output= <span class="number">735</span> <span class="preprocessor"># 最后connected层，原来值为<span class="number">1470</span></span>
-classes = <span class="number">5</span> <span class="preprocessor"># detection层，这里设置为<span class="number">5</span></span>
-</code></pre><p>这个参数的确定由公式<code>output = S x S x (5*B+C)</code>，其中S=7，B=2, C=5（5是我实验使用的类别数）。</p>
-<p>改写<code>src/data.c</code>中的<code>fill_truth_region</code>函数，确定图像和标签数据的加载位置</p>
-<pre><code>//    char *labelpath = find_replace<span class="list">(<span class="keyword">path</span>, <span class="string">"images"</span>, <span class="string">"labels"</span>)</span><span class="comment">;</span>
-    char *labelpath = find_replace<span class="list">(<span class="keyword">path</span>, <span class="string">"box_imgs"</span>, <span class="string">"box_labels"</span>)</span><span class="comment">;</span>
-</code></pre><p>改写<code>src/yolo.c</code>：</p>
-<pre><code>//<span class="type">char</span> *voc_names[] = {<span class="string">"aeroplane"</span>, <span class="string">"bicycle"</span>, <span class="string">"bird"</span>, <span class="string">"boat"</span>, <span class="string">"bottle"</span>, <span class="string">"bus"</span>, <span class="string">"car"</span>, <span class="string">"cat"</span>, <span class="string">"chair"</span>, <span class="string">"cow"</span>, <span class="string">"diningtable"</span>, <span class="string">"dog"</span>, <span class="string">"horse"</span>, <span class="string">"motorbike"</span>, <span class="string">"person"</span>, <span class="string">"pottedplant"</span>, <span class="string">"sheep"</span>, <span class="string">"sofa"</span>, <span class="string">"train"</span>, <span class="string">"tvmonitor"</span>};
-//image voc_labels[<span class="number">20</span>];
-<span class="type">char</span> *voc_names[] = {<span class="string">"men_jacket"</span>, <span class="string">"men_bottem"</span>, <span class="string">"underwear"</span>, <span class="string">"women_bottem"</span>, <span class="string">"women_jacket"</span>};
-image voc_labels[<span class="number">5</span>];
-<span class="type">void</span> train_yolo(<span class="type">char</span> *cfgfile, <span class="type">char</span> *weightfile)
-{
-//    <span class="type">char</span> *train_images = <span class="string">"/data/voc/train.txt"</span>;
-//    <span class="type">char</span> *backup_directory = <span class="string">"/home/pjreddie/backup/"</span>;
-    <span class="type">char</span> *train_images = <span class="string">"/home/xixi/darknet/train.txt"</span>;
-    <span class="type">char</span> *backup_directory = <span class="string">"/home/xixi/darknet/results/"</span>;
-
-...
-
-<span class="type">void</span> run_yolo(<span class="type">int</span> argc, <span class="type">char</span> **argv)
-{
-    /*
-    <span class="type">int</span> i;
-    <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; <span class="number">20</span>; ++i){
-        <span class="type">char</span> buff[<span class="number">256</span>];
-        sprintf(buff, <span class="string">"data/labels/%s.png"</span>, voc_names[i]);
-        voc_labels[i] = load_image_color(buff, <span class="number">0</span>, <span class="number">0</span>);
-    }
-    */
-</code></pre><p>改好之后重新编译代码，下载预训练好的模型参数文件，并开始训练</p>
-<pre><code>make
-wget http:<span class="comment">//pjreddie.com/media/files/extraction.conv.weights</span>
-./darknet -<span class="tag">i</span> <span class="number">2</span> yolo train cfg/yolo<span class="class">.cfg</span> extraction<span class="class">.conv</span><span class="class">.weights</span>
-</code></pre><p>在results文件夹下面就好生成训练好的模型文件，当迭代40000次后，会输出最终模型文件yolo_final.weights。这个过程用GPU大概需要3天时间，消耗显存6个G。（-i参数表示使用第二块GPU）</p>
-<h1 id="YOLO检测">YOLO检测</h1><pre><code><span class="comment"># 检测单张图片</span>
-./darknet yolo <span class="built_in">test</span> cfg/yolo.cfg results/yolo_final.weights &lt;image&gt;
-<span class="comment"># 检测多张图片</span>
-./darknet yolo <span class="built_in">test</span> cfg/yolo.cfg results/yolo_final.weights
-<span class="comment"># 改变检测的阈值</span>
-./darknet yolo <span class="built_in">test</span> cfg/yolo.cfg results/yolo_final.weights &lt;image&gt; -thresh <span class="number">0</span>
-<span class="comment"># 改为CPU模式检测</span>
-./darknet -nogpu yolo <span class="built_in">test</span> cfg/yolo.cfg results/yolo_final.weights &lt;image&gt;
-</code></pre><p>经过测试，在GPU环境下，测试一张图片跑完整的YOLO模型需要40ms~100ms，CPU环境下需要5秒以上。</p>
-<h1 id="补充">补充</h1><p>YOLO官方后来又出了一个yolo2.cfg，研究了一下，每一卷积层都加了batch_normlization，提高训练速度，破费。同时把最后的一个全连接层改成了一个local层</p>
-<h1 id="讨论和思考">讨论和思考</h1><ul>
-<li><p>YOLO的核心思想就是利用整张图作为网络的输入，直接在输出层回归bounding box的位置和bounding box所属的类别。</p>
-</li>
-<li><p>将一副图像经过类似alexnet的特征提取，最后经过一层的全连接层之后又映射回SxS个网格(grid cell)，如果某个object的中心 落在这个网格中，则这个网格就负责预测这个object。</p>
-</li>
-<li><p>每个网格要预测B个bounding box，每个bounding box除了要回归自身的位置之外，还要附带预测一个confidence值。 这个confidence等于所预测的box中含有object的置信度（object落在其中，取1，否则取0）和这个box和truth的IOU交集的乘积确定。这样每个网格要返回bounding box预测的(x, y, w, h)和confidence5个值，以及object的类别信息C类，所以最后一层的输出应该为<code>S x S x (5*B+C)</code>。</p>
-</li>
-<li><p>由于xywh取的是相对坐标，归一化为0~1，confidence取值范围为0~1，category的类别取值为0或1，简单实现了归一化的目的，然而由于目标函数使用了均方误差损失函数，位置坐标和类别判别信息维度对损失函数的贡献不应该是一样的，所以文章中采用了如下的方法改进</p>
-</li>
-</ul>
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="五险一金知多少？">五险一金知多少？</h1><h2 id="养老保险">养老保险</h2><p> 一般要交满15年，到退休的时候才能终生享受养老金,所以想拿养老金的人请务必在自己退休前15年就开始交。如果到退休年龄交养老保险不满15年,那等到你退休的时候国家会把你个人帐户上存的8%的养老金全部退给你。那单位给你交的21%到哪里去了?国家把单位为你交的21%的钱全部划到国家的养老统筹基金里了。国家规定，退钱的时候只退给个人自己扣交的钱,单位为他交的钱全部都为国家做贡献。退休时候的养老金是怎么算出来的。养老金的算法很复杂,国家每年都会把缴费基数变一次,:如果你现在30岁,你现在的缴费基数是3000元,而退休年龄如果是55岁的话,那你必须在你40岁以前就开始交养老保险了,而如果你现在从30岁就开始交,交到55岁是25年,那首先肯定你能享受养老金了,其次,如果25年后你交的 3000块的缴费基数已经变成了6000,那你55岁的时候首先每个月可以拿到6000×20%=1200块的基本养老金,这是国家给你的,此外你的个人帐户上的钱在25年里也积攒了不少,把缴费基数平均一下好了, (3000+6000)÷2=4500,那么你这25年里个人帐户上应该有4500×8%(你缴纳的养老保险的个人比例)×25年×12个月=108000元钱,除了之前的1200块以外你每个月还能拿到108000÷ 120=900块, 这样你55岁开始每个月起码可以拿到1200+900=2100元的养老金,当然每年国家的基数还在往上涨,这样每年除了你自己的900块,你退休以后每个月都会拿到比1200块更多的钱,那你的养老金当然也会越来越多的所以说交养老保险交得越多越好,你交得越多你退休以后享受的也越多,而且,国家每年调整基数以后你拿的钱也会越来越多,现在交1000十年之后拿1500都是有可能的。但是,不管你在哪里交社保费,等你退休的时候你都只能回你的户口所在地享受当地的退休待遇,所以,在基数高的地方交社保但是退休回基数低的地方享受养老金的人那就亏大了。为什么这么说呢?如果你年轻的时候在南京工作,交了20年的社保然后退休了,但是如果你的户口在黑龙江,那你必须回黑龙江享受养老金.如果你在南京交了20年的平均基数是3000，而当你退休的时候黑龙江的缴费基数才1000，那么你退休的时候只能享受 1000的待遇!这是很亏的!一句话,如果你在富地方交社保但是退休的时候回穷地方享受社保,那你一辈子交的很多但是享受的很少!交3000 块可能只能享受1000块!这是很恐怖的事情,但是没办法,国家就是这个政策,所以请所有目前户口在基数低的地方但是在北京或上海等基数高的地方工作交社保的注意了,你要么就在西部交社保,要么就在退休前把户口迁到北京或上海,否则你就是在做人生一笔巨亏本的买卖。也许你会说,如果在基数低的地方交钱,退休的时候回基数高的地方享受高福利。错!你以为劳动保障部门会随随便便就让你享受么?一般这种情况下政府会找个理由直接拒绝你转入!到时候你就聪明反被聪明误了:在黑龙江享受不了,在南京也享受不了!不过有些地方对这样的情况有了一些缓和的规定,比如南京允许你在退休前5年从基数低的地方转回南京,再在南京继续交5年南京的高基数,之后允许你回南京享受养老金.这个政策各个地方估计都不一样,有打算转的人最好现在就去你当地的劳动局把这个问题搞清楚,免得退休时候发生你意想不到的意外! </p>
+<h2 id="医疗保险">医疗保险</h2><p> 单位每月给你交的是9%,你个人每月交的大概是2%外加10块钱的大病统筹,大病统筹只管住院,而那11%里国家每个月会往你的医保帐户上打属于你自己的2%,如果你每个月按照1369元的最低基数交社保,那么1369×2%=27.38元。就是国家每个月打给你个人的钱,这个钱可以积累起来直接刷卡去买药或者看门诊,剩下的9%国家就拿去算到医疗统筹基金里了。按规定,如果你从2008年1月开始缴纳医疗保险,那么从2008年2月起你就可以刷卡买药或者看门诊,从2008年7月起你住院的费用就可以报销了。如果你2008年8月1日住院了,住的是南京市最好的三级医院,住院期间用的都是医保范围内的药,手术+住院等费用一共花了5000元,那么报销的时候医保中心首先扣除1000块,这是起步价,剩下的4000块医保中心可以报销4000×86%=3440元,你个人只要付4000×14%=560元就可以了,加上之前的1000元起步价,你花了5000块自己只要付1560元就可以了,而且这1560元还可以从你的医保卡里扣(如果你平时不怎么用那卡), 所以实际上你住院花不了多少钱。医疗保险对于我们年轻人来说比养老保险重要多了,毕竟看病住院实在太贵了,这也是参加社会保险的意义。不过南京市规定医疗保险必须交满25年才能在退休以后终生享受,所以如果你55岁退休,那最迟30岁起就必须开始交医疗保险了。 </p>
+<h2 id="工伤保险">工伤保险</h2><p> 用得少,需要提醒的是你如果在工作的时候或者上下班的时候出了什么事,这个险就用得上了。但在实践中很多人出了事不注意保存证据,导致自己无法享受工伤保险,这是很可惜的。如果你下班的时候被车撞了,那应该赶快报警,让警察来调查记录并拍照采集证据,警察处理完以后会给你开个事故鉴定书之类的东西,你就可以拿这个去单位要求报工伤了。如果你出了事就随便让人跑了而且还不找证人还不报警什么的,那没证据的情况下一般不会被采纳为工伤的。工伤还有个时效问题,如果你2008年7月1日出了工伤,那你必须马上报告单位,把警察出具的证据和事故鉴定书以及你出工伤以后去看病或住院的病历交给单位,叫单位拿着这些材料去做工伤鉴定,你的单位必须在2008年8月1日之前把你的有效材料送到工伤鉴定中心,如果距离你出工伤的日子超过了一个月, 那工伤可能就鉴定不起来了。如果你单位不去给你鉴定,那你自己可以拿着材料去鉴定中心鉴定,最好也不要超过一个月,否则会很麻烦很麻烦。 </p>
+<h2 id="生育保险,">生育保险,</h2><p> 南京从08年6月1日起执行新政策。一是报销比例提高；二是建卡的时候必须出示结婚证和医保卡等相关证件，所有的费用从建卡开始到你生完小孩结束，院方同医保中心实时结算，个人只需承担生育保险不保的费用。至于生育津贴如何发放可能仍然需要单位出面办理，具体可以咨询下劳动保障部门。看看老政策，因为现在是7月，新政规定6月之前建卡的仍然按老政策执行，可能某些同志还需要了解。例如,如果你是女生,每个月工资为1000元,2008年1月1日开始交生育保险,缴费基数为1369,而你2008年3月怀孕,2008年12月底生了孩子,2009年1月出院,那么你出院以后要赶快把结婚证(未婚生子的报销不了)+独生子女证(一般来说生2胎的报销不了)+病历+建大小卡检查和住院和手术费用的所有发票+住院清单+出院小结这些所有的材料交到公司,如果你怀孕时候检查花了500块,生孩子的时候住院+手术花了2000块,一般来说,公司在医保规定范围内基本上可以给你全部报销,报销以后给你的钱包括:500块检查费+2000块住院手术费+1369元/月×4个月=7976块, 1369元/月×4个月这是医保中心特别为报销的女生补贴的。只有女生报销才能拿的到国家规定女孩子报销生育保险的时候必须给4个月的平均工资,所以你生孩子报销的话不仅不要花钱而且还可以赚4个月的工资!如果你基数交的比工资高,比如拿1000块交的是1369,那么你还赚了呢。生育保险起码要交一年才能享受,切记切记。此外还有个问题,男生也交生育保险，是否可以享受生育保险呢?如果你是男生,你老婆没工作或者工作单位没交保险,而她生孩子的时候你交生育保险也已经超过了一年,那么你也可以报销生育保险,但以之前的例子为例,你只能报销500块检查费+2000块住院手术费的一半=1250元, 补贴的1369元/月×4个月的工资你就享受不到了!这是只有女生报销的时候才可以享受的哦~同样的花费,女生报销就能拿7976块,男生报销只能拿1250块,这大概也是中国少有的”歧视男性”的政策。所以说,女生要生孩子之前最好计划一下,提前一年开始找个单位交生育保险,可以赚呢!而男生如果要娶老婆,最好娶一个生孩子的时候已经交了一年生育保险而且缴的基数还比她本身工资高的女生哦!不过如果她实在没保险也没关系,你还可以给她报销生育保险,不过你没补贴的4个月工资拿,而且该报的费用你只能拿回来一半。 </p>
+<h2 id="失业保险，">失业保险，</h2><p> 要交满一年才能享受,一般交1年拿2个月,交2年拿4个月,但一辈子最多拿24个月。南京市失业保险金月标准601元，市区最低标准为518元。如果你2008年1月1日开始交保险,2009年1月你被公司辞退了,那你可以让公司给你拿2个月的失业保险,如果这一年你都是以1369的基数交的保险,那你2个月起码可以拿到1000多块钱或者你2008年1月1日开始交保险,2009年1月你和公司合同到期了,你们都不想续签合同的话那你也可以在离开公司以前让公司给你去拿2个月的失业保险,也是800多块。就是说合同到期或者公司辞退,你都可以按照一年拿2个月的失业金的比例去要求公司给你办,如果公司不给你办你可以去告它,一告一个准。但是如果你是合同没到期自己辞职走,那就算你交满了1年也享受不到失业保险只要是自己辞职的,别说交1年了,就是交10年的失业保险到辞职的时候你也拿不到一分钱。 </p>
+<h2 id="住房公积金">住房公积金</h2><p>如果你每个月公积金交300块,那么公司每个月也往你帐户上打300块,你买房子的时候这就是600块了。如果你一辈子交了5万,那你帐户上就是10万了,这种好事大家一定不要拒绝啊。公积金可以用来买房子,还贷款,装修什么的,如果你自己家可以找到地皮盖房子,那盖房子的钱也可以从公积金里付如果你一直不用这钱,最后退休的时候貌似可以把钱全部取出来。</p>
+<h2 id="辞职跳槽时五险一金怎么办？">辞职跳槽时五险一金怎么办？</h2><p>五险: 养老, 失业 工伤, 医疗, 生育<br>一金:公积金<br>缴费标准:养老(单位20%， 个人8%)<br>生育 (单位交)<br>工伤(单位交，个人不交)<br>医疗(单位10%, 个人2%*基数+3)<br>失业单位1.5% 个人0.5%)<br>公积金(今年最高不超12％以前年度不超10％，单位个人各一半)</p>
 <ol>
-<li>更重视坐标预测，给这些损失前面赋予更大的loss weight, 训练中取5。</li>
-<li>对没有object的box的confidence loss，赋予小的loss weight，训练中取0.5。</li>
-<li>有object的box的confidence loss和类别的loss的loss weight正常取1。</li>
+<li>养老保险是可以中断的, 中间中断无所谓,最后是累计年限的, 不过交得越多,当然养老金也越多拉. 办理转移手续: 在老单位打出转移单, 交给新单位继续上就行 </li>
+<li>失业保险虽然必须要交,但和我们没有多大关系(如果你是学校毕业的, 属于干部身份,档案可以存人才的), 断不断不要紧, 我们失业了也领 不到失业金,除非发疯了,把干部身份转为工人身份, 以后退休按工人待遇领退休金. 失业保险只有在街道登记的失业者才能申请(工人身份的档案放在街道, 干部身份的放在人才或单位)<br>办理转移手续: 不用办理, 到新单位继续上就行.</li>
+<li>医疗保险比较重要, 规定是中断三个月以上就失效, 三个月以后看病就得自己掏钱, 小病无所谓,大病就惨了, 中断三个月以上的到新单位重新上.<br>每个上医保的有一个存折,终身使用, 不管单位是否变化, 单位应该每月把一定比例的钱打入存折, 个人可以随时提取. 用途不管.<br>每个上医保的有一个蓝本, 就是医疗本, 医疗规定门诊费用2000元以上部分才可以报销, 比如花了2500, 只报销500的50%-70%(医院不同,报销比例不同),如果住院报得就多了. 看病的时候要告诉医院开医保的单子, 住院要带上. </li>
+<li>公积金单位把给你的钱和你自己的钱都存到你的公积金帐户,比如工资3000元, 单位给你300, 你自己扣除300, 所以你每月公积金帐户应该有600元, 只能一年取一次, 要去公积金中心取, 需要买房或修房. 可以自取或委托单位取.<br>办理转移手续: 先在新单位开帐号, 拿帐号给老单位,让老单位把原来帐号的钱转入新帐号.<br>公积金中心每年六月会给单位发每个员工的对帐单, 显示你的帐户现在的钱.<br>另外, 每年四月左右是调整下年度养老\失业\医疗基数的时间,<br>每年六月是调整下年度公积金的时间.</li>
 </ol>
-<ul>
-<li><p>对于小的box位置偏差对实际的效果影响更为严重，但均方误差对这个没有体现，所以对w和h参数又取了平方根处理，增大的小box的位置偏移对loss函数的影响。</p>
-</li>
-<li><p>一个网格有多个bounding box的时候，根据IOU值取前B个进行处理。所以对多个物体相互靠近的时候处理的并不是十分理想。</p>
-</li>
-<li><p>在test一张图片的时候，通过网络得到SxSx(5*B+C)层的值后，每个网格的类别信息Pr1，其对应的bounding box的confidence Pr2以及box和网格的IOU信息的乘积用来预测box属于某一类的概率。根据阈值过滤后，对保留的boxes进行非极大值抑制NMS处理，得到最终结果。</p>
-</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="cj3hb065g00333cfhfxekidxu" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/darknet/">darknet</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-caffe-add-layer" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/03/23/caffe-add-layer/" class="article-date">
-  <time datetime="2016-03-23T14:06:35.000Z" itemprop="datePublished">2016-03-23</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/23/caffe-add-layer/">caffe学习（六）创建自己的模型</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>最近阅读文章《Supervised Learning of Semantics-Preserving Hashing via Deep Neural Networks for Large-Scale Image Search》，对应的开源代码有两个版本<a href="https://github.com/kevinlin311tw/caffe-cvprw15" target="_blank" rel="external">https://github.com/kevinlin311tw/caffe-cvprw15</a>，<a href="https://github.com/kevinlin311tw/Caffe-DeepBinaryCode" target="_blank" rel="external">https://github.com/kevinlin311tw/Caffe-DeepBinaryCode</a>，<strong>两者之间的主要区别在于后者使用了更为复杂的目标函数，而不是简单的做了一层sigmoid</strong>。由于其在alexnet上进行了微小改动，在fc7和fc8层之间添加了一个latent layer，将原本用于检索的4096特征维度哈希为128维的二值特征，取得了不错的效果，借鉴这篇文章的代码，我实验了一下如何创建自己的模型，添加自己的layer</p>
-<h2 id="预训练模型">预训练模型</h2><p>不同于文章使用的alexnet，我的实验使用的是更为复杂的googLeNet。首先要训练好一个模型，对应一个caffemodel文件，和其训练测试对应的prototxt文件，并在此之上进行fine-tune。</p>
-<h2 id="准备训练数据">准备训练数据</h2><p>跟普通的分类训练没有区别，也要准备lmdb格式的文件以及均值文件。</p>
-<h2 id="修改train-prototxt">修改train.prototxt</h2><p>原本的层级结构是<code>pool5/7x7_s1 --&gt; loss3/classifier --&gt; SoftmaxWithLoss &amp; Accuracy</code>，改动后变成<code>pool5/7x7_s1 --&gt; latent_SSDH --&gt; latent_SSDH_encode --&gt; loss3/classifier_change --&gt; SoftmaxWithLoss &amp; Accuracy</code>。具体就是添加了一层InnerProduct，输出数目为哈希的位数，后面接一层Sigmoid层将其二值化，再接到原本的loss3/classifier层，并对该层进行finetune，调整该层的训练参数。改动代码如下：</p>
-<pre><code><span class="preprocessor">#########added by yx followed by layer <span class="string">"pool5/drop_7x7_s1"</span></span>
-layer {
-  name: <span class="string">"latent_SSDH"</span>
-  type: <span class="string">"InnerProduct"</span>
-  bottom: <span class="string">"pool5/7x7_s1"</span>
-  top: <span class="string">"latent_SSDH"</span>
-  param {
-    lr_mult: <span class="number">1</span>
-    decay_mult: <span class="number">1</span>
-  }
-  param {
-    lr_mult: <span class="number">2</span>
-    decay_mult: <span class="number">0</span>
-  }
-  inner_product_param {
-    num_output: <span class="number">128</span>
-    weight_filler {
-      type: <span class="string">"gaussian"</span>
-      <span class="built_in">std</span>: <span class="number">0.005</span>
-    }
-    bias_filler {
-      type: <span class="string">"constant"</span>
-      value: <span class="number">1</span>
-    }
-  }
-}
-layer {
-  name: <span class="string">"latent_SSDH_encode"</span>
-  bottom: <span class="string">"latent_SSDH"</span>
-  top: <span class="string">"latent_SSDH_encode"</span>
-  type: <span class="string">"Sigmoid"</span>
-}
-<span class="preprocessor">##########################</span>
-</code></pre><p>并把loss3/classifier层的名字改为<code>loss3/classifier_change</code>，bottom层改为<code>latent_SSDH_encode</code>，top层改为<code>loss3/classifier_change</code>，把lr_mult参数*10。</p>
-<p>最后把SoftmaxWithLoss层以及Accuracy层的bottom改为新层名<code>loss3/classifier_change</code>。</p>
-<p>这里详细介绍一下weight_filter的初始化细节，一般有<code>gaussian</code>和<code>xavier</code>两种方式：<br>xavier具体方式是从[-scale, +scale]中进行均匀采样，对卷积层或全连接层中参数进行初始化的方法。<br>其中scale = \sqrt(3 / n), n根据不同实现可设置为n=(num_in + num_out) / 2 (Understanding the difficulty of training deep feedforward neural networks )，或n=num_out (caffe最初实现方法)</p>
-<h2 id="修改solver-prototxt">修改solver.prototxt</h2><ul>
-<li>将<code>test_initialization</code>屏蔽掉</li>
-<li>weight_decay改为0.0005</li>
-<li>gamma改为0.1</li>
-<li>base_lr参数降低10倍，改为0.001</li>
-</ul>
-<h2 id="修改deploy-prototxt">修改deploy.prototxt</h2><p>因为原本的deploy是要做分类的任务，而我这里是要做哈希特征提取，所以要把原来的最后两层loss3/classifier_change和Softmax屏蔽掉，并添加如下代码</p>
-<pre><code><span class="comment">############## added by yx #########</span>
-<span class="name">layer</span> {
-  <span class="literal">name</span>: <span class="string">"latent_SSDH"</span>
-  <span class="built_in">type</span>: <span class="string">"InnerProduct"</span>
-  bottom: <span class="string">"pool5/7x7_s1"</span>
-  top: <span class="string">"latent_SSDH"</span>
-  inner_product_param {
-    num_output: <span class="number">128</span>
-  }
-}
-<span class="name">layer</span> {
-  <span class="literal">name</span>: <span class="string">"latent_SSDH_encode"</span>
-  <span class="built_in">type</span>: <span class="string">"Sigmoid"</span>
-  bottom: <span class="string">"latent_SSDH"</span>
-  top: <span class="string">"latent_SSDH_encode"</span>
-}
-</code></pre><h2 id="训练命令">训练命令</h2><pre><code>nohup ../../build/tools/caffe train --solver=solver<span class="class">.prototxt</span> -weights sku30450_googlenet_quick_iter_500000<span class="class">.caffemodel</span> -gpu <span class="number">1</span> &amp;
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cj3hb069k003w3cfh1vngp0fo" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-linux-shell-skill" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/03/19/linux-shell-skill/" class="article-date">
-  <time datetime="2016-03-19T05:24:25.000Z" itemprop="datePublished">2016-03-19</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/19/linux-shell-skill/">linux shell技巧总结</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="匹配特殊字符空格">匹配特殊字符空格</h3><pre><code>find . -<span class="property">name</span> <span class="string">"*[[:space:]]*"</span>
-</code></pre><h3 id="找到指定文件并删除">找到指定文件并删除</h3><pre><code>find . -<span class="property">name</span> <span class="string">"abc*"</span> -exec rm {} \;
-</code></pre><h2 id="大文件分割与合并">大文件分割与合并</h2><p>把aaa.tar.gz分割，每卷5G，然后合并</p>
-<pre><code><span class="tag">split</span> <span class="tag">-b</span> 5000<span class="tag">m</span> <span class="tag">aaa</span><span class="class">.tar</span><span class="class">.gz</span> <span class="tag">aaa_part</span><span class="class">.tar</span><span class="class">.gz</span>.
-<span class="tag">cat</span> <span class="tag">aaa_part</span><span class="class">.tar</span><span class="class">.gz</span>.* &gt; <span class="tag">aaa</span><span class="class">.tar</span><span class="class">.gz</span>
-</code></pre><p>大文件夹aaa分卷压缩与合并解压</p>
-<pre><code>tar czvf - aaa <span class="string">| split -b 5000m - aaa_part.tar.gz.</span>
-cat aaa_part.tar.gz.* <span class="string">| tar xz</span>
-</code></pre><h3 id="批量杀死进程">批量杀死进程</h3><pre><code>ps aux | grep <span class="string">"common"</span> | cut –c <span class="number">9</span>-<span class="number">15</span> | xargs kill
-</code></pre><h2 id="find_文件查找">find 文件查找</h2><p>查找txt和pdf文件</p>
-<pre><code>find . ( -<span class="property">name</span> <span class="string">"*.txt"</span> -o -<span class="property">name</span> <span class="string">"*.pdf"</span> ) -print
-</code></pre><p>正则方式查找.txt和pdf，<code>-iregex</code>: 忽略大小写的正则</p>
-<pre><code><span class="keyword">find</span> . -regex  <span class="string">".*(.txt|.pdf)$"</span>
-</code></pre><p>否定参数，查找所有非txt文本</p>
-<pre><code><span class="keyword">find</span> . ! -name <span class="string">"*.txt"</span> -<span class="keyword">print</span>
-</code></pre><p>指定搜索深度，打印出当前目录的文件（深度为1）</p>
-<pre><code><span class="built_in">find</span> . -maxdepth <span class="number">1</span> -<span class="built_in">type</span> f
-</code></pre><p>按类型搜索：-type f 文件 / l 符号链接 / d 目录</p>
-<pre><code>find . -<span class="keyword">type</span> <span class="keyword">d</span> -<span class="keyword">print</span>  <span class="comment">//只列出所有目录</span>
-</code></pre><p>按时间搜索：<br>  -atime 访问时间 (单位是天，分钟单位则是-amin，以下类似）<br>  -mtime 修改时间（内容被修改）<br>  -ctime 变化时间（元数据或权限变化）<br>最近7天被访问过的所有文件：</p>
-<pre><code><span class="built_in">find</span> . -atime <span class="number">7</span> -<span class="built_in">type</span> f -<span class="built_in">print</span>
-</code></pre><p>按大小搜索：w字 k M G，寻找大于2k的文件</p>
-<pre><code><span class="built_in">find</span> . -<span class="built_in">type</span> f -size +<span class="number">2</span>k
-</code></pre><p>按权限查找：</p>
-<pre><code><span class="built_in">find</span> . -<span class="built_in">type</span> f -perm <span class="number">644</span> -<span class="built_in">print</span> //找具有可执行权限的所有文件
-</code></pre><p>按用户查找：</p>
-<pre><code><span class="built_in">find</span> . -<span class="built_in">type</span> f -user weber -<span class="built_in">print</span>// 找用户weber所拥有的文件
-</code></pre><h3 id="找到后的后续动作">找到后的后续动作</h3><p>删除：删除当前目录下所有的swp文件：</p>
-<pre><code><span class="keyword">find</span> . -<span class="built_in">type</span> <span class="keyword">f</span> -name <span class="string">"*.swp"</span> -<span class="built_in">delete</span>
-</code></pre><p>执行动作（强大的exec）</p>
-<pre><code><span class="title">find</span> . -<span class="typedef"><span class="keyword">type</span> f -user root -exec chown weber <span class="container">{}</span> ; //将当前目录下的所有权变更为weber</span>
-</code></pre><p>注：{}是一个特殊的字符串，对于每一个匹配的文件，{}会被替换成相应的文件名；<br>eg：将找到的文件全都copy到另一个目录：</p>
-<pre><code><span class="title">find</span> . -<span class="typedef"><span class="keyword">type</span> f -mtime +10 -name "*.txt" -exec cp <span class="container">{}</span> <span class="type">OLD</span> ;</span>
-</code></pre><p>结合多个命令<br>tips: 如果需要后续执行多个命令，可以将多个命令写成一个脚本。然后 -exec 调用时执行脚本即可；</p>
-<pre><code><span class="deletion">-exec ./commands.sh {} \;</span>
-</code></pre><h3 id="-print的定界符">-print的定界符</h3><p>默认使用’\n’作为文件的定界符；<br>-print0 使用”作为文件的定界符，这样就可以搜索包含空格的文件；</p>
-<h2 id="grep_文本搜索">grep 文本搜索</h2><p>常用参数<br>-o 只输出匹配的文本行<br>-v 只输出没有匹配的文本行<br>-c 统计文件中包含文本的次数</p>
-<pre><code><span class="keyword">grep</span> -c <span class="string">"text"</span> filename
-</code></pre><p>-n 打印匹配的行号<br>-i 搜索时忽略大小写<br>-l 只打印文件名<br>在多级目录中对文本递归搜索(程序员搜代码的最爱）：</p>
-<pre><code><span class="keyword">grep</span> <span class="string">"class"</span> . -R -n
-</code></pre><p>匹配多个模式</p>
-<pre><code>grep -<span class="keyword">e</span> <span class="string">"class"</span> -<span class="keyword">e</span> <span class="string">"vitural"</span> <span class="keyword">file</span>
-</code></pre><p>grep输出以作为结尾符的文件名：（-z）</p>
-<pre><code>grep <span class="string">"test"</span> file<span class="keyword">*</span> -lZ|<span class="string"> xargs -0 rm</span>
-</code></pre><h2 id="xargs_命令行参数转换">xargs 命令行参数转换</h2><p>xargs 能够将输入数据转化为特定命令的命令行参数；这样，可以配合很多命令来组合使用。比如grep，比如find；</p>
-<p>将多行输出转化为单行输出</p>
-<pre><code><span class="keyword">cat</span> <span class="keyword">file</span>.txt| xargs
-</code></pre><p>将单行转化为多行输出，-n：指定每行显示的字段数</p>
-<pre><code><span class="keyword">cat</span> single.txt | xargs -<span class="keyword">n</span> 3
-</code></pre><h3 id="xargs参数说明">xargs参数说明</h3><p>-d 定义定界符 （默认为空格 多行的定界符为 n）<br>-n 指定输出为多行<br>-I {} 指定替换字符串，这个字符串在xargs扩展时会被替换掉,用于待执行的命令需要多个参数时。eg：</p>
-<pre><code>cat <span class="built_in">file</span>.txt | xargs -I {} ./<span class="command"><span class="keyword">command</span>.<span class="title">sh</span> -<span class="title">p</span> {} -<span class="title">1</span></span>
-</code></pre><p>-0：指定为输入定界符，eg：统计程序行数</p>
-<pre><code>find <span class="built_in">source</span>_dir/ -type f -name <span class="string">"*.cpp"</span> -print0 |xargs -<span class="number">0</span> wc <span class="operator">-l</span>
-</code></pre><h2 id="sort_排序">sort 排序</h2><p>字段说明：<br>-n 按数字进行排序 VS -d 按字典序进行排序<br>-r 逆序排序<br>-k N 指定按第N列排序<br>eg：</p>
-<pre><code><span class="title">sort</span> -nrk <span class="number">1</span> <span class="typedef"><span class="keyword">data</span>.txt</span>
-<span class="title">sort</span> -bd <span class="typedef"><span class="keyword">data</span> // 忽略像空格之类的前导空白字符</span>
-</code></pre><h2 id="uniq_消除重复行">uniq 消除重复行</h2><p>消除重复行</p>
-<pre><code>sort unsort.txt <span class="string">| uniq</span>
-</code></pre><p>统计各行在文件中出现的次数</p>
-<pre><code><span class="built_in">sort</span> unsort.txt | uniq -<span class="built_in">c</span>
-</code></pre><p>找出重复行，可指定每行中需要比较的重复内容：-s 开始位置 -w 比较字符数</p>
-<pre><code><span class="keyword">sort</span> unsort.txt | uniq -<span class="literal">d</span>
-</code></pre><h2 id="用tr进行转换">用tr进行转换</h2><p>通用用法</p>
-<pre><code><span class="keyword">echo</span> <span class="number">12345</span> | <span class="built_in">tr</span> <span class="string">'0-9'</span> <span class="string">'9876543210'</span> //加解密转换，替换对应字符
-<span class="keyword">cat</span> text| <span class="built_in">tr</span> <span class="string">'t'</span> <span class="string">' '</span>  //制表符转空格
-</code></pre><p>tr删除字符</p>
-<pre><code><span class="keyword">cat</span> <span class="keyword">file</span> | tr -<span class="keyword">d</span> '0-9' <span class="comment">// 删除所有数字</span>
-</code></pre><p>-c 求补集</p>
-<pre><code><span class="keyword">cat</span> <span class="keyword">file</span> | tr -c '0-9' <span class="comment">//获取文件中所有数字</span>
-<span class="keyword">cat</span> <span class="keyword">file</span> | tr -<span class="keyword">d</span> -c '0-9 <span class="keyword">n</span>'  <span class="comment">//删除非数字数据</span>
-</code></pre><p>tr压缩字符<br>tr -s 压缩文本中出现的重复字符；最常用于压缩多余的空格</p>
-<pre><code><span class="keyword">cat</span> <span class="keyword">file</span> | <span class="built_in">tr</span> -<span class="keyword">s</span> <span class="string">' '</span>
-</code></pre><p>字符类<br>tr中可用各种字符类：<br>alnum：字母和数字<br>alpha：字母<br>digit：数字<br>space：空白字符<br>lower：小写<br>upper：大写<br>cntrl：控制（非可打印）字符<br>print：可打印字符<br>使用方法：tr [:class:] [:class:]</p>
-<pre><code>eg: <span class="tag">tr</span> <span class="string">'[:lower:]'</span> <span class="string">'[:upper:]'</span>
-</code></pre><h2 id="cut_按列切分文本">cut 按列切分文本</h2><p>截取文件的第2列和第4列：</p>
-<pre><code><span class="label">cut</span> -<span class="literal">f2</span>,<span class="number">4</span> filename
-</code></pre><p>去文件除第3列的所有列：</p>
-<pre><code>cut -f3 <span class="comment">--complement filename</span>
-</code></pre><p>-d 指定定界符：</p>
-<pre><code>cat <span class="operator">-f</span>2 <span class="operator">-d</span><span class="string">";"</span> filename
-</code></pre><p>cut 取的范围<br>N- 第N个字段到结尾<br>-M 第1个字段为M<br>N-M N到M个字段</p>
-<ul>
-<li><p>cut 取的单位<br>-b 以字节为单位<br>-c 以字符为单位<br>-f 以字段为单位（使用定界符）<br>eg:</p>
-<p>  cut -c1-5 file //打印第一到5个字符<br>  cut -c-2 file  //打印前2个字符</p>
-</li>
-</ul>
-<h2 id="wc_统计行和字符的工具">wc 统计行和字符的工具</h2><pre><code>wc -<span class="keyword">l</span> <span class="keyword">file</span> <span class="comment">// 统计行数</span>
-wc -w <span class="keyword">file</span> <span class="comment">// 统计单词数</span>
-wc -c <span class="keyword">file</span> <span class="comment">// 统计字符数</span>
-</code></pre><h2 id="sed_文本替换利器">sed 文本替换利器</h2><p>首处替换</p>
-<pre><code>seg <span class="string">'s/text/replace_text/'</span> <span class="keyword">file</span>   <span class="comment">//替换每一行的第一处匹配的text</span>
-</code></pre><p>全局替换</p>
-<pre><code>seg 's/<span class="type">text</span>/replace_text/g' <span class="type">file</span>
-</code></pre><p>默认替换后，输出替换后的内容，如果需要直接替换原文件,使用-i：</p>
-<pre><code>seg -<span class="tag">i</span> <span class="string">'s/text/repalce_text/g'</span> file
-</code></pre><p>移除空白行：</p>
-<pre><code>sed <span class="string">'/^$/d'</span> <span class="keyword">file</span>
-</code></pre><p>变量转换，已匹配的字符串通过标记&amp;来引用</p>
-<pre><code>echo this <span class="keyword">is</span> en example | seg 's/\w+/<span class="comment">[&amp;]</span>/g'
-$&gt;<span class="comment">[this]</span>  <span class="comment">[is]</span> <span class="comment">[en]</span> <span class="comment">[example]</span>
-</code></pre><p>子串匹配标记<br>第一个匹配的括号内容使用标记1来引用</p>
-<pre><code><span class="title">sed</span> <span class="string">'s/hello([0-9])/1/'</span>
-</code></pre><p>双引号求值，sed通常用单引号来引用；也可使用双引号，使用双引号后，双引号会对表达式求值：</p>
-<pre><code><span class="title">sed</span> <span class="string">'s/<span class="variable">$var</span>/HLLOE/'</span>
-</code></pre><p>当使用双引号时，我们可以在sed样式和替换字符串中指定变量；</p>
-<pre><code>p=patten
-r=replaced
-<span class="built_in">echo</span> <span class="string">"line con a patten"</span> | sed <span class="string">"s/<span class="variable">$p</span>/<span class="variable">$r</span>/g"</span>
-$&gt;line con a replaced
-</code></pre><h2 id="awk_数据流处理工具">awk 数据流处理工具</h2><p>awk脚本结构<br>awk ‘BEGIN{ statements } statements2 END{ statements }’</p>
-<ul>
-<li>工作方式</li>
-</ul>
+<p>下面再说说现在市场上一些不规范的情况 </p>
 <ol>
-<li>执行begin中语句块；</li>
-<li>从文件或stdin中读入一行，然后执行statements2，重复这个过程，直到文件全部被读取完毕；</li>
-<li>执行end语句块；</li>
-</ol>
-<h3 id="print_打印当前行">print 打印当前行</h3><p>使用不带参数的print时，会打印当前行;</p>
-<pre><code>echo -<span class="keyword">e</span> <span class="string">"line1nline2"</span> | awk 'BEGIN{<span class="keyword">print</span> <span class="string">"start"</span>} {<span class="keyword">print</span> } END{ <span class="keyword">print</span> <span class="string">"End"</span> }'
-</code></pre><p>print 以逗号分割时，参数以空格定界;</p>
-<pre><code>echo <span class="string">| awk ' {var1 = "</span>v1<span class="string">" ; var2 = "</span>V2<span class="string">"; var3="</span>v3<span class="string">"; </span>
-print var1, var2 , var3; }'
-$&gt;v1 V2 v3
-</code></pre><p>使用-拼接符的方式;</p>
-<pre><code>echo <span class="string">| awk ' {var1 = "</span>v1<span class="string">" ; var2 = "</span>V2<span class="string">"; var3="</span>v3<span class="string">"; </span>
-print var1<span class="string">"-"</span>var2<span class="string">"-"</span>var3; }'
-$&gt;v1-V2-v3
-</code></pre><h3 id="特殊变量：NR_NF_$0_$1_$2">特殊变量：NR NF $0 $1 $2</h3><p>NR:表示记录数量，在执行过程中对应当前行号；<br>NF:表示字段数量，在执行过程总对应当前行的字段数；<br>$0:这个变量包含执行过程中当前行的文本内容；<br>$1:第一个字段的文本内容；<br>$2:第二个字段的文本内容；</p>
-<pre><code>echo -<span class="keyword">e</span> <span class="string">"line1 f2 f3n line2 n line 3"</span> | awk '{<span class="keyword">print</span> NR<span class="string">":"</span><span class="label">$0</span><span class="string">"-"</span><span class="label">$1</span><span class="string">"-"</span><span class="label">$2}</span>'
-</code></pre><p>打印每一行的第二和第三个字段：</p>
-<pre><code><span class="title">awk</span> <span class="string">'{print <span class="variable">$2</span>, <span class="variable">$3</span>}'</span> file
-</code></pre><p>统计文件的行数：</p>
-<pre><code>awk <span class="string">' END {print NR}'</span> <span class="keyword">file</span>
-</code></pre><p>累加每一行的第一个字段：</p>
-<pre><code>echo -<span class="keyword">e</span> <span class="string">"1n 2n 3n 4n"</span> | awk 'BEGIN{num = 0 ;
-<span class="keyword">print</span> <span class="string">"begin"</span>;} {<span class="keyword">sum</span> += <span class="label">$1</span>;} END {<span class="keyword">print</span> <span class="string">"=="</span>; <span class="keyword">print</span> <span class="keyword">sum</span> }'
-</code></pre><h3 id="传递外部变量">传递外部变量</h3><pre><code><span class="keyword">var</span>=<span class="number">1000</span>
-echo | awk <span class="string">'{print vara}'</span> vara=$<span class="keyword">var</span> 
-<span class="preprocessor">#  输入来自stdin</span>
-awk <span class="string">'{print vara}'</span> vara=$<span class="keyword">var</span> file 
-<span class="preprocessor"># 输入来自文件</span>
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cj3hb061e00283cfhskz459r0" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell/">shell</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-spark-learn" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/02/23/spark-learn/" class="article-date">
-  <time datetime="2016-02-23T13:50:37.000Z" itemprop="datePublished">2016-02-23</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/02/23/spark-learn/">Spark学习记录</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本笔记主要记录Spark在Hadoop环境中使用python语言进行算法开发过程中遇到的问题</p>
-<h3 id="Spark的启动">Spark的启动</h3><p>在Spark的安装路径中的<code>bin</code>路径中有pyspark，这是一种交互式的调用方法，还可以编写好python脚本之后通过</p>
-<pre><code><span class="label">spark</span>-<span class="keyword">submit </span>xxx.py
-</code></pre><p>的方式来调用。</p>
-<h3 id="sc_is_not_defined">sc is not defined</h3><p>任何Spark程序都需要一个SparkContext来开始，其包含了Spark集群配置的各种参数，如果代码报错<code>sc is not defined</code>，需要添加如下代码进行初始化：</p>
-<pre><code>from pyspark import SparkContext
-sc = <span class="function"><span class="title">SparkContext</span><span class="params">(<span class="string">'local[2]'</span>, <span class="string">'First Spark App'</span>)</span></span>
-</code></pre><h3 id="常用HDFS_Shell命令">常用HDFS Shell命令</h3><p>大多数FS Shell命令和对应的Unix Shell命令类似，格式为hadoop fs <args>，如下：</args></p>
-<pre><code>hadoop <span class="built_in">fs</span> -cat URI [URI …]
-hadoop <span class="built_in">fs</span> -chmod [-R] &lt;<span class="built_in">MODE</span>[,<span class="built_in">MODE</span>]... | OCTALMODE&gt; URI [URI …]
-hadoop <span class="built_in">fs</span> -cp URI [URI …] &lt;dest&gt;
-hadoop <span class="built_in">fs</span> -du URI [URI …]
-hadoop <span class="built_in">fs</span> -<span class="built_in">mkdir</span> &lt;paths&gt;
-hadoop <span class="built_in">fs</span> -ls &lt;args&gt;
-hadoop <span class="built_in">fs</span> -rmr URI [URI …]    # rm -rf
-</code></pre><p>在HDFS和本地之间复制文件的命令如下：</p>
-<pre><code>hadoop fs -get [-ignorecrc] [-crc] <span class="variable">&lt;src&gt;</span> <span class="variable">&lt;localdst&gt;</span>    <span class="comment"># 复制文件到本地文件系统</span>
-hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="variable">&lt;dst&gt;</span>    <span class="comment"># 本地文件复制到HDFS</span>
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cj3hb05yf001k3cfhhh7tubay" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-ml-skill" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/02/18/ml-skill/" class="article-date">
-  <time datetime="2016-02-18T13:23:36.000Z" itemprop="datePublished">2016-02-18</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/02/18/ml-skill/">机器学习技巧总结</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="SVM_vs_Logistic_Regression">SVM vs Logistic Regression</h3><ol>
-<li>逻辑回归和线性核SVM本质上其实没啥区别；</li>
-<li>特征数大于样本数或者二者数量相当时，逻辑回归或者线性核SVM会有比较好的效果；</li>
-<li>特征数较少，样本数一般多时，高斯核SVM会有比较好的效果；</li>
-<li>特征少，样本特别多时，构建更多的特征，然后用逻辑回归或者线性核SVM</li>
-</ol>
-<h3 id="调参技巧">调参技巧</h3><p>解决测试误差较大的办法</p>
-<ol>
-<li>增加训练样本 -&gt; 降低方差</li>
-<li>减少特征数量 -&gt; 降低方差</li>
-<li>增加新特征 -&gt; 降低偏差</li>
-<li>现有特征多项式组合(x1^2, x2^2, x1*x2等等) -&gt; 降低偏差</li>
-<li>降低正则λ -&gt; 降低偏差</li>
-<li>增加正则λ -&gt; 降低方差</li>
+<li>很多单位不按本人工资给上保险和公积金, 比如按北京市平均工资上, 个人就吃亏了. 所以找工作的时候要问清楚. </li>
+<li>现在很多人才都规定养老失业和大病是捆绑的, 要么都不上,要么都一起上,而且必须档案在人才的才给上. 如果个人在人才上, 就必须把单位的钱和个人的钱都自己交 , 挺多的, 据说按最低标准, 每月也得交一千多, 而且没有多少钱到个人帐户上, 建议如果比较年轻, 身体还好, 只是暂时失业, 不必自己交了, 以后到单位再上吧.<br>3.有钱人可以不上养老保险, 穷人最好上,指 望能有点钱养老.有人说自己存着, 但国家对养老金还是有所保障的,会根据经济情况上调.<br>4.有些单位以档案不在本单位,不给上, 是不对的, 因为档案和保险不挂钩 </li>
+<li>外地户口的同样,应该给上所有的保险和公积金, 和户口没关系, 以后如果去其他城市, 都是可以转的 </li>
 </ol>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cj3hb060n00243cfh07vj6zvn" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cj3hb05tk000a3cfh3rs4j9lq" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
 
     </footer>
   </div>
@@ -954,16 +300,12 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
 
 
   
-    <article id="post-python-skill" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/02/18/python-skill/" class="article-date">
-  <time datetime="2016-02-18T13:21:09.000Z" itemprop="datePublished">2016-02-18</time>
+    <a href="/2015/03/17/hello-world/" class="article-date">
+  <time datetime="2015-03-17T13:31:09.205Z" itemprop="datePublished">2015-03-17</time>
 </a>
     
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
   </div>
   <div class="article-inner">
     
@@ -972,7 +314,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/02/18/python-skill/">python技巧总结</a>
+      <a class="article-title" href="/2015/03/17/hello-world/">Hello World</a>
     </h1>
   
 
@@ -980,124 +322,22 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="查看运行时间">查看运行时间</h2><p>用ipython的run命令做profiling，找出耗时语句</p>
-<pre><code><span class="built_in">run</span> <span class="bash">-p xxx.py</span>
-</code></pre><h2 id="ipynb文件">ipynb文件</h2><p>ipynb文件是用浏览器演示python交互的优良插件，可以提供运行代码，插图，文章说明，插入公式等多种功能。<br>只需在含有ipynb文件的的父目录位置执行</p>
-<pre><code><span class="title">ipython</span> notebook
-</code></pre><p>即可生成shell服务器端，浏览器作为客户端展示出来。</p>
-<h2 id="内存优化">内存优化</h2><p>及时释放内存。大数组使用完之后，手动del释放array。注意所有对数组的引用都del之后，数组才会被del。这些引用包括A[2:]这样的view。<br>尽量重用内存，比如：</p>
-<pre><code>A = <span class="keyword">B </span>+ C # <span class="keyword">B </span>is neverused later
-</code></pre><p>可以改写成</p>
-<pre><code><span class="constant">B</span> += C
-<span class="constant">A</span> = B
-</code></pre><h2 id="py2exe">py2exe</h2><p>windows环境把python脚步打包成可执行程序，安装py2exe。注意使用pip install安装只能支持python3版本，要想在python2.7环境下使用py2exe，要在这里下载<a href="https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win32-py2.7.exe/download" target="_blank" rel="external">py2exe-0.6.9.win32-py2.7.exe</a></p>
-<p>在脚步所在目录下新建一个<code>setup.py</code>文件，加入</p>
-<pre><code>from distutils<span class="class">.core</span> import setup
-import py2exe
-
-<span class="function"><span class="title">setup</span><span class="params">(windows = [<span class="string">'xxxxxx.py'</span>])</span></span>
-</code></pre><p>然后执行</p>
-<pre><code>python setup<span class="class">.py</span> py2exe
-</code></pre><p>然后可执行程序以及相关依赖都会创建在dist文件夹，打包带走dist即可。</p>
-<h2 id="random随机数模块">random随机数模块</h2><h3 id="random-random">random.random</h3><p>用于生成[0, 1.0)的随机浮点数</p>
-<h3 id="random-uniform(a,_b)">random.uniform(a, b)</h3><p>生成[a, b]的随机浮点数</p>
-<h3 id="random-randint(a,_b)">random.randint(a, b)</h3><p>生成[a, b]的随机整数</p>
-<h3 id="random-choice(sequence)">random.choice(sequence)</h3><p>从sequence中随机得到一个元素</p>
-<h3 id="random-shuffle(x[,_random])">random.shuffle(x[, random])</h3><p>用于将列表x元素打乱顺序</p>
-<h3 id="random-sample(sequence,_k)">random.sample(sequence, k)</h3><p>从指定序列中随机获取长度k的片段，不改变原有序列</p>
+        <p>Welcome to <a href="http://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="http://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="http://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
+<h2 id="Quick_Start">Quick Start</h2><h3 id="Create_a_new_post">Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+<p>More info: <a href="http://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
+<h3 id="Run_server">Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="http://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
+<h3 id="Generate_static_files">Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="http://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
+<h3 id="Deploy_to_remote_sites">Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="http://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cj3hb05zf001t3cfhnleg1xu6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="cj3hb0623002j3cfhhdae7ze2" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-linux-c-skill" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/01/18/linux-c-skill/" class="article-date">
-  <time datetime="2016-01-18T14:07:18.000Z" itemprop="datePublished">2016-01-18</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/01/18/linux-c-skill/">Linux c/c++ 技巧总结</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="遍历目录内文件">遍历目录内文件</h2><p>Linux下的dirent.h头文件是专门为了获取文件夹目录内容而设计的结构体。使用示例如下：</p>
-<pre><code><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;dirent.h&gt;</span></span>
-<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span>
-<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span>
-<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span>
-
-<span class="function"><span class="keyword">void</span> <span class="title">List</span><span class="params">(<span class="keyword">char</span>* path, <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt;&amp; files)</span>
-</span>{
-    <span class="keyword">struct</span> dirent* ent = <span class="literal">NULL</span>;
-    DIR* pDir;
-    <span class="keyword">char</span> dir[<span class="number">512</span>];
-    <span class="keyword">struct</span> stat statbuf;  
-    <span class="keyword">if</span> ( (pDir=opendir(path))==<span class="literal">NULL</span> )
-    {
-    <span class="built_in">fprintf</span>( <span class="built_in">stderr</span>, <span class="string">"Cannot open directory:%s\n"</span>, path );
-        <span class="keyword">return</span>;
-    }
-    <span class="keyword">while</span>( (ent=readdir(pDir)) != <span class="literal">NULL</span> )
-    {
-        <span class="comment">//得到读取文件的绝对路径名</span>
-        <span class="built_in">snprintf</span>(dir, <span class="number">512</span>, <span class="string">"%s/%s"</span>, path, ent-&gt;d_name);   
-        <span class="comment">//得到文件信息</span>
-        lstat(dir, &amp;statbuf);
-        <span class="comment">//判断是目录还是文件</span>
-        <span class="keyword">if</span> ( S_ISDIR(statbuf.st_mode) )
-        {
-            <span class="comment">//排除当前目录和上级目录</span>
-            <span class="keyword">if</span> (<span class="built_in">strcmp</span>(<span class="string">"."</span>,ent-&gt;d_name) == <span class="number">0</span> || <span class="built_in">strcmp</span>( <span class="string">".."</span>,ent-&gt;d_name) == <span class="number">0</span>) 
-                <span class="keyword">continue</span>;
-            <span class="comment">//如果是子目录,递归调用函数本身,实现子目录中文件遍历</span>
-            <span class="built_in">printf</span>( <span class="string">"子目录:%s/\n"</span>, ent-&gt;d_name );
-            <span class="comment">//递归调用,遍历子目录中文件</span>
-            <span class="comment">//List(dir);</span>
-        }
-        <span class="keyword">else</span>
-        {
-            <span class="built_in">printf</span>( <span class="string">"文件:%s\n"</span>, ent-&gt;d_name );
-            files.push_back(pathName.assign(path).append(<span class="string">"/"</span>).append(ent-&gt;d_name));
-        }       
-    }
-    closedir(pDir);
-}
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cj3hb061r002c3cfhhskjssxs" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
-
     </footer>
   </div>
   
@@ -1107,7 +347,7 @@ import py2exe
   
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
     </nav>
   
 </section>
