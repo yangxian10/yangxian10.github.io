@@ -65,6 +65,73 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-caffefe2-install" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/07/caffefe2-install/" class="article-date">
+  <time datetime="2017-10-07T06:10:51.000Z" itemprop="datePublished">2017-10-07</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/07/caffefe2-install/">caffe2学习（一）安装配置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="相关依赖">相关依赖</h2><p>caffe2的依赖比caffe要干净很多，必要的库比较少</p>
+<ul>
+<li>cmake</li>
+<li>git</li>
+<li>glog</li>
+<li>protobuf</li>
+<li>CUDA (optional)</li>
+<li>cudnn (optional)</li>
+</ul>
+<h2 id="caffe2安装">caffe2安装</h2><pre><code>git <span class="built_in">clone</span> --recursive https://github.com/caffe2/caffe2.git
+<span class="built_in">cd</span> caffe2
+make -j8
+<span class="built_in">cd</span> build
+sudo make install
+
+<span class="comment"># test</span>
+python -c <span class="string">'from caffe2.python import core'</span> <span class="number">2</span>&gt;/dev/null &amp;&amp; <span class="built_in">echo</span> <span class="string">"Success"</span> || <span class="built_in">echo</span> <span class="string">"Failure"</span>
+python -m caffe2.python.operator_test.relu_op_<span class="built_in">test</span>
+
+<span class="comment"># Environment Variables</span>
+<span class="built_in">export</span> PYTHONPATH=<span class="variable">$PYTHONPATH</span>:/home/<span class="number">15072585</span>/caffe2/build  <span class="comment">#(add to ~/.bashrc)</span>
+</code></pre><h2 id="tips">tips</h2><ul>
+<li>gpu版本报错，已经在github issue上提问了<a href="https://github.com/caffe2/caffe2/issues/1297" target="_blank" rel="external">https://github.com/caffe2/caffe2/issues/1297</a>，目前没能解决，只能在cmake里关闭CUDA开关<code>option(USE_CUDA &quot;Use Cuda&quot; OFF)</code></li>
+<li><code>from caffe2.python import core</code>报错<code>No module named past.builtins</code>，解决方案<code>pip install future</code></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/07/caffefe2-install/" data-id="cj8gx9r8w003ancfhjz13ua0r" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-caffe-forward" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/06/03/caffe-forward/" class="article-date">
@@ -133,7 +200,7 @@ vim src/caffe/layers/base_conv_layer.cpp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/06/03/caffe-forward/" data-id="cj3hb068q003n3cfhg0zncpmp" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/06/03/caffe-forward/" data-id="cj8gx9r9s003qncfh1zzt3uj6" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -180,7 +247,7 @@ vim src/caffe/layers/base_conv_layer.cpp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/06/03/interview/" data-id="cj3hb061y002g3cfhdplph5we" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/06/03/interview/" data-id="cj8gx9r7f002gncfhvubef8kz" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
@@ -226,7 +293,7 @@ sess = tf.<span class="function"><span class="title">Session</span><span class="
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/04/22/tensorflow-gpu/" data-id="cj3hb05vp00153cfh47r5gxgh" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/04/22/tensorflow-gpu/" data-id="cj8gx9r620015ncfhwnuctwr0" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -365,7 +432,7 @@ sess.close()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/03/29/tensorflow-mydata/" data-id="cj3hb05up000t3cfh23q3tuaw" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/03/29/tensorflow-mydata/" data-id="cj8gx9r52000tncfhgm22bs5r" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -462,7 +529,7 @@ saver.<span class="function"><span class="title">restore</span><span class="para
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/03/26/tensorflow-saver/" data-id="cj3hb05ue000q3cfh435bjlon" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/03/26/tensorflow-saver/" data-id="cj8gx9r52000qncfhkypayfxd" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -515,7 +582,7 @@ tf_upgrade.py --intree <span class="variable">&lt;input_dir&gt;</span> -outtree 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/02/27/tensorflow-update/" data-id="cj3hb05ty000k3cfhadtkn1uv" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/02/27/tensorflow-update/" data-id="cj8gx9r4n000kncfh1kr4545k" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -602,7 +669,7 @@ pip install <span class="regexp">/tmp/</span>tensorflow_pkg/tensorflow-<span cla
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/02/19/tensorflow1-0-install/" data-id="cj3hb05ts000g3cfhcnhgvki4" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/02/19/tensorflow1-0-install/" data-id="cj8gx9r4n000gncfhpkflkxok" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -686,7 +753,7 @@ pip install <span class="regexp">/tmp/</span>tensorflow_pkg/tensorflow-<span cla
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/12/30/cmake-learn/" data-id="cj3hb067a00373cfhm9fy43ma" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/12/30/cmake-learn/" data-id="cj8gx9r8w0037ncfhl5eidl8g" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
@@ -884,7 +951,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/08/28/caffe-add-jni-example/" data-id="cj3hb069o003z3cfhpg5iblg9" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/08/28/caffe-add-jni-example/" data-id="cj8gx9ra70042ncfhp732fvow" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -932,7 +999,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/22/tensorflow-modelresource/" data-id="cj3hb05uu000w3cfhuo3yihpu" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/22/tensorflow-modelresource/" data-id="cj8gx9r52000wncfhn6r3h0x4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -979,7 +1046,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="cj3hb067h003a3cfhltpq1sss" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="cj8gx9r8w003encfh1wpppcxn" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -1042,7 +1109,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="cj3hb0627002k3cfh03kd905v" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="cj8gx9r7v002kncfhnm1e55dx" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -1168,7 +1235,7 @@ images = re.<span class="function"><span class="title">findall</span><span class
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cj3hb05yy001p3cfhubaosjp5" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cj8gx9r6k001pncfhkytcn1jw" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -1225,7 +1292,7 @@ params = params.<span class="function"><span class="title">item</span><span clas
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cj3hb05y0001h3cfhi7byo9fr" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cj8gx9r64001hncfhg6dk67ab" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1291,7 +1358,7 @@ label_n
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cj3hb05vl00123cfh54em42og" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cj8gx9r5i0012ncfhgd1421w5" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1561,7 +1628,7 @@ config.gpu_options.allow_growth = <span class="keyword">True</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-captcha/" data-id="cj3hb05xb001e3cfhdcg180hw" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-captcha/" data-id="cj8gx9r64001encfhp0mobq9v" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1813,7 +1880,7 @@ init = tf.initialize_all_variables()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/28/tensorflow-cnn/" data-id="cj3hb05wp001b3cfh818ewyzp" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/28/tensorflow-cnn/" data-id="cj8gx9r64001bncfhi08l26wm" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1899,7 +1966,7 @@ tf<span class="class">.summary</span><span class="class">.merge_all</span>(key=<
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cj3hb05u2000n3cfhsryrqe5y" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cj8gx9r4n000nncfh9naypm2q" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -2040,111 +2107,7 @@ saver.<span class="function"><span class="title">save</span><span class="params"
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cj3hb05vt00183cfhd3f6oyya" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-tensorflow-install" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/04/20/tensorflow-install/" class="article-date">
-  <time datetime="2016-04-20T12:46:00.000Z" itemprop="datePublished">2016-04-20</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/04/20/tensorflow-install/">tensorflow学习（一）安装配置</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>tensorflow是google开源的深度学习平台，由于其性能比较差，一开始我是拒绝的，不过由于google强大的影响力和执行力，版本迭代更新很快，现在性能已经很快了，而且最新的版本也支持了分布式。而且tensorflow的中文文档也是所有开源框架里最完善的，所以近期抽空学习一下。还是先从安装搞起。<br>虽然其有比较完善的官方文档<a href="https://www.tensorflow.org/" target="_blank" rel="external">https://www.tensorflow.org/</a>以及其中文版本<a href="http://wiki.jikexueyuan.com/project/tensorflow-zh/" target="_blank" rel="external">http://wiki.jikexueyuan.com/project/tensorflow-zh/</a>，但使用的时候还是发现存在一些坑，还是记录一下学习过程中遇到的问题。<br>tensorflow支持pip、virtualenv、Docker三种安装方式。我这里只尝试了最简单方便的pip安装。</p>
-<h2 id="安装环境">安装环境</h2><p>我的电脑是centOS 7.0，k40双卡</p>
-<h2 id="CUDA和cudnn">CUDA和cudnn</h2><p>参考之前教程，安装CUDA和cudnn。我这里的CUDA版本是7.0，cudnn版本是v3。<br>再安装six和protobuf到对应版本，tensorflow要求’six &gt;= 1.10.0, protobuf &gt;= 3.0.0b2’，网上下载对应的whl包，执行</p>
-<pre><code><span class="tag">pip</span> <span class="tag">install</span> <span class="tag">six-1</span><span class="class">.10</span><span class="class">.0-py2</span><span class="class">.py3-none-any</span><span class="class">.whl</span>
-<span class="tag">pip</span> <span class="tag">install</span> <span class="tag">protobuf</span>
-</code></pre><h2 id="pip安装tensorflow">pip安装tensorflow</h2><p>根据官方教程，应该执行如下命令</p>
-<pre><code><span class="comment"># 仅使用 CPU 的版本</span>
-pip install <span class="symbol">https:</span>/<span class="regexp">/storage.googleapis.com/tensorflow</span><span class="regexp">/linux/cpu</span><span class="regexp">/tensorflow-0.7.1-cp27-none-linux_x86_64.whl
-# 开启 GPU 支持的版本 (安装该版本的前提是已经安装了 CUDA sdk)
-pip install https:/</span><span class="regexp">/storage.googleapis.com/tensorflow</span><span class="regexp">/linux/gpu</span><span class="regexp">/tensorflow-0.7.1-cp27-none-linux_x86_64.whl</span>
-</code></pre><p>但是由于GFW原因，上述命令可能会超时失败，于是寻找其他whl包的位置。<br>在官方的github上很容易找到其对应的安装版本。<a href="https://github.com/tensorflow/tensorflow" target="_blank" rel="external">https://github.com/tensorflow/tensorflow</a>，我这里使用的版本是python2的GPU版本。</p>
-<pre><code># 开启 GPU 支持的版本 (安装该版本的前提是已经安装了 CUDA sdk)
-pip <span class="operator"><span class="keyword">install</span> <span class="keyword">http</span>://ci.tensorflow.org/<span class="keyword">view</span>/Nightly/job/nigntly-matrix-linux-gpu/TF_BUILD_CONTAINER_TYPE=GPU,TF_BUILD_IS_OPT=OPT,TF_BUILD_IS_PIP=PIP,TF_BUILD_PYTHON_VERSION=PYTHON2,label=gpu-<span class="keyword">slave</span>/lastSuccessfulBuild/artifact/pip_test/whl/tensorflow-<span class="number">0.7</span><span class="number">.1</span>-cp27-<span class="keyword">none</span>-linux_x86_64.whl</span>
-</code></pre><p>安装成功。<br>但是在<code>import tensorflow</code>的时候会报错说ImportError: libcudart.so.7.5: cannot open shared object file: No such file or directory，可恶，我明明装的是CUDA7.0，竟然报错找不到7.5，解决这个问题也很简单，只需要把7.0做个软链接弄个名7.5骗过tensorflow就行，代码如下：</p>
-<pre><code>sudo ln -s <span class="regexp">/usr/</span>local<span class="regexp">/cuda/</span>lib64<span class="regexp">/libcudart.so.7.0 /u</span>sr<span class="regexp">/local/</span>cuda<span class="regexp">/lib64/</span>libcudart.so.<span class="number">7.5</span>
-sudo ln -s <span class="regexp">/usr/</span>local<span class="regexp">/cuda/</span>lib64<span class="regexp">/libcublas.so.7.0 /u</span>sr<span class="regexp">/local/</span>cuda<span class="regexp">/lib64/</span>libcublas.so.<span class="number">7.5</span>
-</code></pre><h2 id="运行tensorflow">运行tensorflow</h2><p>在python终端执行如下代码：</p>
-<pre><code>import tensorflow as tf
-hello = tf.<span class="function"><span class="title">constant</span><span class="params">(<span class="string">'Hello, TensorFlow!'</span>)</span></span>
-sess = tf.<span class="function"><span class="title">Session</span><span class="params">()</span></span>
-print sess.<span class="function"><span class="title">run</span><span class="params">(hello)</span></span>
-<span class="tag">a</span> = tf.<span class="function"><span class="title">constant</span><span class="params">(<span class="number">10</span>)</span></span>
-<span class="tag">b</span> = tf.<span class="function"><span class="title">constant</span><span class="params">(<span class="number">32</span>)</span></span>
-print sess.<span class="function"><span class="title">run</span><span class="params">(a+b)</span></span>
-</code></pre><p>顺利运行表明tensorflow安装完成。</p>
-<h2 id="源码路径以及示例">源码路径以及示例</h2><p>由于我的python是anaconda版本，所以tensorflow会安装在’$HOME/anaconda/lib/python2.7/site-packages/tensorflow’。<br>运行第一个示例，如下：</p>
-<pre><code>cd <span class="variable">$HOME</span>/anaconda/<span class="class"><span class="keyword">lib</span>/<span class="title">python2</span>.7/<span class="title">site</span>-<span class="title">packages</span>/<span class="title">tensorflow</span></span>
-python ./models/image/mnist/convolutional.py
-</code></pre><p>程序会下载mnist数据集，迭代训练，显示当前loss、学习率以及误差。</p>
-<h2 id="GLIBC的版本问题解决方案">GLIBC的版本问题解决方案</h2><p>在CentOS/RHEL 6的操作系统中，GLIBC的版本可能不满足tensorflow的要求，在<code>import tensorflow</code>的时候会报错</p>
-<pre><code>ImportError: /lib64/libc.<span class="keyword">so</span>.6: <span class="keyword">version</span> `GLIBC_2.15' not found (required <span class="keyword">by</span> /home/15072585/anaconda/lib/python2.7/site-packages/tensorflow/python/_pywrap_tensorflow.<span class="keyword">so</span>)
-</code></pre><p>通过命令查看<code>/lib64/libc.so.6</code>的GLIBC版本：</p>
-<pre><code>strings <span class="regexp">/lib64/</span>libc.so.<span class="number">6</span> |<span class="keyword">grep</span> GLIBC
-</code></pre><p>可以看到其只支持到2.12，不能支持高版本。解决方案：</p>
-<pre><code>mkdir ~/my_libc_env
-cd ~/my_libc_env
-wget http:<span class="comment">//launchpadlibrarian.net/137699828/libc6_2.17-0ubuntu5_amd64.deb</span>
-wget http:<span class="comment">//launchpadlibrarian.net/137699829/libc6-dev_2.17-0ubuntu5_amd64.deb</span>
-wget ftp:<span class="comment">//rpmfind.net/linux/sourceforge/m/ma/magicspecs/apt/3.0/x86_64/RPMS.lib/libstdc++-4.8.2-7mgc30.x86_64.rpm</span>
-ar p libc6_2<span class="number">.17</span>-<span class="number">0u</span>buntu5_amd64.deb data.tar.gz | tar zx
-ar p libc6-dev_2<span class="number">.17</span>-<span class="number">0u</span>buntu5_amd64.deb data.tar.gz | tar zx
-rpm2cpio libstdc++-<span class="number">4.8</span><span class="number">.2</span>-<span class="number">7</span>mgc30.x86_64.rpm| cpio -idmv
-</code></pre><p>以后想执行支持tensorflow的python版本的时候需要执行命令：</p>
-<pre><code><span class="constant">LD_LIBRARY_PATH</span>=<span class="string">"$HOME/my_libc_env/lib/x86_64-linux-gnu/:$HOME/my_libc_env/usr/lib64/"</span> <span class="variable">$HOME</span>/my_libc_env/<span class="class"><span class="keyword">lib</span>/<span class="title">x86_64</span>-<span class="title">linux</span>-<span class="title">gnu</span>/<span class="title">ld</span>-2.17.<span class="title">so</span> `<span class="title">which</span> <span class="title">python</span>`</span>
-</code></pre><h3 id="GLIBC版本升级注意事项">GLIBC版本升级注意事项</h3><p>注意GLIBC这是一个根本的库，不能轻易升级。非要升级的话，首先查看当前的libc的指向</p>
-<pre><code>ll /lib64/libc<span class="class">.so</span>.<span class="number">6</span>
-</code></pre><p>获取高级版本的libc.so，比如/lib64/libc-2.15.so，这个步骤非常繁琐，编译生成很麻烦。我是通过从另外高级版本的机器copy过来使用的，所以没有生成，过程隐去。<br>接下来就是将软链接指向新的libc，实际操作注意rm原来的链接之后，系统的大部分命令都无法使用了，要用<code>LD_PRELOAD=/lib64/libc-2.15.so</code>指定所使用的libc才能运行shell命令。代码如下：</p>
-<pre><code>rm -rf /lib64/libc.so.<span class="number">6</span>
-LD_PRELOAD=<span class="regexp">/lib64/libc</span>-<span class="number">2.15</span>.so ln -<span class="regexp">s/lib64/libc-2.15.so  lib64/libc</span>.so.<span class="number">6</span>
-</code></pre><h1 id="基于源码安装(不建议)">基于源码安装(不建议)</h1><h2 id="安装jdk">安装jdk</h2><p>bazel依赖于jdk，网上都是安装JDK 8，由于centos默认是JDK 7，并且我们项目用的java版本也是1.7，所以去bazel官网看了一下，也是支持JDK 7的。所以这里没安装java</p>
-<h2 id="安装bazel">安装bazel</h2><pre><code>git clone http<span class="variable">s:</span>//github.<span class="keyword">com</span>/bazelbuild/bazel.git
-<span class="keyword">cd</span> bazel
-./compile.<span class="keyword">sh</span>
-sudo
-<span class="keyword">cp</span> output/bazel /usr/local/bin/
-</code></pre><h2 id="编译tensorflow">编译tensorflow</h2><pre><code>git clone <span class="symbol">https:</span>/<span class="regexp">/github.com/tensorflow</span><span class="regexp">/tensorflow
-cd tensorflow
-./configure</span>
-<span class="comment"># choose with Google Cloud Platform / with GPU</span>
-bazel build -c opt --config=cuda /<span class="regexp">/tensorflow/tools</span><span class="regexp">/pip_package:build_pip_package
-bazel-bin/tensorflow</span><span class="regexp">/tools/pip</span>_package/build_pip_package /tmp/tensorflow_pkg
-pip install /tmp/tensorflow_pkg/tensorflow-<span class="number">0.10</span>.<span class="number">0</span>-py2-none-any.whl
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cj3hb05v9000z3cfhi0khc2q2" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cj8gx9r640018ncfhg74kujut" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -2169,7 +2132,7 @@ pip install /tmp/tensorflow_pkg/tensorflow-<span class="number">0.10</span>.<spa
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">25</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">26</span></li></ul>
     </div>
   </div>
 
@@ -2178,7 +2141,7 @@ pip install /tmp/tensorflow_pkg/tensorflow-<span class="number">0.10</span>.<spa
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
     </div>
   </div>
 
@@ -2196,7 +2159,7 @@ pip install /tmp/tensorflow_pkg/tensorflow-<span class="number">0.10</span>.<spa
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -2206,6 +2169,10 @@ pip install /tmp/tensorflow_pkg/tensorflow-<span class="number">0.10</span>.<spa
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/10/07/caffefe2-install/">caffe2学习（一）安装配置</a>
+          </li>
         
           <li>
             <a href="/2017/06/03/caffe-forward/">caffe学习（九）inference代码优化</a>
@@ -2221,10 +2188,6 @@ pip install /tmp/tensorflow_pkg/tensorflow-<span class="number">0.10</span>.<spa
         
           <li>
             <a href="/2017/03/29/tensorflow-mydata/">tensorflow学习（十二）加载自定义图像数据集</a>
-          </li>
-        
-          <li>
-            <a href="/2017/03/26/tensorflow-saver/">tensorflow学习（十一）保存和恢复模型</a>
           </li>
         
       </ul>

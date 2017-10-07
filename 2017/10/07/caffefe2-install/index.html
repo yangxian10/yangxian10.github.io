@@ -3,33 +3,57 @@
 <head>
   <meta charset="utf-8">
   
-  <title>tensorflow学习（九）1.0正式版安装配置 | 杨现的个人博客</title>
+  <title>caffe2学习（一）安装配置 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="近期tensorflow发布了正式版，我们也赶快更新起来。
-安装环境操作系统centOS 7.0， k80四卡。注意tensorflow1.0.0只支持CUDA8，所以需要将CUDA升级到8.0，cudnn升级到v5.1。
-安装OpenCV注意之前选择的OpenCV2.4.11版本对CUDA8.0是不兼容的，要升级到OpenCV2.4.13。
-cd ~/opencv
-mkdir release
-c">
+  <meta name="description" content="相关依赖caffe2的依赖比caffe要干净很多，必要的库比较少
+
+cmake
+git
+glog
+protobuf
+CUDA (optional)
+cudnn (optional)
+
+caffe2安装git clone --recursive https://github.com/caffe2/caffe2.git
+cd caffe2
+make -j8
+cd build
+sudo make ins">
 <meta property="og:type" content="article">
-<meta property="og:title" content="tensorflow学习（九）1.0正式版安装配置">
-<meta property="og:url" content="http://yoursite.com/2017/02/19/tensorflow1-0-install/index.html">
+<meta property="og:title" content="caffe2学习（一）安装配置">
+<meta property="og:url" content="http://yoursite.com/2017/10/07/caffefe2-install/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="近期tensorflow发布了正式版，我们也赶快更新起来。
-安装环境操作系统centOS 7.0， k80四卡。注意tensorflow1.0.0只支持CUDA8，所以需要将CUDA升级到8.0，cudnn升级到v5.1。
-安装OpenCV注意之前选择的OpenCV2.4.11版本对CUDA8.0是不兼容的，要升级到OpenCV2.4.13。
-cd ~/opencv
-mkdir release
-c">
-<meta property="og:updated_time" content="2017-06-07T12:33:28.993Z">
+<meta property="og:description" content="相关依赖caffe2的依赖比caffe要干净很多，必要的库比较少
+
+cmake
+git
+glog
+protobuf
+CUDA (optional)
+cudnn (optional)
+
+caffe2安装git clone --recursive https://github.com/caffe2/caffe2.git
+cd caffe2
+make -j8
+cd build
+sudo make ins">
+<meta property="og:updated_time" content="2017-10-07T06:11:44.337Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="tensorflow学习（九）1.0正式版安装配置">
-<meta name="twitter:description" content="近期tensorflow发布了正式版，我们也赶快更新起来。
-安装环境操作系统centOS 7.0， k80四卡。注意tensorflow1.0.0只支持CUDA8，所以需要将CUDA升级到8.0，cudnn升级到v5.1。
-安装OpenCV注意之前选择的OpenCV2.4.11版本对CUDA8.0是不兼容的，要升级到OpenCV2.4.13。
-cd ~/opencv
-mkdir release
-c">
+<meta name="twitter:title" content="caffe2学习（一）安装配置">
+<meta name="twitter:description" content="相关依赖caffe2的依赖比caffe要干净很多，必要的库比较少
+
+cmake
+git
+glog
+protobuf
+CUDA (optional)
+cudnn (optional)
+
+caffe2安装git clone --recursive https://github.com/caffe2/caffe2.git
+cd caffe2
+make -j8
+cd build
+sudo make ins">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -79,10 +103,10 @@ c">
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-tensorflow1-0-install" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-caffefe2-install" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2017/02/19/tensorflow1-0-install/" class="article-date">
-  <time datetime="2017-02-19T12:52:10.000Z" itemprop="datePublished">2017-02-19</time>
+    <a href="/2017/10/07/caffefe2-install/" class="article-date">
+  <time datetime="2017-10-07T06:10:51.000Z" itemprop="datePublished">2017-10-07</time>
 </a>
     
   <div class="article-category">
@@ -97,7 +121,7 @@ c">
         
   
     <h1 class="article-title" itemprop="name">
-      tensorflow学习（九）1.0正式版安装配置
+      caffe2学习（一）安装配置
     </h1>
   
 
@@ -105,59 +129,39 @@ c">
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>近期tensorflow发布了正式版，我们也赶快更新起来。</p>
-<h2 id="安装环境">安装环境</h2><p>操作系统centOS 7.0， k80四卡。注意tensorflow1.0.0只支持CUDA8，所以需要将<strong>CUDA升级到8.0，cudnn升级到v5.1</strong>。</p>
-<h2 id="安装OpenCV">安装OpenCV</h2><p>注意之前选择的OpenCV2.4.11版本对CUDA8.0是不兼容的，要升级到<strong>OpenCV2.4.13</strong>。</p>
-<pre><code>cd ~/opencv
-mkdir <span class="operator"><span class="keyword">release</span>
-cd <span class="keyword">release</span>
-cmake -<span class="keyword">D</span> CMAKE_BUILD_TYPE=<span class="keyword">RELEASE</span> -<span class="keyword">D</span> CMAKE_INSTALL_PREFIX=/usr/<span class="keyword">local</span> -<span class="keyword">D</span> CUDA_GENERATION=Kepler ..
+        <h2 id="相关依赖">相关依赖</h2><p>caffe2的依赖比caffe要干净很多，必要的库比较少</p>
+<ul>
+<li>cmake</li>
+<li>git</li>
+<li>glog</li>
+<li>protobuf</li>
+<li>CUDA (optional)</li>
+<li>cudnn (optional)</li>
+</ul>
+<h2 id="caffe2安装">caffe2安装</h2><pre><code>git <span class="built_in">clone</span> --recursive https://github.com/caffe2/caffe2.git
+<span class="built_in">cd</span> caffe2
 make -j8
-sudo make <span class="keyword">install</span></span>
-</code></pre><p>因为OpenCV在cmake的时候找不到anaconda的python路径，所以需要手动将cv2.so和cv.py复制到anaconda对应的lib下。注意安装完之后再编译与OpenCV相关程序会出现报错<code>cannot find -lopencv_dep_cudart</code>。解决办法是要控制CMake的一个开关，在cmake的时候注意</p>
-<pre><code>cmake -D CUD<span class="built_in">A_USE</span>_STATIC_CUD<span class="built_in">A_RUNTIME</span>=OFF ..
-</code></pre><p>或者在CMakeLists.txt中在<code>find_package(OpenCV REQUIRED)</code>前添加</p>
-<pre><code><span class="function"><span class="title">set</span><span class="params">(CUDA_USE_STATIC_CUDA_RUNTIME OFF)</span></span>
-</code></pre><p>但这样还是需要更改每个工程的配置，还是有些麻烦，我采用了大杀器，更改了cmake安装包里的默认配置。使用的是cmake3.7.0这个安装包。</p>
-<pre><code>vim ./Modules/FindCUDA.cmake
-# line 793, ON <span class="comment">--&gt; OFF</span>
-option(CUDA_USE_STATIC_CUDA_RUNTIME "<span class="operator"><span class="keyword">Use</span> the <span class="keyword">static</span> <span class="keyword">version</span> <span class="keyword">of</span> the CUDA runtime <span class="keyword">library</span> <span class="keyword">if</span> available<span class="string">" OFF)</span></span>
-</code></pre><p>注意官网日志说明<strong>OpenCV3.2版本支持CUDA8</strong>，如果硬着头皮上OpenCV3.2，安装也没啥多说的。注意k80的GPU是kepler架构，如果是pascal架构的也要相应选择。在安装的时候还会遇到<code>Downloading ippicv_linux_20151201.tgz...</code>的问题，要确保服务器能访问<code>raw.githubusercontent.com</code>。还有一个bug是mkl也要更新到1.13新版本，不然会报错缺少<code>mkl_version.h</code>文件。</p>
-<h2 id="安装tensorflow">安装tensorflow</h2><p>新版本tensorflow安装已经非常简单了，只需要直接pip安装即可。相应的依赖包都会自动更新到匹配版本，非常方便</p>
-<pre><code>pip <span class="keyword">install</span> tensorflow-gpu    <span class="comment"># gpu version</span>
-pip <span class="keyword">install</span> tensorflow    <span class="comment"># cpu version</span>
-</code></pre><h2 id="tips">tips</h2><p>安装好之后可能会遇到can’t find libmkl_avx.so的问题，应该是anaconda和tensorflow的安装顺序导致的，可以通过下面的办法暂时解决</p>
-<pre><code><span class="built_in">export</span> LD_PRELOAD=libmkl_rt.so
-</code></pre><h2 id="安装bazel">安装bazel</h2><h3 id="安装jdk8">安装jdk8</h3><p>bazel需要java8的支持，由于系统本身有一套jdk7的环境，我这套jdk8的环境只想对我生效，配置如下：</p>
-<pre><code>download jdk-<span class="number">8</span>u131-linux-x64.tar.gz
-tar xzvf jdk-<span class="number">8</span>u131-linux-x64.tar.gz
-vim ~/.bashrc
-    export JAVA_HOME=<span class="variable">$HOME</span>/software_bak/jdk1.<span class="number">8.0_131</span>
-    export PATH=<span class="variable">$JAVA</span>_HOME/bin:<span class="variable">$PATH</span>
-    export CLASSPATH=.:<span class="variable">$JAVA</span>_HOME/lib/dt.jar:<span class="variable">$JAVA</span>_HOME/lib/tools.jar
-source ~/.bashrc
-java -version
-</code></pre><h3 id="安装bazel-1">安装bazel</h3><pre><code>wget https:<span class="comment">//github.com/bazelbuild/bazel/releases/download/0.5.1/bazel-0.5.1-installer-linux-x86_64.sh</span>
-chmod +x bazel-<span class="number">0.5</span>.<span class="number">1</span>-installer-linux-x86_64<span class="class">.sh</span>
-./bazel-<span class="number">0.5</span>.<span class="number">1</span>-installer-linux-x86_64<span class="class">.sh</span> --user
-vim ~/<span class="class">.bashrc</span>
-    export PATH=<span class="variable">$PATH</span>:<span class="variable">$HOME</span>/bin
-source ~/<span class="class">.bashrc</span>
-bazel version
-</code></pre><h2 id="源码安装tensorflow">源码安装tensorflow</h2><pre><code>git    clone --recurse-submodules <span class="string">https:</span><span class="comment">//github.com/tensorflow/tensorflow</span>
-cd tensorflow
-.<span class="regexp">/configure /</span>/ 大部分都使用默认选项，注意GPU选项要打开
-bazel build -c opt --config=cuda <span class="comment">//tensorflow/tools/pip_package:build_pip_package</span>
-bazel-bin<span class="regexp">/tensorflow/</span>tools<span class="regexp">/pip_package/</span>build_pip_package <span class="regexp">/tmp/</span>tensorflow_pkg
-pip install <span class="regexp">/tmp/</span>tensorflow_pkg/tensorflow-<span class="number">0.10</span><span class="number">.0</span>-py2-none-any.whl
-</code></pre>
+<span class="built_in">cd</span> build
+sudo make install
+
+<span class="comment"># test</span>
+python -c <span class="string">'from caffe2.python import core'</span> <span class="number">2</span>&gt;/dev/null &amp;&amp; <span class="built_in">echo</span> <span class="string">"Success"</span> || <span class="built_in">echo</span> <span class="string">"Failure"</span>
+python -m caffe2.python.operator_test.relu_op_<span class="built_in">test</span>
+
+<span class="comment"># Environment Variables</span>
+<span class="built_in">export</span> PYTHONPATH=<span class="variable">$PYTHONPATH</span>:/home/<span class="number">15072585</span>/caffe2/build  <span class="comment">#(add to ~/.bashrc)</span>
+</code></pre><h2 id="tips">tips</h2><ul>
+<li>gpu版本报错，已经在github issue上提问了<a href="https://github.com/caffe2/caffe2/issues/1297" target="_blank" rel="external">https://github.com/caffe2/caffe2/issues/1297</a>，目前没能解决，只能在cmake里关闭CUDA开关<code>option(USE_CUDA &quot;Use Cuda&quot; OFF)</code></li>
+<li><code>from caffe2.python import core</code>报错<code>No module named past.builtins</code>，解决方案<code>pip install future</code></li>
+</ul>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/02/19/tensorflow1-0-install/" data-id="cj8gx9r4n000gncfhpkflkxok" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/07/caffefe2-install/" data-id="cj8gx9r8w003ancfhjz13ua0r" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
 
     </footer>
   </div>
@@ -165,19 +169,10 @@ pip install <span class="regexp">/tmp/</span>tensorflow_pkg/tensorflow-<span cla
     
 <nav id="article-nav">
   
-    <a href="/2017/02/27/tensorflow-update/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          tensorflow学习（十）实用工具介绍
-        
-      </div>
-    </a>
   
-  
-    <a href="/2016/12/30/cmake-learn/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2017/06/03/caffe-forward/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">用CMake搭建一个高质量的C/C++工程</div>
+      <div class="article-nav-title">caffe学习（九）inference代码优化</div>
     </a>
   
 </nav>
