@@ -3,17 +3,18 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2017/10 | 杨现的个人博客</title>
+  <title>caffe2学习（二）基础 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="迭代的是人，递归的是神">
-<meta property="og:type" content="website">
-<meta property="og:title" content="杨现的个人博客">
-<meta property="og:url" content="http://yoursite.com/archives/2017/10/index.html">
+  <meta name="description" content="写在前面最近开始尝试了caffe2，主要是因为tensorflow的发展越来越奇怪，一种网络实现在tensorflow中有多种对应的实现方式，臃肿的函数表达，每月一次大更新没有向下兼容，越来越高昂的学习成本，加之最近其他几大深度学习框架对tensorflow有合围之势…太多的槽点了，让我有点想放弃tensorflow这个坑了。还是怀念caffe的简洁，于是还是捡起贾扬清大神的续集填坑吧。废话不多说">
+<meta property="og:type" content="article">
+<meta property="og:title" content="caffe2学习（二）基础">
+<meta property="og:url" content="http://yoursite.com/2017/10/07/caffe2-abc/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="迭代的是人，递归的是神">
+<meta property="og:description" content="写在前面最近开始尝试了caffe2，主要是因为tensorflow的发展越来越奇怪，一种网络实现在tensorflow中有多种对应的实现方式，臃肿的函数表达，每月一次大更新没有向下兼容，越来越高昂的学习成本，加之最近其他几大深度学习框架对tensorflow有合围之势…太多的槽点了，让我有点想放弃tensorflow这个坑了。还是怀念caffe的简洁，于是还是捡起贾扬清大神的续集填坑吧。废话不多说">
+<meta property="og:updated_time" content="2017-10-07T06:14:35.385Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="杨现的个人博客">
-<meta name="twitter:description" content="迭代的是人，递归的是神">
+<meta name="twitter:title" content="caffe2学习（二）基础">
+<meta name="twitter:description" content="写在前面最近开始尝试了caffe2，主要是因为tensorflow的发展越来越奇怪，一种网络实现在tensorflow中有多种对应的实现方式，臃肿的函数表达，每月一次大更新没有向下兼容，越来越高昂的学习成本，加之最近其他几大深度学习框架对tensorflow有合围之势…太多的槽点了，让我有点想放弃tensorflow这个坑了。还是怀念caffe的简洁，于是还是捡起贾扬清大神的续集填坑吧。废话不多说">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -63,58 +64,66 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2017/10/07/caffe2-abc/" class="archive-article-date">
-  <time datetime="2017-10-07T06:13:10.000Z" itemprop="datePublished">10月 7</time>
+        <section id="main"><article id="post-caffe2-abc" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/07/caffe2-abc/" class="article-date">
+  <time datetime="2017-10-07T06:13:10.000Z" itemprop="datePublished">2017-10-07</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/10/07/caffe2-abc/">caffe2学习（二）基础</a>
+    <h1 class="article-title" itemprop="name">
+      caffe2学习（二）基础
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2017/10/07/caffefe2-install/" class="archive-article-date">
-  <time datetime="2017-10-07T06:10:51.000Z" itemprop="datePublished">10月 7</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/10/07/caffefe2-install/">caffe2学习（一）安装配置</a>
-    </h1>
-  
+        <h2 id="写在前面">写在前面</h2><p>最近开始尝试了caffe2，主要是因为tensorflow的发展越来越奇怪，一种网络实现在tensorflow中有多种对应的实现方式，臃肿的函数表达，每月一次大更新没有向下兼容，越来越高昂的学习成本，加之最近其他几大深度学习框架对tensorflow有合围之势…太多的槽点了，让我有点想放弃tensorflow这个坑了。还是怀念caffe的简洁，于是还是捡起贾扬清大神的续集填坑吧。废话不多说了，还是看看caffe2的亮点吧</p>
+<h2 id="caffe2亮点">caffe2亮点</h2><ul>
+<li>支持分布式训练</li>
+<li>对移动端的deployment的支持</li>
+<li>基础计算单元改为Operators，相对于caffe的layers单元有很多改进</li>
+</ul>
+<h3 id="caffe模型导入caffe2">caffe模型导入caffe2</h3><pre><code>python -m caffe2<span class="class">.python</span><span class="class">.caffe_translator</span> deploy<span class="class">.prototxt</span> pretrained.caffemodel
+</code></pre><h3 id="torch模型导入caffe2">torch模型导入caffe2</h3><p>使用torch2caffe的工具，将caffe作为桥梁，不展开讨论了</p>
 
-    </header>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/10/07/caffe2-abc/" data-id="cj8gxddrl003eykfh2s66hy1s" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe2/">caffe2</a></li></ul>
+
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/10/07/caffefe2-install/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">caffe2学习（一）安装配置</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-  
-    </div></section>
-  
+
 </section>
         
           <aside id="sidebar">
