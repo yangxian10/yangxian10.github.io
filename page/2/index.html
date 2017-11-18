@@ -65,6 +65,258 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-tensorflow-cnn" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/28/tensorflow-cnn/" class="article-date">
+  <time datetime="2016-05-28T09:16:03.000Z" itemprop="datePublished">2016-05-28</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/05/28/tensorflow-cnn/">tensorflow学习（四）自己创建CNN网络</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>之前已经介绍过数据的加载和可视化的问题，这次该研究模型了。CNN网络应该是深度学习的一个经典了，话不多说，直接介绍核心模块。</p>
+<h2 id="权重初始化">权重初始化</h2><pre><code><span class="function"><span class="keyword">def</span> <span class="title">weight_variable</span><span class="params">(shape)</span>:</span>
+    initial = tf.truncated_normal(shape, dtype=tf.float32, stddev=<span class="number">0.1</span>)
+    <span class="keyword">return</span> tf.Variable(initial)
+
+<span class="function"><span class="keyword">def</span> <span class="title">bias_variable</span><span class="params">(shape)</span>:</span>
+    initial = tf.constant(<span class="number">0.1</span>, shape=shape)
+    <span class="keyword">return</span> tf.Variable(initial, trainable=<span class="keyword">True</span>)
+
+weights = {
+    <span class="string">'wc1'</span>: weight_variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">64</span>]),
+    <span class="string">'wc2'</span>: weight_variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">64</span>, <span class="number">128</span>]),
+    <span class="string">'wd1'</span>: weight_variable([<span class="number">4</span>*<span class="number">4</span>*<span class="number">12</span>, <span class="number">1024</span>]),
+    <span class="string">'wd2'</span>: weight_variable([<span class="number">1024</span>, <span class="number">1024</span>]),
+    <span class="string">'out'</span>: weight_variable([<span class="number">1024</span>, <span class="number">10</span>])
+}
+biases = {
+    <span class="string">'bc1'</span>: bias_variable([<span class="number">64</span>]),
+    <span class="string">'bc2'</span>: bias_variable([<span class="number">128</span>]),
+    <span class="string">'bd1'</span>: bias_variable([<span class="number">1024</span>]),
+    <span class="string">'bd2'</span>: bias_variable([<span class="number">1024</span>]),
+    <span class="string">'out'</span>: bias_variable([n_classes])
+}
+</code></pre><h2 id="卷积层">卷积层</h2><p>这里的卷积参数使用1步长（stride size），0边距（padding size）的模板，保证输出和输入是同一个大小。</p>
+<pre><code>def <span class="function"><span class="title">conv2d</span><span class="params">(x, W, B, name)</span></span>:
+    with tf.<span class="function"><span class="title">name_scope</span><span class="params">(name)</span></span> as scope:
+        conv = tf<span class="class">.nn</span><span class="class">.conv2d</span>(x, W, strides=[<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>], <span class="attribute">padding</span>=<span class="string">'SAME'</span>)
+        bias = tf<span class="class">.nn</span><span class="class">.bias_add</span>(conv, B)
+        conv = tf<span class="class">.nn</span><span class="class">.relu</span>(bias, name=scope)
+        return conv
+
+conv1 = <span class="function"><span class="title">conv2d</span><span class="params">(images, weights[<span class="string">'wc1'</span>], biases[<span class="string">'bc1'</span>], <span class="string">'conv1'</span>)</span></span>
+</code></pre><p>tensorflow里的padding参数支持<code>SAME</code>和<code>VALID</code>两种模式，设输入矩阵大小为<code>W*W</code>，卷积滤波器大小<code>F*F</code>，步长stride大小为<code>S</code>，则</p>
+<pre><code><span class="preprocessor"># padding = <span class="string">'VALID'</span></span>
+new_height = new_width = (W – F + <span class="number">1</span>) / S (结果向上取整)
+<span class="preprocessor"># padding = <span class="string">'SAME'</span></span>
+pad_needed_height = (new_height – <span class="number">1</span>) × S + F - W (结果向上取整，并在四周添加像素)
+</code></pre><p>当new_height为奇数的时候，在顶部贴两个像素，在底部贴3个像素，而caffe和cuDNN是在两边各贴两个像素。这点不同，导致用caffe训练的模型转tensorflow的时候要慎用‘SAME’模式，切记！</p>
+<h2 id="池化">池化</h2><p>池化分为均值池化<code>tf.nn.avg_pool</code>和max池化<code>tf.nn.max_pool</code>。这里的池化用简单传统的2x2大小的模板做max pooling。</p>
+<pre><code><span class="function"><span class="keyword">def</span> <span class="title">max_pool</span><span class="params">(x, k, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.max_pool(x, ksize=[<span class="number">1</span>, k, k, <span class="number">1</span>], strides=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>, name=name)
+
+<span class="function"><span class="keyword">def</span> <span class="title">avg_pool</span><span class="params">(x, k, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.avg_pool(x, ksize=[<span class="number">1</span>, k, k, <span class="number">1</span>], strides=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>, name=name)
+
+pool1 = max_pool(conv1, k=<span class="number">2</span>, <span class="string">'pool1'</span>)
+</code></pre><h2 id="归一化">归一化</h2><pre><code><span class="function"><span class="keyword">def</span> <span class="title">norm</span><span class="params">(x, lsize, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.lrn(x, lsize, bias=<span class="number">1.0</span>, alpha=<span class="number">0.001</span> / <span class="number">9.0</span>, beta=<span class="number">0.75</span>, name=name)
+
+norm1 = norm(pool1, lsize=<span class="number">4</span>, <span class="string">'norm1'</span>)
+</code></pre><h2 id="全连接层">全连接层</h2><p>现在加一个1024维的全连接层，在池化层和全连接层连接处要将池化层输出的张量reshape成一向量</p>
+<pre><code>pool2_flat = tf.<span class="function"><span class="title">reshape</span><span class="params">(pool2, [-<span class="number">1</span>, weights[<span class="string">'wd1'</span>].get_shape()</span></span>.<span class="function"><span class="title">as_list</span><span class="params">()</span></span>[<span class="number">0</span>]])
+</code></pre><p>乘上权重矩阵，加上偏置，然后对其使用ReLU。</p>
+<pre><code>fc1 = tf<span class="class">.nn</span><span class="class">.relu</span>(tf.<span class="function"><span class="title">matmul</span><span class="params">(pool2_flat, weights[<span class="string">'wd1'</span>])</span></span> + biases[<span class="string">'bd1'</span>])
+</code></pre><h2 id="Dropout">Dropout</h2><p>用一个placeholder来代表一个神经元的输出在dropout中保持不变的概率。这样我们可以在训练过程中启用dropout，在测试过程中关闭dropout。 tensorflow学习（四）创建自己的CNN网络及可视化<code>tf.nn.dropout</code>操作除了可以屏蔽神经元的输出外，还会自动处理神经元输出值的scale。所以用dropout的时候可以不用考虑scale。</p>
+<pre><code>keep_prob = tf.<span class="function"><span class="title">placeholder</span><span class="params">(<span class="string">"float"</span>)</span></span>
+fc1_drop = tf<span class="class">.nn</span><span class="class">.dropout</span>(fc1, keep_prob)
+</code></pre><h2 id="Batch_Normalization">Batch Normalization</h2><p>《Batch Normalization: Accelerating Deep Network Training by  Reducing Internal Covariate Shift》文章中的batch normalization可以提高训练的收敛速度，甚至可以不使用dropout和L2正则就能取得很好的泛化能力，参考中文资料<a href="http://blog.csdn.net/happynear/article/details/44238541" target="_blank" rel="external">http://blog.csdn.net/happynear/article/details/44238541</a>。具体需要计算每个batch在该层所有特征图的均值和标准差，然后将上一层的输出归一化之后再送入下一层。</p>
+<p>具体在tensorflow中，用<code>tf.nn.moments</code>求出axes对应的特征图维度的均值<code>mean</code>和标准差<code>variance</code>，然后用<code>tf.nn.batch_normalization</code>进行归一化，其中<code>offset</code>一般初始化为0，<code>scale</code>初始化为1，另外offset、scale的shape与mean相同，<code>variance_epsilon</code>这个参数设为一个很小的数就行，比如0.001。<br>需要强调一点的是，BN在神经网络进行training和testing的时候，所用的mean、variance是不一样的！以上的batch_normalization在训练的时候有效，测试阶段，只有一个样本输入，这时候网络参数固定，用之前训练好的均值和标准差作为参数传入即可。类似图片样本测试时候需要先减去均值，而这个均值文件是由训练样本生成的，差不多的道理。有一个不错的代码实现<a href="http://r2rt.com/implementing-batch-normalization-in-tensorflow.html" target="_blank" rel="external">http://r2rt.com/implementing-batch-normalization-in-tensorflow.html</a></p>
+<pre><code>def <span class="function"><span class="title">batch_norm_wrapper</span><span class="params">(inputs, is_training, decay = <span class="number">0.999</span>)</span></span>:
+    scale = tf.<span class="function"><span class="title">Variable</span><span class="params">(tf.ones([inputs.get_shape()</span></span>[-<span class="number">1</span>]]))
+    beta = tf.<span class="function"><span class="title">Variable</span><span class="params">(tf.zeros([inputs.get_shape()</span></span>[-<span class="number">1</span>]]))
+    pop_mean = tf.<span class="function"><span class="title">Variable</span><span class="params">(tf.zeros([inputs.get_shape()</span></span>[-<span class="number">1</span>]]), trainable=False)
+    pop_var = tf.<span class="function"><span class="title">Variable</span><span class="params">(tf.ones([inputs.get_shape()</span></span>[-<span class="number">1</span>]]), trainable=False)
+
+    <span class="keyword">if</span> is_training:
+        batch_mean, batch_var = tf<span class="class">.nn</span><span class="class">.moments</span>(inputs,[<span class="number">0</span>])
+        train_mean = tf.<span class="function"><span class="title">assign</span><span class="params">(pop_mean, pop_mean * decay + batch_mean * (<span class="number">1</span> - decay)</span></span>)
+        train_var = tf.<span class="function"><span class="title">assign</span><span class="params">(pop_var, pop_var * decay + batch_var * (<span class="number">1</span> - decay)</span></span>)
+        with tf.<span class="function"><span class="title">control_dependencies</span><span class="params">([train_mean, train_var])</span></span>:
+            return tf<span class="class">.nn</span><span class="class">.batch_normalization</span>(inputs, batch_mean, batch_var, beta, scale, epsilon)
+    <span class="keyword">else</span>:
+        return tf<span class="class">.nn</span><span class="class">.batch_normalization</span>(inputs, pop_mean, pop_var, beta, scale, epsilon)
+
+bn_z1 = <span class="function"><span class="title">batch_norm_wrapper</span><span class="params">(z1, is_training)</span></span>
+</code></pre><h2 id="输出层">输出层</h2><p>普通输出层</p>
+<pre><code>out = tf.<span class="function"><span class="title">matmul</span><span class="params">(fc2_drop, _weights[<span class="string">'out'</span>])</span></span> + _biases[<span class="string">'out'</span>]
+</code></pre><p>使用softmax层</p>
+<pre><code>out = tf<span class="class">.nn</span><span class="class">.softmax</span>(tf.<span class="function"><span class="title">matmul</span><span class="params">(fc2_drop, weights[<span class="string">'out'</span>])</span></span> + biases[<span class="string">'out'</span>])
+</code></pre><h2 id="训练">训练</h2><p>定义损失函数，这里要注意在输出层是否使用了softmax，这里不要重复使用。这里使用的损失函数是真实值y与预测值y_pred之间的交叉熵。注意<code>tf.reduce_sum</code>是把minibatch里的每张图的交叉熵都加进来的。</p>
+<pre><code>y_pred = tf<span class="class">.nn</span><span class="class">.softmax</span>(pred)
+cost = -tf.<span class="function"><span class="title">reduce_sum</span><span class="params">(y * tf.log(y_pred)</span></span>)
+</code></pre><p>或者调用系统函数更为方便，如下</p>
+<pre><code>cost = tf.<span class="function"><span class="title">reduce_mean</span><span class="params">(tf.nn.softmax_cross_entropy_with_logits(pred, y)</span></span>)
+</code></pre><p>tensorflow有大量的微分迭代优化算法，来对交叉熵进行梯度下降。</p>
+<pre><code>optimizer = tf<span class="class">.train</span><span class="class">.GradientDescentOptimizer</span>(learning_rate=learning_rate).<span class="function"><span class="title">minimize</span><span class="params">(cost)</span></span>
+optimizer = tf<span class="class">.train</span><span class="class">.AdamOptimizer</span>(learning_rate=learning_rate).<span class="function"><span class="title">minimize</span><span class="params">(cost)</span></span>
+</code></pre><p>模型训练通过反复执行optimizer来更新参数：</p>
+<pre><code>with tf.<span class="function"><span class="title">Session</span><span class="params">()</span></span> as sess:
+    sess.<span class="function"><span class="title">run</span><span class="params">(init)</span></span>
+    <span class="keyword">for</span> <span class="tag">i</span> <span class="keyword">in</span> <span class="function"><span class="title">range</span><span class="params">(<span class="number">1000</span>)</span></span>:
+        batch = mnist<span class="class">.train</span><span class="class">.next_batch</span>(<span class="number">50</span>)
+        sess.<span class="function"><span class="title">run</span><span class="params">(optimizer, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>], keep_prob: dropout})</span></span>
+</code></pre><p>tensorflow的<code>Session</code>和<code>InteractiveSession</code>方式不同。前者是构建完图对象后，通过run()整体执行全部操作，并通过close()释放资源。后者更为方便的进行交互，使用<code>Tensor.eval()</code>和<code>Operation.run()</code>方法代替<code>Session.run()</code>。在DQN这类算法中由于每次迭代都需要交互，所以使用<code>InteractiveSession</code>。</p>
+<h2 id="评估模型">评估模型</h2><p>通过<code>tf.argmax</code>函数获得输出层中的最大值的索引位置，并将所有的测试样本的结果取平均值得到测试集上的准确率。注意在测试集中dropout参数设置为1，也就是没有dropout。</p>
+<pre><code>correct_pred = tf.<span class="function"><span class="title">equal</span><span class="params">(tf.argmax(pred,<span class="number">1</span>)</span></span>, tf.<span class="function"><span class="title">argmax</span><span class="params">(y,<span class="number">1</span>)</span></span>)
+accuracy = tf.<span class="function"><span class="title">reduce_mean</span><span class="params">(tf.cast(correct_pred, tf.float32)</span></span>)
+acc = sess.<span class="function"><span class="title">run</span><span class="params">(accuracy, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>], keep_prob: <span class="number">1</span>.})</span></span>
+</code></pre><h2 id="MyNet网络完整训练代码">MyNet网络完整训练代码</h2><pre><code><span class="keyword">from</span> tensorflow.examples.tutorials.mnist <span class="keyword">import</span> input_data
+mnist = input_data.read_data_sets(<span class="string">'MNIST_data'</span>, one_hot=<span class="keyword">True</span>)
+
+<span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf
+<span class="comment"># Parameters</span>
+learning_rate = <span class="number">0.001</span>
+training_iters = <span class="number">200000</span>
+batch_size = <span class="number">64</span>
+display_step = <span class="number">20</span>
+
+<span class="comment"># Network Parameters</span>
+n_input = <span class="number">784</span> <span class="comment"># MNIST data input (img shape: 28*28)</span>
+n_classes = <span class="number">10</span> <span class="comment"># MNIST total classes (0-9 digits)</span>
+dropout = <span class="number">0.8</span> <span class="comment"># Dropout, probability to keep units</span>
+
+<span class="comment"># tf Graph input</span>
+x = tf.placeholder(tf.float32, [<span class="keyword">None</span>, n_input])
+y = tf.placeholder(tf.float32, [<span class="keyword">None</span>, n_classes])
+keep_prob = tf.placeholder(tf.float32) <span class="comment"># dropout (keep probability)</span>
+
+<span class="function"><span class="keyword">def</span> <span class="title">weight_variable</span><span class="params">(shape)</span>:</span>
+    initial = tf.truncated_normal(shape, dtype=tf.float32, stddev=<span class="number">0.1</span>)
+    <span class="keyword">return</span> tf.Variable(initial)
+
+<span class="function"><span class="keyword">def</span> <span class="title">bias_variable</span><span class="params">(shape)</span>:</span>
+    initial = tf.constant(<span class="number">0.1</span>, shape=shape)
+    <span class="keyword">return</span> tf.Variable(initial, trainable=<span class="keyword">True</span>)
+
+<span class="function"><span class="keyword">def</span> <span class="title">conv2d</span><span class="params">(x, W, B, name)</span>:</span>
+    <span class="keyword">with</span> tf.name_scope(name) <span class="keyword">as</span> scope:
+        conv = tf.nn.conv2d(x, W, strides=[<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>)
+        bias = tf.nn.bias_add(conv, B)
+        conv = tf.nn.relu(bias, name=scope)
+        <span class="keyword">return</span> conv
+
+<span class="function"><span class="keyword">def</span> <span class="title">max_pool</span><span class="params">(x, k, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.max_pool(x, ksize=[<span class="number">1</span>, k, k, <span class="number">1</span>], strides=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>, name=name)
+
+<span class="function"><span class="keyword">def</span> <span class="title">avg_pool</span><span class="params">(x, k, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.avg_pool(x, ksize=[<span class="number">1</span>, k, k, <span class="number">1</span>], strides=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>, name=name)
+
+<span class="function"><span class="keyword">def</span> <span class="title">norm</span><span class="params">(x, lsize, name)</span>:</span>
+    <span class="keyword">return</span> tf.nn.lrn(x, lsize, bias=<span class="number">1.0</span>, alpha=<span class="number">0.001</span> / <span class="number">9.0</span>, beta=<span class="number">0.75</span>, name=name)
+
+<span class="function"><span class="keyword">def</span> <span class="title">my_net</span><span class="params">(_x, _weights, _biases, _dropout)</span>:</span>
+    _x = tf.reshape(_x, shape=[-<span class="number">1</span>, <span class="number">28</span>, <span class="number">28</span>, <span class="number">1</span>])
+
+    conv1 = conv2d(_x, _weights[<span class="string">'wc1'</span>], _biases[<span class="string">'bc1'</span>], <span class="string">'conv1'</span>)
+    pool1 = max_pool(conv1, k=<span class="number">2</span>, name=<span class="string">'pool1'</span>)
+    norm1 = norm(pool1, lsize=<span class="number">4</span>, name=<span class="string">'norm1'</span>)
+
+    conv2 = conv2d(norm1, _weights[<span class="string">'wc2'</span>], _biases[<span class="string">'bc2'</span>], <span class="string">'conv2'</span>)
+    pool2 = max_pool(conv2, k=<span class="number">2</span>, name=<span class="string">'pool2'</span>)
+    norm2 = norm(pool2, lsize=<span class="number">4</span>, name=<span class="string">'norm2'</span>)
+
+    pool2_flat = tf.reshape(norm2, [-<span class="number">1</span>, _weights[<span class="string">'wd1'</span>].get_shape().as_list()[<span class="number">0</span>]])
+    fc1 = tf.nn.relu(tf.matmul(pool2_flat, _weights[<span class="string">'wd1'</span>]) + _biases[<span class="string">'bd1'</span>])
+    fc1_drop = tf.nn.dropout(fc1, _dropout)
+
+    fc2 = tf.nn.relu(tf.matmul(fc1_drop, _weights[<span class="string">'wd2'</span>]) + _biases[<span class="string">'bd2'</span>])
+    fc2_drop = tf.nn.dropout(fc2, _dropout)
+
+    out = tf.matmul(fc2_drop, _weights[<span class="string">'out'</span>]) + _biases[<span class="string">'out'</span>]
+    <span class="keyword">return</span> out
+
+weights = {
+    <span class="string">'wc1'</span>: weight_variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">64</span>]),
+    <span class="string">'wc2'</span>: weight_variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">64</span>, <span class="number">128</span>]),
+    <span class="string">'wd1'</span>: weight_variable([<span class="number">7</span>*<span class="number">7</span>*<span class="number">128</span>, <span class="number">1024</span>]),
+    <span class="string">'wd2'</span>: weight_variable([<span class="number">1024</span>, <span class="number">1024</span>]),
+    <span class="string">'out'</span>: weight_variable([<span class="number">1024</span>, <span class="number">10</span>])
+}
+biases = {
+    <span class="string">'bc1'</span>: bias_variable([<span class="number">64</span>]),
+    <span class="string">'bc2'</span>: bias_variable([<span class="number">128</span>]),
+    <span class="string">'bd1'</span>: bias_variable([<span class="number">1024</span>]),
+    <span class="string">'bd2'</span>: bias_variable([<span class="number">1024</span>]),
+    <span class="string">'out'</span>: bias_variable([n_classes])
+}
+
+<span class="comment"># Construct model</span>
+pred = my_net(x, weights, biases, keep_prob)
+
+<span class="comment"># Define loss and optimizer</span>
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(pred, y))
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+
+<span class="comment"># Evaluate model</span>
+correct_pred = tf.equal(tf.argmax(pred,<span class="number">1</span>), tf.argmax(y,<span class="number">1</span>))
+accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
+<span class="comment"># Initializing the variables</span>
+init = tf.initialize_all_variables()
+
+<span class="comment"># Launch the graph</span>
+<span class="keyword">with</span> tf.Session() <span class="keyword">as</span> sess:
+    sess.run(init)
+    step = <span class="number">1</span><span class="comment"># Keep training until reach max iterations</span>
+    <span class="keyword">while</span> step * batch_size &lt; training_iters:
+        batch = mnist.train.next_batch(batch_size)
+        <span class="comment"># Fit training using batch data</span>
+        sess.run(optimizer, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>], keep_prob: dropout})
+        <span class="keyword">if</span> step % display_step == <span class="number">0</span>:
+            <span class="comment"># Calculate batch accuracy</span>
+            acc = sess.run(accuracy, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>], keep_prob: <span class="number">1.</span>})
+            <span class="comment"># Calculate batch loss</span>
+            loss = sess.run(cost, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>], keep_prob: <span class="number">1.</span>})
+            <span class="keyword">print</span> <span class="string">"Iter "</span> + str(step*batch_size) + <span class="string">", Minibatch Loss= "</span> + <span class="string">"{:.6f}"</span>.format(loss) + <span class="string">", Training Accuracy= "</span> + <span class="string">"{:.5f}"</span>.format(acc)
+        step += <span class="number">1</span>
+    <span class="keyword">print</span> <span class="string">"Optimization Finished!"</span>
+    <span class="comment"># Calculate accuracy for 256 mnist test images</span>
+    <span class="keyword">print</span> <span class="string">"Testing Accuracy:"</span>, sess.run(accuracy, feed_dict={x: mnist.test.images[:<span class="number">256</span>], y: mnist.test.labels[:<span class="number">256</span>], keep_prob: <span class="number">1.</span>})
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/05/28/tensorflow-cnn/" data-id="cja4p2i8u001brofhncfejdjj" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-tensorflow-tensorboard" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/05/23/tensorflow-tensorboard/" class="article-date">
@@ -139,7 +391,7 @@ tf<span class="class">.summary</span><span class="class">.merge_all</span>(key=<
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cja291bya000n94fhxfdi61ng" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cja4p2i7j000nrofhyadfyaus" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -280,7 +532,7 @@ saver.<span class="function"><span class="title">save</span><span class="params"
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cja291bz4001894fhrg9b4m1p" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cja4p2i8f0018rofhqs26vqoe" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -384,7 +636,7 @@ pip install /tmp/tensorflow_pkg/tensorflow-<span class="number">0.10</span>.<spa
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cja291byt000z94fhxzp5hwxq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cja4p2i8f000zrofhrgx5abg7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -478,7 +730,7 @@ n = p1.<span class="function"><span class="title">query</span><span class="param
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cja291bzw001w94fho83evlop" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cja4p2i9a001wrofhpqn9bdth" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nnsearch/">nnsearch</a></li></ul>
@@ -548,7 +800,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cja291c16003294fh6xxauvb7" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cja4p2iar0035rofh5p4l536z" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/visualization/">visualization</a></li></ul>
@@ -591,7 +843,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cja291c0u002n94fh4fgrck41" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cja4p2iac002nrofh1jfqngvu" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -866,7 +1118,7 @@ wget http:<span class="comment">//pjreddie.com/media/files/extraction.conv.weigh
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="cja291c1a003694fhu6ig8r99" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="cja4p2iar0039rofhfjli40uc" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/darknet/">darknet</a></li></ul>
@@ -972,7 +1224,7 @@ layer {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cja291c29004694fhytlc28wv" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cja4p2ibm0049rofh5p4sgqsf" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -1156,7 +1408,7 @@ awk <span class="string">'{print vara}'</span> vara=$<span class="keyword">var</
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cja291c0e002894fh8s6iu8y8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cja4p2i9p0028rofhf5fcdrrh" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell/">shell</a></li></ul>
@@ -1216,7 +1468,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cja291bzj001k94fh701lqb8f" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cja4p2i9a001krofhim0t36gb" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
@@ -1273,7 +1525,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cja291c06002494fhewx34w7v" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cja4p2i9p0024rofhatqbwqnx" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
@@ -1340,7 +1592,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cja291bzs001t94fhyw2qbxa5" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cja4p2i9a001trofhcugdfix3" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -1424,7 +1676,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cja291c0i002c94fhpgw1we8q" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cja4p2i9p002crofhk6b0gzmj" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
@@ -1472,7 +1724,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cja291c2g004c94fh418tww9i" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cja4p2ic2004frofh2dddxly3" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/source/">source</a></li></ul>
@@ -1517,7 +1769,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cja291brl000094fh93f47yaw" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cja4p2i620000rofhz5j3jtze" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tricks/">tricks</a></li></ul>
@@ -1593,7 +1845,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cja291c12002y94fh7cstim7x" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cja4p2iac0031rofh6av5pmfl" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dataset/">dataset</a></li></ul>
@@ -1709,7 +1961,7 @@ detector = dlib.get_frontal_face_detector()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cja291c10002v94fhneewovlb" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cja4p2iac002yrofhqa3enq9s" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/face/">face</a></li></ul>
@@ -1770,7 +2022,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cja291c01002094fhlue6rflm" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cja4p2i9a0020rofh2jy7cz7j" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mxnet/">mxnet</a></li></ul>
@@ -1835,79 +2087,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cja291c24004094fharazvz29" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-caffe-interface" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/08/23/caffe-interface/" class="article-date">
-  <time datetime="2015-08-23T12:28:12.000Z" itemprop="datePublished">2015-08-23</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/08/23/caffe-interface/">caffe学习（四）caffe的接口参数说明</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>caffe接口参数</p>
-<h2 id="C接口">C接口</h2><h3 id="train相关参数">train相关参数</h3><ul>
-<li>-solver参数（必须有），与<code>solver.prototxt</code>文件一起使用</li>
-<li>-snapshot参数（可选），通常用来从之前训练一半的模型<code>xxx.solverstate</code>继续训练使用</li>
-<li>-weights参数（选填），与训练好的<code>model.caffemodel</code>一起使用，用来在fine-tuning的时候初始化参数</li>
-<li>-gpu参数，用来选择使用GPU，根据<code>nvidia-smi</code>的GPU的ID选择，比如选择第三块GPU就使用<code>-gpu 2</code>的参数，如果想使用所有的GPU一起跑一个程序，就使用<code>-gpu all</code></li>
-</ul>
-<p>举个例子<br><!-- lang:bash--></p>
-<pre><code># train LeNet
-caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt
-# train on GPU <span class="number">2</span>
-caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt -gpu <span class="number">2</span>
-# resume training <span class="keyword">from</span> the half-way point snapshot
-caffe train -solver examples<span class="regexp">/mnist/</span>lenet_solver.prototxt -snapshot examples<span class="regexp">/mnist/</span>lenet_iter_5000.solverstate
-# fine-tune CaffeNet model weights <span class="keyword">for</span> style recognition
-caffe train -solver examples<span class="regexp">/finetuning_on_flickr_style/</span>solver.prototxt -weights models<span class="regexp">/bvlc_reference_caffenet/</span>bvlc_reference_caffenet.caffemodel
-</code></pre><h3 id="test、time相关参数">test、time相关参数</h3><ul>
-<li>-iterations迭代次数，time的时候测试的次数，默认为50次</li>
-<li>-model测试时候选择加载的模型，对应<code>train_val.prototxt</code>或者<code>deploy.prototxt</code>一起使用</li>
-</ul>
-<p>举个例子<br><!-- lang:bash--></p>
-<pre><code># score the learned LeNet model on the validation <span class="operator"><span class="keyword">set</span> <span class="keyword">as</span> defined <span class="keyword">in</span> the
-# <span class="keyword">model</span> architeture lenet_train_test.prototxt
-caffe <span class="keyword">test</span> -<span class="keyword">model</span> examples/mnist/lenet_train_test.prototxt -weights examples/mnist/lenet_iter_10000.caffemodel -gpu <span class="number">0</span> -iterations <span class="number">100</span>
-# <span class="keyword">time</span> a <span class="keyword">model</span> architecture <span class="keyword">with</span> the given weights <span class="keyword">on</span> the <span class="keyword">first</span> GPU <span class="keyword">for</span> <span class="number">10</span> iterations
-caffe <span class="keyword">time</span> -<span class="keyword">model</span> examples/mnist/lenet_train_test.prototxt -weights examples/mnist/lenet_iter_10000.caffemodel -gpu <span class="number">0</span> -iterations <span class="number">10</span></span>
-</code></pre><h3 id="device_query相关参数">device_query相关参数</h3><p>这个模块用来查看多GPU时候的一些显卡相关信息。举例<br><!-- lang:bash--></p>
-<pre><code><span class="comment"># query the first device</span>
-<span class="title">caffe</span> device_query -gpu <span class="number">0</span>
-</code></pre><h2 id="python接口">python接口</h2><p>通过<code>import caffe</code>来加载caffe模块，几个比较重要的模块caffe.Net, caffe.SDGSolver, caffe.io, caffe.draw</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cja291c1u003u94fh4l09l79t" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cja4p2ibm0043rofh3t58w5r1" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -1932,7 +2112,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">27</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">27</span></li></ul>
     </div>
   </div>
 
@@ -1941,7 +2121,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe2/">caffe2</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe2/">caffe2</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
     </div>
   </div>
 
@@ -1950,7 +2130,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 12.5px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 17.5px;">caffe</a> <a href="/tags/caffe2/" style="font-size: 12.5px;">caffe2</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 12.5px;">face</a> <a href="/tags/machine-learning/" style="font-size: 12.5px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 12.5px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 15px;">生活</a>
+      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 12px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 18px;">caffe</a> <a href="/tags/caffe2/" style="font-size: 12px;">caffe2</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 14px;">face</a> <a href="/tags/machine-learning/" style="font-size: 12px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 12px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 16px;">生活</a>
     </div>
   </div>
 
@@ -1959,7 +2139,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -1971,7 +2151,11 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
       <ul>
         
           <li>
-            <a href="/2017/11/16/face-resource/">人脸算法资源汇总</a>
+            <a href="/2017/11/18/face-algorithm/">人脸算法资源汇总</a>
+          </li>
+        
+          <li>
+            <a href="/2017/11/16/face-resource/">人脸资讯数据资源汇总</a>
           </li>
         
           <li>
@@ -1984,10 +2168,6 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
         
           <li>
             <a href="/2017/06/03/caffe-forward/">caffe学习（九）inference代码优化</a>
-          </li>
-        
-          <li>
-            <a href="/2017/06/03/interview/">试题整理</a>
           </li>
         
       </ul>
