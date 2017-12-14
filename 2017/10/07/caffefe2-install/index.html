@@ -37,7 +37,7 @@ cd caffe2
 make -j8
 cd build
 sudo make ins">
-<meta property="og:updated_time" content="2017-10-07T06:13:21.000Z">
+<meta property="og:updated_time" content="2017-12-14T13:58:12.832Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="caffe2学习（一）安装配置">
 <meta name="twitter:description" content="相关依赖caffe2的依赖比caffe要干净很多，必要的库比较少
@@ -151,8 +151,11 @@ python -m caffe2.python.operator_test.relu_op_<span class="built_in">test</span>
 <span class="comment"># Environment Variables</span>
 <span class="built_in">export</span> PYTHONPATH=<span class="variable">$PYTHONPATH</span>:/home/<span class="number">15072585</span>/caffe2/build  <span class="comment">#(add to ~/.bashrc)</span>
 </code></pre><h2 id="tips">tips</h2><ul>
-<li>gpu版本报错，已经在github issue上提问了<a href="https://github.com/caffe2/caffe2/issues/1297" target="_blank" rel="external">https://github.com/caffe2/caffe2/issues/1297</a>，目前没能解决，只能在cmake里关闭CUDA开关<code>option(USE_CUDA &quot;Use Cuda&quot; OFF)</code></li>
-<li><code>from caffe2.python import core</code>报错<code>No module named past.builtins</code>，解决方案<code>pip install future</code></li>
+<li><p>gpu版本报错，已经在github issue上提问了<a href="https://github.com/caffe2/caffe2/issues/1297" target="_blank" rel="external">https://github.com/caffe2/caffe2/issues/1297</a>，解决方案安装gcc 4.9.4</p>
+<p>  tar jxf gcc-4.9.4.tar.bz2<br>  cd gcc-4.9.4<br>  ./configure –enable-checking=release –enable-languages=c,c++ –disable-multilib –prefix=/home/yang/gcc<br>  make -j8<br>  make install<br>  export PATH=/home/yang/gcc/bin:$PATH<br>  export LD_LIBRARY_PATH=/home/yang/gcc/lib64:$LD_LIBRARY_PATH</p>
+</li>
+<li><p><code>from caffe2.python import core</code>报错<code>No module named past.builtins</code>，解决方案<code>pip install future</code></p>
+</li>
 </ul>
 
       
