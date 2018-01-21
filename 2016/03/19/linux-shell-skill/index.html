@@ -21,7 +21,7 @@ cat aaa_part.tar.gz.* &amp;gt; aaa.tar.gz
 split -b 5000m aaa.tar.gz aaa_part.tar.gz.
 cat aaa_part.tar.gz.* &amp;gt; aaa.tar.gz
 大文件夹aa">
-<meta property="og:updated_time" content="2016-07-13T14:18:25.339Z">
+<meta property="og:updated_time" content="2018-01-21T01:48:09.068Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="linux shell技巧总结">
 <meta name="twitter:description" content="匹配特殊字符空格find . -name &quot;*[[:space:]]*&quot;
@@ -247,6 +247,11 @@ echo | awk <span class="string">'{print vara}'</span> vara=$<span class="keyword
 <span class="preprocessor">#  输入来自stdin</span>
 awk <span class="string">'{print vara}'</span> vara=$<span class="keyword">var</span> file 
 <span class="preprocessor"># 输入来自文件</span>
+</code></pre><h2 id="系统启动自运行脚本">系统启动自运行脚本</h2><h3 id="使用rc-local">使用rc.local</h3><pre><code>sudo chmod +x /etc/rc.<span class="keyword">d</span>/rc.<span class="keyword">local</span>
+sudo vim /etc/rc.<span class="keyword">d</span>/rc.<span class="keyword">local</span>
+<span class="keyword">sh</span> /home/admin/script.<span class="keyword">sh</span> &amp;
+</code></pre><h3 id="使用Crontab">使用Crontab</h3><pre><code>crontab -<span class="literal">e</span>
+@reboot (<span class="keyword">sleep</span> 90; <span class="keyword">sh</span> \home\admin\script.<span class="keyword">sh</span>)
 </code></pre>
       
     </div>
