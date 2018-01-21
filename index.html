@@ -65,6 +65,108 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-linux-tips" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/01/21/linux-tips/" class="article-date">
+  <time datetime="2018-01-21T03:41:26.000Z" itemprop="datePublished">2018-01-21</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/study/">study</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/01/21/linux-tips/">linux-tips</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="linux内存free理解">linux内存free理解</h2><ul>
+<li>total：是总的物理内存</li>
+<li>used：使用中的内存</li>
+<li>free：完全空闲的内存</li>
+<li>shared：多个进程共享的内存　</li>
+<li>buffers：写缓存，在写入磁盘之前，先把数据缓存一段时间，可以释放</li>
+<li>cache：读缓存，读取过的文件，会缓存一段时间。可以释放</li>
+<li>-buffers/cache：应用程序实际使用中的内存大小，等于used-buffers-cached</li>
+<li>+buffers/cache：可供使用的内存总量，等于free+buffers+cached</li>
+<li>Swap：不解释，都能看懂的<br>所以，可以供程序使用的内存，应该看+buffers/cache，而不是free，这是新手最容易犯的错误之一。那位可能要问了，明明已经开始使用swap了，怎么能说内存还充足呢？照我的理解是，系统在分配内存的时候，如果发现内存不足，会释放一批旧的cache，把空间腾出来给新申请的进程用，有时候释放不充分或者不及时，于是开始使用到swap了！</li>
+</ul>
+<h2 id="系统启动自运行脚本">系统启动自运行脚本</h2><h3 id="使用rc-local">使用rc.local</h3><pre><code>sudo chmod +x /etc/rc.<span class="keyword">d</span>/rc.<span class="keyword">local</span>
+sudo vim /etc/rc.<span class="keyword">d</span>/rc.<span class="keyword">local</span>
+<span class="keyword">sh</span> /home/admin/script.<span class="keyword">sh</span> &amp;
+</code></pre><h3 id="使用Crontab">使用Crontab</h3><pre><code>crontab -<span class="literal">e</span>
+@reboot (<span class="keyword">sleep</span> 90; <span class="keyword">sh</span> \home\admin\script.<span class="keyword">sh</span>)
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/01/21/linux-tips/" data-id="cjco8w9q60029l8fh3ightsbt" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-ReID-resource" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/01/21/ReID-resource/" class="article-date">
+  <time datetime="2018-01-21T02:02:50.000Z" itemprop="datePublished">2018-01-21</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Computer-Vision/">Computer Vision</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/01/21/ReID-resource/">ReID资源汇总</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="论文">论文</h2><p>Person Re-identification: Past, Present and Future<br><a href="https://arxiv.org/abs/1610.02984" target="_blank" rel="external">https://arxiv.org/abs/1610.02984</a><br>Gated Siamese Convolutional Neural Network Architecture for Human Re-Identification<br><a href="https://arxiv.org/abs/1607.08378" target="_blank" rel="external">https://arxiv.org/abs/1607.08378</a><br>Deep Hybrid Similarity Learning for Person Re-identification<br><a href="https://arxiv.org/abs/1702.04858" target="_blank" rel="external">https://arxiv.org/abs/1702.04858</a><br>A Discriminatively Learned CNN Embedding for Person Re-identification<br><a href="https://arxiv.org/abs/1611.05666" target="_blank" rel="external">https://arxiv.org/abs/1611.05666</a><br>code:<a href="https://github.com/layumi/2016_person_re-ID" target="_blank" rel="external">https://github.com/layumi/2016_person_re-ID</a></p>
+<h2 id="blog">blog</h2><p>行人对齐+重识别网络：Pedestrian Alignment Network for Large-scale Person Re-identification<br><a href="https://zhuanlan.zhihu.com/p/29269953" target="_blank" rel="external">https://zhuanlan.zhihu.com/p/29269953</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/01/21/ReID-resource/" data-id="cjco8w9lt0000l8fhfqvfi8ba" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ReID/">ReID</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-face-algorithm" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/11/18/face-algorithm/" class="article-date">
@@ -109,7 +211,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/11/18/face-algorithm/" data-id="cja4p2iac002vrofh7gajr2qw" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/11/18/face-algorithm/" data-id="cjco8w9r8002zl8fhfqnek2li" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/face/">face</a></li></ul>
@@ -187,7 +289,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/11/16/face-resource/" data-id="cja4p2iac002qrofhmdo4rndq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/11/16/face-resource/" data-id="cjco8w9r3002vl8fhp4gid7mx" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/face/">face</a></li></ul>
@@ -237,7 +339,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/07/caffe2-abc/" data-id="cja4p2iar003krofhn7cjx89a" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/07/caffe2-abc/" data-id="cjco8w9sj003ol8fhd2hbq47j" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe2/">caffe2</a></li></ul>
@@ -313,7 +415,7 @@ export LD_LIBRARY_PATH=/home/yang/gcc/lib64:<span class="variable">$LD</span>_LI
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/10/07/caffefe2-install/" data-id="cja4p2iar003grofhe6s0qmnu" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/10/07/caffefe2-install/" data-id="cjco8w9sc003kl8fh2kjep0ma" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe2/">caffe2</a></li></ul>
@@ -393,7 +495,7 @@ vim src/caffe/layers/base_conv_layer.cpp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/06/03/caffe-forward/" data-id="cja4p2ibm0040rofhao5399y1" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/06/03/caffe-forward/" data-id="cjco8w9t50044l8fhsnfmsttb" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -440,7 +542,7 @@ vim src/caffe/layers/base_conv_layer.cpp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/06/03/interview/" data-id="cja4p2i9p002grofhfrq4m5j1" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/06/03/interview/" data-id="cjco8w9qq002ll8fhwkd2isfq" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
@@ -486,7 +588,7 @@ sess = tf.<span class="function"><span class="title">Session</span><span class="
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/04/22/tensorflow-gpu/" data-id="cja4p2i8f0015rofhxe45f77a" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/04/22/tensorflow-gpu/" data-id="cjco8w9on0016l8fhx5hfg3ha" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -625,7 +727,7 @@ sess.close()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/03/29/tensorflow-mydata/" data-id="cja4p2i7z000trofhj9qa5jxd" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/03/29/tensorflow-mydata/" data-id="cjco8w9o1000ul8fhtz0ai5rg" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -722,7 +824,7 @@ saver.<span class="function"><span class="title">restore</span><span class="para
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/03/26/tensorflow-saver/" data-id="cja4p2i7z000qrofheu567ujy" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/03/26/tensorflow-saver/" data-id="cjco8w9nx000rl8fhlylt8luk" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -775,7 +877,7 @@ tf_upgrade.py --intree <span class="variable">&lt;input_dir&gt;</span> -outtree 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/02/27/tensorflow-update/" data-id="cja4p2i7j000krofhhb6chr73" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/02/27/tensorflow-update/" data-id="cjco8w9nn000ll8fh9xb81at5" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -862,7 +964,7 @@ pip install <span class="regexp">/tmp/</span>tensorflow_pkg/tensorflow-<span cla
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/02/19/tensorflow1-0-install/" data-id="cja4p2i7j000grofh3u73ncu1" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/02/19/tensorflow1-0-install/" data-id="cjco8w9nh000gl8fhh8tsdzjx" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -946,7 +1048,7 @@ pip install <span class="regexp">/tmp/</span>tensorflow_pkg/tensorflow-<span cla
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/12/30/cmake-learn/" data-id="cja4p2iar003drofhws995to9" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/12/30/cmake-learn/" data-id="cjco8w9s6003hl8fhawwcs19w" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
@@ -1144,7 +1246,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/08/28/caffe-add-jni-example/" data-id="cja4p2ibm004crofhlkwrvml2" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/08/28/caffe-add-jni-example/" data-id="cjco8w9tl004gl8fh1y7n230b" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -1192,7 +1294,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/22/tensorflow-modelresource/" data-id="cja4p2i7z000wrofhfebtz3bv" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/22/tensorflow-modelresource/" data-id="cjco8w9o6000xl8fhykdl1cle" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1239,7 +1341,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="cja4p2ib7003nrofhgxe26fs1" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="cjco8w9so003rl8fhh5u95f22" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -1302,7 +1404,7 @@ java -Djava.library.path=.  com.suning.pore.TestSuningPore $1</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="cja4p2iab002krofhbn73cwi0" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="cjco8w9qx002pl8fh90n06d8q" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -1428,7 +1530,7 @@ images = re.<span class="function"><span class="title">findall</span><span class
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cja4p2i9a001profhmds2888y" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cjco8w9pd001ql8fh592x2qwn" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -1485,343 +1587,7 @@ params = params.<span class="function"><span class="title">item</span><span clas
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cja4p2i8u001hrofh5gqtvr48" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-tensorflow-inception" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/06/13/tensorflow-inception/" class="article-date">
-  <time datetime="2016-06-13T11:57:11.000Z" itemprop="datePublished">2016-06-13</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/06/13/tensorflow-inception/">tensorflow学习（六）CNN网络Inception</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>这次我们来上手一个大型网络,googLeNet。这篇讲一下Inception v3网络的训练和测试以及数据集的加载。</p>
-<h2 id="数据准备">数据准备</h2><p>将图片按照类别放入不同的文件夹下。格式如下：</p>
-<pre><code>data_dir/train/label_0/<span class="tag">a</span><span class="class">.jpg</span>
-data_dir/train/label_0/<span class="tag">b</span><span class="class">.jpg</span>
-...
-data_dir/train/label_1/f<span class="class">.jpg</span>
-...
-data_dir/validation/label_0/c<span class="class">.jpg</span>
-data_dir/validation/label_0/d<span class="class">.jpg</span>
-...
-data_dir/labels.txt
-</code></pre><p>同时将所有label的类别整理成一个txt放在data_dir/labels.txt文件中，行数代表该类别对应的整数值，从0开始计数，其文本内容如下：</p>
-<pre><code>label_0
-label_1
-label_2
-...
-label_n
-</code></pre><h3 id="转化成为TFRecord格式">转化成为TFRecord格式</h3><p>首先通过<code>_find_iamge_files</code>函数得到全量图片的文件名、标签、标签文本信息的对应关系，并打乱排序。然后按线程数将全量文件分块，分别执行<code>_process_image_files_batch</code>。将数据按分块分别写入对应的TFRecordWriter。这个操作的代码我整理保存在了<a href="https://github.com/yangxian10/tensorflow_code/blob/master/build_image_tfrecord_data.py" target="_blank" rel="external">build_image_tfrecord_data.py</a>。其中两个重要的参数，一个是进程数量的控制参数<code>num_threads</code>和Record数据分块的参数<code>num_shards</code>。我这里有个不同，原来代码是读文件之后直接压入Record，我是用OpenCV解码之后，将解码后数据变成string压入Record。代码调用格式如下：</p>
-<pre><code>python build_image_tfrecord_data.py \
-  -<span class="ruby">-train_directory=mydata/train \
-</span>  -<span class="ruby">-validation_directory=mydata/validation \
-</span>  -<span class="ruby">-output_directory=mydata/tf_record \
-</span>  -<span class="ruby">-labels_file=mydata/labels.txt</span>
-</code></pre><h2 id="网络模型">网络模型</h2><h2 id="单机训练">单机训练</h2><h2 id="分布式训练">分布式训练</h2><h2 id="测试评估">测试评估</h2><h3 id="参考文献">参考文献</h3><p><a href="https://github.com/tensorflow/models/tree/master/inception" target="_blank" rel="external">https://github.com/tensorflow/models/tree/master/inception</a><br><a href="http://arxiv.org/abs/1512.00567" target="_blank" rel="external">http://arxiv.org/abs/1512.00567</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cja4p2i8f0012rofhgdfaczxb" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-tensorflow-captcha" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/06/13/tensorflow-captcha/" class="article-date">
-  <time datetime="2016-06-13T11:52:35.000Z" itemprop="datePublished">2016-06-13</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/06/13/tensorflow-captcha/">tensorflow学习（五）基于CNN的验证码识别</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>验证码的识别是OCR中的一个重要内容，特别是对于爬虫系统意义重大，传统方法都是单个字符识别，包括二值化处理、字符分割、字符识别的过程。由于现在深度学习的火爆，end-to-end的方法流行起来。这里就用tensorflow实现一个端到端的CNN验证码识别功能。</p>
-<p>本文的想法是把验证码看成一个多标签学习的问题，相当于几个有标签的图像识别。这里没有考虑使用LSTM对验证码序列进行学习，因为我个人觉得验证码字符之间的相关性不强，没必要用这种大杀器。</p>
-<h2 id="验证码数据集">验证码数据集</h2><p>用<a href="https://pypi.python.org/pypi/captcha/0.1.1" target="_blank" rel="external">python-captcha</a>生成验证码数据集，这个库可以生成声音和图像的验证码，安装过程非常简单</p>
-<pre><code>pip <span class="keyword">install</span> captcha
-</code></pre><p>使用示例如下：</p>
-<pre><code>from captcha<span class="class">.image</span> import ImageCaptcha
-
-image = <span class="function"><span class="title">ImageCaptcha</span><span class="params">(fonts=[<span class="string">'/path/A.ttf'</span>, <span class="string">'/path/B.ttf'</span>])</span></span>
-image.<span class="function"><span class="title">write</span><span class="params">(<span class="string">'1234'</span>, <span class="string">'out.png'</span>)</span></span>
-</code></pre><h2 id="数据输入">数据输入</h2><p>验证码图片生成后是通过字节流生成的，可以随机生成，所以训练样本量可以无穷大。我们这里使用定长的4位验证码，包含0~9、a~z、A~Z。图像大小缩放到(30, 80, 3)。代码如下：</p>
-<pre><code><span class="keyword">import</span> numpy <span class="keyword">as</span> np
-<span class="keyword">import</span> cv2
-<span class="keyword">import</span> random
-<span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf
-<span class="keyword">from</span> captcha.image <span class="keyword">import</span> ImageCaptcha
-
-<span class="class"><span class="keyword">class</span> <span class="title">OCR_data</span><span class="params">(object)</span>:</span>
-    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, num, data_dir, batch_size=<span class="number">50</span>, len_code=<span class="number">4</span>, height=<span class="number">30</span>, width=<span class="number">80</span>)</span>:</span>
-        self.num = num
-        self.data_dir = data_dir
-        self.batch_size = batch_size
-        self.len_code = len_code
-        self.height = height
-        self.width = width
-        self.captcha = ImageCaptcha()
-        self.index_in_epoch = <span class="number">0</span>
-        self._imgs = []
-        self._labels = []
-        <span class="keyword">for</span> i <span class="keyword">in</span> range(self.num):
-            <span class="keyword">if</span> i % <span class="number">100</span> == <span class="number">0</span>:
-                <span class="keyword">print</span> <span class="string">'%s images have been created.'</span> % i
-            img, label = self.create_captcha()
-            self._imgs.append(img)
-            self._labels.append(label)
-        self._imgs = np.array(self._imgs)
-        self._labels = np.array(self._labels)
-
-
-    <span class="function"><span class="keyword">def</span> <span class="title">create_captcha</span><span class="params">(self)</span>:</span>
-        code, label = self.gen_rand()
-        img = self.captcha.generate(code)
-        img = np.fromstring(img.getvalue(), dtype=<span class="string">'uint8'</span>)
-        img = cv2.imdecode(img, cv2.IMREAD_COLOR)
-        img = cv2.resize(img, (self.width, self.height))
-        <span class="keyword">return</span> (img, label)
-
-    <span class="function"><span class="keyword">def</span> <span class="title">gen_rand</span><span class="params">(self)</span>:</span>
-        buf = <span class="string">''</span>
-        label = []
-        <span class="keyword">for</span> i <span class="keyword">in</span> range(self.len_code):
-            rnd = random.randint(<span class="number">0</span>, <span class="number">61</span>)
-            label.append(rnd)
-            <span class="keyword">if</span> rnd &lt; <span class="number">10</span>:
-                ascii_code = chr(rnd+<span class="number">48</span>)
-            <span class="keyword">elif</span> rnd &lt; <span class="number">36</span>:
-                ascii_code = chr(rnd+<span class="number">65</span>)
-            <span class="keyword">else</span>:
-                ascii_code = chr(rnd+<span class="number">97</span>)
-            buf += ascii_code
-        label_one_hot = self.dense_to_one_hot(label, <span class="number">62</span>)
-        <span class="keyword">return</span> buf, label_one_hot
-
-    <span class="function"><span class="keyword">def</span> <span class="title">dense_to_one_hot</span><span class="params">(self, labels_dense, num_classes)</span>:</span>
-        num_labels = len(labels_dense)
-        index_offest = np.arange(num_labels) * num_classes
-        labels_one_hot = np.zeros((num_labels, num_classes))
-        labels_one_hot.flat[index_offest + labels_dense] = <span class="number">1</span>
-        labels_one_hot = labels_one_hot.reshape(num_labels*num_classes)
-        <span class="keyword">return</span> labels_one_hot
-
-    <span class="function"><span class="keyword">def</span> <span class="title">next_batch</span><span class="params">(self, batch_size)</span>:</span>
-        start = self.index_in_epoch
-        self.index_in_epoch += batch_size
-        <span class="keyword">if</span> self.index_in_epoch &gt; self.num:
-            perm = np.arange(self.num)
-            np.random.shuffle(perm)
-            self._imgs = self._imgs[perm]
-            self._labels = self._labels[perm]
-            start = <span class="number">0</span>
-            self.index_in_epoch = batch_size
-            <span class="keyword">assert</span> batch_size &lt;= self.num
-        end = self.index_in_epoch
-        <span class="keyword">return</span> self._imgs[start:end], self._labels[start:end]
-</code></pre><h2 id="训练">训练</h2><pre><code><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf
-<span class="keyword">from</span> captcha_data <span class="keyword">import</span> OCR_data
-<span class="comment"># Parameters</span>
-learning_rate = <span class="number">0.001</span>
-training_iters = <span class="number">200000</span>
-batch_size = <span class="number">64</span>
-display_step = <span class="number">20</span>
-
-<span class="comment"># Network Parameters</span>
-<span class="comment"># n_input = 7200  # 30*80*3</span>
-n_classes = <span class="number">62</span>  <span class="comment"># 10+26+26</span>
-
-data_train = OCR_data(<span class="number">1000</span>, <span class="string">'/data/captcha_data'</span>)
-data_test = OCR_data(<span class="number">500</span>, <span class="string">'/data/captcha_data'</span>)
-
-<span class="comment"># tf Graph input</span>
-x = tf.placeholder(tf.float32, [<span class="keyword">None</span>, <span class="number">30</span>, <span class="number">80</span>, <span class="number">3</span>])
-y = tf.placeholder(tf.float32, [<span class="keyword">None</span>, <span class="number">4</span>*n_classes])
-
-<span class="function"><span class="keyword">def</span> <span class="title">print_activations</span><span class="params">(t)</span>:</span>
-    print(t.op.name, t.get_shape().as_list())
-
-<span class="function"><span class="keyword">def</span> <span class="title">weight_variable</span><span class="params">(shape)</span>:</span>
-    initial = tf.truncated_normal(shape, dtype=tf.float32, stddev=<span class="number">0.1</span>)
-    <span class="keyword">return</span> tf.Variable(initial)
-
-<span class="function"><span class="keyword">def</span> <span class="title">bias_variable</span><span class="params">(shape)</span>:</span>
-    initial = tf.constant(<span class="number">0.0</span>, shape=shape)
-    <span class="keyword">return</span> tf.Variable(initial, trainable=<span class="keyword">True</span>)
-
-<span class="function"><span class="keyword">def</span> <span class="title">conv2d</span><span class="params">(x, W, B, name)</span>:</span>
-    <span class="keyword">with</span> tf.name_scope(name) <span class="keyword">as</span> scope:
-        conv = tf.nn.conv2d(x, W, strides=[<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>)
-        bias = tf.nn.bias_add(conv, B)
-        conv = tf.nn.relu(bias, name=scope)
-        <span class="keyword">return</span> conv
-
-<span class="function"><span class="keyword">def</span> <span class="title">max_pool</span><span class="params">(x, k, name)</span>:</span>
-    <span class="keyword">return</span> tf.nn.max_pool(x, ksize=[<span class="number">1</span>, k, k, <span class="number">1</span>], strides=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>, name=name)
-
-<span class="function"><span class="keyword">def</span> <span class="title">avg_pool</span><span class="params">(x, k, name)</span>:</span>
-    <span class="keyword">return</span> tf.nn.avg_pool(x, ksize=[<span class="number">1</span>, k, k, <span class="number">1</span>], strides=[<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>], padding=<span class="string">'SAME'</span>, name=name)
-
-<span class="function"><span class="keyword">def</span> <span class="title">norm</span><span class="params">(x, lsize, name)</span>:</span>
-    <span class="keyword">return</span> tf.nn.lrn(x, lsize, bias=<span class="number">1.0</span>, alpha=<span class="number">0.001</span> / <span class="number">9.0</span>, beta=<span class="number">0.75</span>, name=name)
-
-weights = {
-    <span class="string">'wc1'</span>: weight_variable([<span class="number">5</span>, <span class="number">5</span>, <span class="number">3</span>, <span class="number">32</span>]),
-    <span class="string">'wc2'</span>: weight_variable([<span class="number">5</span>, <span class="number">5</span>, <span class="number">32</span>, <span class="number">32</span>]),
-    <span class="string">'wc3'</span>: weight_variable([<span class="number">3</span>, <span class="number">3</span>, <span class="number">32</span>, <span class="number">32</span>]),
-    <span class="string">'wd1'</span>: weight_variable([<span class="number">4</span>*<span class="number">10</span>*<span class="number">32</span>, <span class="number">512</span>]),
-    <span class="string">'out1'</span>: weight_variable([<span class="number">512</span>, n_classes]),
-    <span class="string">'out2'</span>: weight_variable([<span class="number">512</span>, n_classes]),
-    <span class="string">'out3'</span>: weight_variable([<span class="number">512</span>, n_classes]),
-    <span class="string">'out4'</span>: weight_variable([<span class="number">512</span>, n_classes])
-}
-biases = {
-    <span class="string">'bc1'</span>: bias_variable([<span class="number">32</span>]),
-    <span class="string">'bc2'</span>: bias_variable([<span class="number">32</span>]),
-    <span class="string">'bc3'</span>: bias_variable([<span class="number">32</span>]),
-    <span class="string">'bd1'</span>: bias_variable([<span class="number">512</span>]),
-    <span class="string">'out1'</span>: bias_variable([n_classes]),
-    <span class="string">'out2'</span>: bias_variable([n_classes]),
-    <span class="string">'out3'</span>: bias_variable([n_classes]),
-    <span class="string">'out4'</span>: bias_variable([n_classes]),
-}
-
-<span class="function"><span class="keyword">def</span> <span class="title">ocr_net</span><span class="params">(_x, _weights, _biases)</span>:</span>
-    _x = tf.reshape(_x, shape=[-<span class="number">1</span>, <span class="number">30</span>, <span class="number">80</span>, <span class="number">3</span>])
-
-    conv1 = conv2d(_x, _weights[<span class="string">'wc1'</span>], _biases[<span class="string">'bc1'</span>], <span class="string">'conv1'</span>)
-    print_activations(conv1)
-    pool1 = max_pool(conv1, k=<span class="number">2</span>, name=<span class="string">'pool1'</span>)
-    print_activations(pool1)
-
-    conv2 = conv2d(pool1, _weights[<span class="string">'wc2'</span>], _biases[<span class="string">'bc2'</span>], <span class="string">'conv2'</span>)
-    print_activations(conv2)
-    pool2 = avg_pool(conv2, k=<span class="number">2</span>, name=<span class="string">'pool2'</span>)
-    print_activations(pool2)
-
-    conv3 = conv2d(pool2, _weights[<span class="string">'wc3'</span>], _biases[<span class="string">'bc3'</span>], <span class="string">'conv3'</span>)
-    print_activations(conv3)
-    pool3 = avg_pool(conv3, k=<span class="number">2</span>, name=<span class="string">'pool3'</span>)
-    print_activations(pool3)
-
-    pool3_flat = tf.reshape(pool3, [-<span class="number">1</span>, _weights[<span class="string">'wd1'</span>].get_shape().as_list()[<span class="number">0</span>]])
-    fc1 = tf.nn.relu(tf.matmul(pool3_flat, _weights[<span class="string">'wd1'</span>]) + _biases[<span class="string">'bd1'</span>], name=<span class="string">'fc1'</span>)
-    print_activations(fc1)
-
-    fc21 = tf.nn.relu(tf.matmul(fc1, _weights[<span class="string">'out1'</span>]) + _biases[<span class="string">'out1'</span>], name=<span class="string">'fc21'</span>)
-    print_activations(fc21)
-
-    fc22 = tf.nn.relu(tf.matmul(fc1, _weights[<span class="string">'out2'</span>]) + _biases[<span class="string">'out2'</span>], name=<span class="string">'fc22'</span>)
-    print_activations(fc22)
-
-    fc23 = tf.nn.relu(tf.matmul(fc1, _weights[<span class="string">'out3'</span>]) + _biases[<span class="string">'out3'</span>], name=<span class="string">'fc23'</span>)
-    print_activations(fc23)
-
-    fc24 = tf.nn.relu(tf.matmul(fc1, _weights[<span class="string">'out4'</span>]) + _biases[<span class="string">'out4'</span>], name=<span class="string">'fc24'</span>)
-    print_activations(fc24)
-
-    out = tf.concat(axis=<span class="number">1</span>, values=[fc21, fc22, fc23, fc24], name=<span class="string">'out'</span>)
-    print_activations(out)
-    <span class="keyword">return</span> out
-
-<span class="function"><span class="keyword">def</span> <span class="title">accuracy_func</span><span class="params">(_pred, _y)</span>:</span>
-    y = tf.reshape(_y, shape=[-<span class="number">1</span>, <span class="number">4</span>, <span class="number">62</span>])
-    pred = tf.reshape(_pred, shape=[-<span class="number">1</span>, <span class="number">4</span>, <span class="number">62</span>])
-    correct_pred = tf.equal(tf.argmax(pred,<span class="number">2</span>), tf.argmax(y,<span class="number">2</span>))
-    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
-    <span class="keyword">return</span> accuracy
-
-pred = ocr_net(x, weights, biases)
-
-cost = -tf.reduce_mean(y*tf.log(pred))
-optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
-
-<span class="comment">#correct_pred = tf.equal(tf.argmax(pred,2), tf.argmax(y,2))</span>
-<span class="comment">#accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))</span>
-accuracy = accuracy_func(pred, y)
-
-init = tf.global_variables_initializer()
-
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = <span class="keyword">True</span>
-
-<span class="keyword">with</span> tf.Session(config=config) <span class="keyword">as</span> sess:
-    sess.run(init)
-    step = <span class="number">1</span><span class="comment"># Keep training until reach max iterations</span>
-    <span class="keyword">while</span> step * batch_size &lt; training_iters:
-        batch = data_train.next_batch(batch_size)
-        <span class="comment"># Fit training using batch data</span>
-        sess.run(optimizer, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>]})
-        <span class="keyword">if</span> step % display_step == <span class="number">0</span>:
-            <span class="comment"># Calculate batch accuracy</span>
-            acc = sess.run(accuracy, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>]})
-            <span class="comment"># Calculate batch loss</span>
-            loss = sess.run(cost, feed_dict={x: batch[<span class="number">0</span>], y: batch[<span class="number">1</span>]})
-            <span class="keyword">print</span> <span class="string">"Iter "</span> + str(step*batch_size) + <span class="string">", Minibatch Loss= "</span> + <span class="string">"{:.6f}"</span>.format(loss) + <span class="string">", Training Accuracy= "</span> + <span class="string">"{:.5f}"</span>.format(acc)
-        step += <span class="number">1</span>
-    <span class="keyword">print</span> <span class="string">"Optimization Finished!"</span>
-
-    test_batch = data_test.next_batch(<span class="number">500</span>)
-    <span class="keyword">print</span> <span class="string">"Testing Accuracy:"</span>, sess.run(accuracy, feed_dict={x: test_batch[<span class="number">0</span>], y: test_batch[<span class="number">1</span>]})
-</code></pre><h2 id="预测">预测</h2><p>tbd</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-captcha/" data-id="cja4p2i8u001erofhbsg3egy6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cjco8w9p5001il8fhkeih84l5" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1846,7 +1612,7 @@ config.gpu_options.allow_growth = <span class="keyword">True</span>
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">27</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">12</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">27</span></li></ul>
     </div>
   </div>
 
@@ -1855,7 +1621,7 @@ config.gpu_options.allow_growth = <span class="keyword">True</span>
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe2/">caffe2</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReID/">ReID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe2/">caffe2</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
     </div>
   </div>
 
@@ -1864,7 +1630,7 @@ config.gpu_options.allow_growth = <span class="keyword">True</span>
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 12px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 18px;">caffe</a> <a href="/tags/caffe2/" style="font-size: 12px;">caffe2</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 14px;">face</a> <a href="/tags/machine-learning/" style="font-size: 12px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 12px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 16px;">生活</a>
+      <a href="/tags/ReID/" style="font-size: 10px;">ReID</a> <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 12px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 18px;">caffe</a> <a href="/tags/caffe2/" style="font-size: 12px;">caffe2</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 14px;">face</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/machine-learning/" style="font-size: 12px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 12px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 16px;">生活</a>
     </div>
   </div>
 
@@ -1873,7 +1639,7 @@ config.gpu_options.allow_growth = <span class="keyword">True</span>
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -1885,6 +1651,14 @@ config.gpu_options.allow_growth = <span class="keyword">True</span>
       <ul>
         
           <li>
+            <a href="/2018/01/21/linux-tips/">linux-tips</a>
+          </li>
+        
+          <li>
+            <a href="/2018/01/21/ReID-resource/">ReID资源汇总</a>
+          </li>
+        
+          <li>
             <a href="/2017/11/18/face-algorithm/">人脸算法资源汇总</a>
           </li>
         
@@ -1894,14 +1668,6 @@ config.gpu_options.allow_growth = <span class="keyword">True</span>
         
           <li>
             <a href="/2017/10/07/caffe2-abc/">caffe2学习（二）基础</a>
-          </li>
-        
-          <li>
-            <a href="/2017/10/07/caffefe2-install/">caffe2学习（一）安装配置</a>
-          </li>
-        
-          <li>
-            <a href="/2017/06/03/caffe-forward/">caffe学习（九）inference代码优化</a>
           </li>
         
       </ul>
