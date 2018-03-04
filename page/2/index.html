@@ -65,6 +65,189 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-python-spider" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/22/python-spider/" class="article-date">
+  <time datetime="2016-06-22T13:02:36.000Z" itemprop="datePublished">2016-06-22</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/study/">study</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/22/python-spider/">python爬虫入门笔记</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="写在前面">写在前面</h1><p>爬虫其实内容的爬取不是最为困难的地方，真正难点在于如何混在群众之中不被发现。由于我在爬虫界还处于幼儿园水平，所以简单写几个脚本爬点美女图片还勉强，想跟亚一爬谈笑风生就不指望了。</p>
+<h1 id="urllib基础">urllib基础</h1><h3 id="html抓取">html抓取</h3><pre><code>import urllib2
+
+request = urllib2.<span class="function"><span class="title">Request</span><span class="params">(<span class="string">"http://www.baidu.com"</span>)</span></span>
+response = urllib2.<span class="function"><span class="title">urlopen</span><span class="params">(request)</span></span>
+data = response.<span class="function"><span class="title">read</span><span class="params">()</span></span>
+</code></pre><p>data就得到了百度主页的html信息。</p>
+<h3 id="html解析">html解析</h3><p>主要就是用<code>re</code>模块来正则匹配</p>
+<pre><code>import re
+
+#返回pattern对象
+re.<span class="function"><span class="title">compile</span><span class="params">(string[,flag])</span></span>  
+#以下为匹配所用函数
+re.<span class="function"><span class="title">match</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">search</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">split</span><span class="params">(pattern, string[, maxsplit])</span></span>
+re.<span class="function"><span class="title">findall</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">finditer</span><span class="params">(pattern, string[, flags])</span></span>
+re.<span class="function"><span class="title">sub</span><span class="params">(pattern, repl, string[, count])</span></span>
+re.<span class="function"><span class="title">subn</span><span class="params">(pattern, repl, string[, count])</span></span>
+</code></pre><p>比较常用的findall，用列表的形式返回全部能匹配的子串。</p>
+<h1 id="反爬伪装">反爬伪装</h1><p>现在主流的反爬策略基本基于三个层面：</p>
+<ul>
+<li>IP层，同一ip访问过多会被封杀</li>
+<li>HTTP协议层，判断是否真实的浏览器行为</li>
+<li>行为层，判断是否真实用户行为<br>上述的程序通常在<code>response.read()</code>的时候会报错10054、10060之类的错误。</li>
+</ul>
+<h3 id="伪装浏览器Header">伪装浏览器Header</h3><p>用chrome打开浏览器，调试模式，然后打开Network模块，选择其中一个页面，打开Headers页面，其中最后的agent就是请求的身份，不填写身份的话，很容易被反爬策略封杀掉。</p>
+<pre><code>user_agent = <span class="comment">'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'</span>
+headers = {<span class="comment">'User-Agent' : user_agent}</span>
+#    <span class="built_in">request</span> = urllib2.<span class="built_in">Request</span>(url, headers)
+<span class="built_in">request</span> = urllib2.<span class="built_in">Request</span>(url)
+<span class="built_in">request</span>.add_header(<span class="comment">'User-Agent', user_agent)</span>
+<span class="built_in">response</span> = urllib2.urlopen(<span class="built_in">request</span>)
+page = <span class="built_in">response</span>.read()
+</code></pre><p>除此之外，有些反爬策略还有反盗链的设计，需要在headers中传入referer</p>
+<pre><code>request.<span class="function"><span class="title">add_header</span><span class="params">(<span class="string">'Referer'</span>, <span class="string">'http://www.taobao.com'</span>)</span></span>
+</code></pre><h3 id="proxy代理设置">proxy代理设置</h3><p>如果ip访问次数过多也会被封杀，采用代理服务器的方法来定期更换代理。</p>
+<pre><code>enable_proxy = True
+proxy_handler = urllib2.<span class="function"><span class="title">ProxyHandler</span><span class="params">({<span class="string">"http"</span> : <span class="string">'http://192.168.0.1:8080'</span>})</span></span>
+null_proxy_handler = urllib2.<span class="function"><span class="title">ProxyHandler</span><span class="params">({})</span></span>
+<span class="keyword">if</span> enable_proxy:
+    opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(proxy_handler)</span></span>
+<span class="keyword">else</span>:
+    opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(null_proxy_handler)</span></span>
+urllib2.<span class="function"><span class="title">install_opener</span><span class="params">(opener)</span></span>
+</code></pre><h3 id="超时设置Timeout">超时设置Timeout</h3><p>在urlopen的时候可以通过设置timeout参数解决网站相应过慢造成的影响。</p>
+<pre><code>response = urllib2.<span class="function"><span class="title">urlopen</span><span class="params">(<span class="string">'http://www.baidu.com'</span>, timeout=<span class="number">10</span>)</span></span>
+</code></pre><h3 id="发送数据">发送数据</h3><p>用来实现和浏览器之间的行为交互</p>
+<pre><code><span class="keyword">data</span> = urllib.parse.urlencode({<span class="string">"act"</span>: <span class="string">"login"</span>, <span class="string">"email"</span>: <span class="string">"xxxxx@qq.com"</span>, <span class="string">"password"</span>: <span class="string">"123456"</span>}).encode(<span class="string">'utf-8'</span>)
+request1 = urllib2.Request(url, <span class="keyword">data</span>=<span class="keyword">data</span>)           <span class="comment"># POST方法</span>
+request2 = urllib2.Request(url+<span class="string">"?%s"</span> % <span class="keyword">data</span>)         <span class="comment"># GET方法</span>
+response = urllib2.urlopen(request1)
+</code></pre><h3 id="常用超时异常">常用超时异常</h3><pre><code>try:
+    urllib2.<span class="function"><span class="title">urlopen</span><span class="params">(request)</span></span>
+except urllib2<span class="class">.HTTPError</span> as e:
+    <span class="function"><span class="title">print</span><span class="params">(e.code, e.reason)</span></span>
+except urllib2<span class="class">.URLError</span> as e:
+    <span class="function"><span class="title">print</span><span class="params">(e.errno, e.reason)</span></span>
+</code></pre><h3 id="服务器cookie检查">服务器cookie检查</h3><pre><code>import <span class="keyword">http</span>.cookiejar
+cookie_jar = <span class="keyword">http</span>.cookiejar.CookieJar()
+cookie_jar_handler = urllib.request.HTTPCookieProcessor(cookiejar=cookie_jar)
+opener = urllib2.build_opener(cookie_jar_handler)        <span class="comment"># add_handler</span>
+response = opener.<span class="built_in">open</span>(url)
+</code></pre><h3 id="获取cookie">获取cookie</h3><p>两种方式，1）直接贴到headers中</p>
+<pre><code>request = urllib2.<span class="function"><span class="title">Request</span><span class="params">(url)</span></span>
+request.<span class="function"><span class="title">add_header</span><span class="params">(<span class="string">'Cookie'</span>, <span class="string">"PHPSESSID=btqkg9amjrtoeev8coq0m78396; USERINFO=n6nxTHTY%2BJA39z6CpNB4eKN8f0KsYLjAQTwPe%2BhLHLruEbjaeh4ulhWAS5RysUM%2B; "</span>)</span></span>
+</code></pre><p>2）构建cookie</p>
+<pre><code>import http<span class="class">.cookiejar</span>
+cookie = http<span class="class">.cookiejar</span><span class="class">.Cookie</span>(name=<span class="string">"xx"</span>, value=<span class="string">"xx"</span>, domain=<span class="string">"xx"</span>, ...)
+cookie_jar = http<span class="class">.cookiejar</span><span class="class">.CookieJar</span>()
+cookie_jar.<span class="function"><span class="title">set_cookie</span><span class="params">(cookie)</span></span>
+cookie_jar_handler = urllib<span class="class">.request</span><span class="class">.HTTPCookieProcessor</span>(cookiejar=cookie_jar)
+opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(cookie_jar_handler)</span></span>
+response = opener.<span class="function"><span class="title">open</span><span class="params">(url)</span></span>
+</code></pre><h3 id="HTTP身份认证">HTTP身份认证</h3><pre><code>password_mgr = urllib2.<span class="function"><span class="title">HTTPPasswordMgrWithDefaultRealm</span><span class="params">()</span></span>
+password_mgr.<span class="function"><span class="title">add_password</span><span class="params">(realm=None, uri=url, user=<span class="string">'username'</span>, passwd=<span class="string">'password'</span>)</span></span>
+handler = urllib2.<span class="function"><span class="title">HTTPBasicAuthHandler</span><span class="params">(password_mgr)</span></span>
+opener = urllib2.<span class="function"><span class="title">build_opener</span><span class="params">(handler)</span></span>
+response = opener.<span class="function"><span class="title">open</span><span class="params">(url)</span></span>
+</code></pre><h1 id="简易图片爬虫">简易图片爬虫</h1><p>关键的就是解析的时候匹配图片内容，得到了图片链接的话，用wget或者其他模块都能保存图片</p>
+<pre><code>patternImg = re.<span class="function"><span class="title">compile</span><span class="params">(<span class="string">'&lt;img.*?src="(.*?)"'</span>,re.S)</span></span>
+images = re.<span class="function"><span class="title">findall</span><span class="params">(patternImg, url_data)</span></span>
+</code></pre><h1 id="参考资料与推荐文章">参考资料与推荐文章</h1><p><a href="http://cuiqingcai.com/" target="_blank" rel="external">http://cuiqingcai.com/</a><br><a href="http://mp.weixin.qq.com/s?__biz=MjM5ODIzNDQ3Mw==&amp;mid=402180172&amp;idx=1&amp;sn=1db24327a15cea8fab6907069fbaabbf&amp;scene=0#wechat_redirect" target="_blank" rel="external">数据时代的反爬虫绝技</a><br><a href="https://zhuanlan.zhihu.com/p/22982208" target="_blank" rel="external">一个很“水”的Python爬虫入门代码文件</a><br><a href="https://zhuanlan.zhihu.com/p/23064000" target="_blank" rel="external">“史上最详细”的Python模拟登录新浪微博流程</a><br><a href="https://luzhijun.github.io/2016/10/29/%E5%BE%AE%E5%8D%9A%E8%AF%9D%E9%A2%98%E7%88%AC%E5%8F%96%E4%B8%8E%E5%AD%98%E5%82%A8%E5%88%86%E6%9E%90/" target="_blank" rel="external">微博话题爬取与存储分析</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cjecep48u001qcsfhgvby0ej3" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-tensorflow-caffe2tensorflow" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/14/tensorflow-caffe2tensorflow/" class="article-date">
+  <time datetime="2016-06-14T13:28:21.000Z" itemprop="datePublished">2016-06-14</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/14/tensorflow-caffe2tensorflow/">tensorflow学习（七）caffe模型训练结果转换为tensorflow格式</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>tensorflow官方认定的转换工具为<a href="https://github.com/ethereon/caffe-tensorflow" target="_blank" rel="external">https://github.com/ethereon/caffe-tensorflow</a>。我们尝试一下转换一个caffe训练的图像识别模型</p>
+<h2 id="caffe-tensorflow安装">caffe-tensorflow安装</h2><pre><code>git clone <span class="string">https:</span><span class="comment">//github.com/ethereon/caffe-tensorflow</span>
+</code></pre><h2 id="生成模型训练代码">生成模型训练代码</h2><p>利用<code>convert.py</code>可以将caffe网络定义的deploy.prototxt文件转换为tensorflow的python实现，不过这种转换之后的模型代码还需要import kaffe模块，虽然<code>kaffe.tensorflow.Network</code>没有其他依赖，可以单独加载到新代码中即可使用，方便移植，我还是更倾向于转换之后参考这个代码重新写一份。调用方式如下：</p>
+<pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --code-output-path=./myNetTensorflow.py
+</code></pre><h2 id="转换训练好的模型">转换训练好的模型</h2><p>也可以将caffemodel的weights和biases参数读取出来转换为npy的格式，并通过<code>numpy.load()</code>读取数据。转换数据的脚本如下：</p>
+<pre><code>./convert<span class="class">.py</span> ./deploy<span class="class">.prototxt</span> --caffemodel=./mynet<span class="class">.caffemodel</span> --data-output-path=./myNetTensorflow.npy
+</code></pre><p>由于转换过来的npy数据的类型比奇怪，是0-d array，要将其取出来需要如下读取方式</p>
+<pre><code>params = np.<span class="function"><span class="title">load</span><span class="params">()</span></span>
+params = params.<span class="function"><span class="title">item</span><span class="params">()</span></span>
+</code></pre><h2 id="注意事项">注意事项</h2><ul>
+<li><p>caffe的模型应该是较新的版本，才能转换</p>
+</li>
+<li><p>并不是所有的caffe模型都能转换为tensorflow，比如caffe的padding支持很多方式，tensorflow目前只支持<code>SAME</code>和<code>VALID</code></p>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cjecep48m001icsfhs2lua8q5" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-tensorflow-inception" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/06/13/tensorflow-inception/" class="article-date">
@@ -119,7 +302,7 @@ label_n
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cjco8w9oj0013l8fhfyuu6694" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cjecep47w0013csfhm5zldexh" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -389,7 +572,7 @@ config.gpu_options.allow_growth = <span class="keyword">True</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-captcha/" data-id="cjco8w9oz001fl8fhdadc0vqb" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-captcha/" data-id="cjecep48i001fcsfh60qt3qqt" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -641,7 +824,7 @@ init = tf.initialize_all_variables()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/28/tensorflow-cnn/" data-id="cjco8w9ov001cl8fhe2q7numd" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/28/tensorflow-cnn/" data-id="cjecep48b001ccsfht7lm9gjj" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -727,7 +910,7 @@ tf<span class="class">.summary</span><span class="class">.merge_all</span>(key=<
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cjco8w9ns000ol8fhjioef116" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cjecep475000ocsfhidq0w2ri" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -868,7 +1051,7 @@ saver.<span class="function"><span class="title">save</span><span class="params"
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cjco8w9or0019l8fhhv61ah8l" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cjecep4850019csfhmiahkn2l" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -972,7 +1155,7 @@ pip install /tmp/tensorflow_pkg/tensorflow-<span class="number">0.10</span>.<spa
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cjco8w9of0010l8fhb76dhxmg" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cjecep47r0010csfhuid6pgc7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1066,7 +1249,7 @@ n = p1.<span class="function"><span class="title">query</span><span class="param
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cjco8w9pp001xl8fhu8e2s9sy" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cjecep49c0021csfh0t3s6kq0" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nnsearch/">nnsearch</a></li></ul>
@@ -1136,7 +1319,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cjco8w9rv0039l8fhhh7tttv8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cjecep4bg003dcsfhnwfyukls" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/visualization/">visualization</a></li></ul>
@@ -1179,7 +1362,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cjco8w9r0002sl8fh6tmh3czj" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cjecep4aq002wcsfhrz0gfk0o" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -1454,7 +1637,7 @@ wget http:<span class="comment">//pjreddie.com/media/files/extraction.conv.weigh
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="cjco8w9s2003dl8fhuo655tdi" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="cjecep4bj003hcsfhz1alp3wq" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/darknet/">darknet</a></li></ul>
@@ -1560,7 +1743,7 @@ layer {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cjco8w9th004dl8fh71jerldq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cjecep4cv004hcsfhrt1470se" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -1744,7 +1927,7 @@ awk <span class="string">'{print vara}'</span> vara=$<span class="keyword">var</
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cjco8w9qe002dl8fhrtyw7lct" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cjecep4a3002hcsfhlvbfosxo" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell/">shell</a></li></ul>
@@ -1804,7 +1987,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cjco8w9p9001ll8fh7y87fubl" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cjecep48p001lcsfh0b885dlf" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
@@ -1861,7 +2044,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cjco8w9pz0025l8fhidvoyo85" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cjecep49q0029csfh66bsq282" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
@@ -1928,7 +2111,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cjco8w9pk001ul8fh9lrczk9u" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cjecep493001ucsfhlnhe9ujw" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -2012,7 +2195,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cjco8w9qj002hl8fhfyh6uj4t" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cjecep4a9002lcsfhhe5vjaih" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
@@ -2060,7 +2243,7 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cjco8w9to004jl8fhnmcfnkyn" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cjecep4d6004qcsfhbiw8ye6i" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/source/">source</a></li></ul>
@@ -2105,202 +2288,10 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cjco8w9ts004nl8fh22dger2t" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cjecep4db004ucsfhhliscn2j" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tricks/">tricks</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-dataset-cv" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/11/05/dataset-cv/" class="article-date">
-  <time datetime="2015-11-05T14:23:30.000Z" itemprop="datePublished">2015-11-05</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Computer-Vision/">Computer Vision</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/11/05/dataset-cv/">Computer Vision DataSet资源列表</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>俗话说，“算法为王，数据为后”。巧妇难为无米之炊，可见再优秀的算法也得有数据支持。这篇就用来记录我用过的数据集，以备不时之需。</p>
-<h1 id="数据集汇总">数据集汇总</h1><p><a href="http://homepages.inf.ed.ac.uk/rbf/CVonline/Imagedbase.htm" target="_blank" rel="external">http://homepages.inf.ed.ac.uk/rbf/CVonline/Imagedbase.htm</a><br><a href="http://visionandlanguage.net/" target="_blank" rel="external">http://visionandlanguage.net/</a><br><a href="http://riemenschneider.hayko.at/vision/dataset/" target="_blank" rel="external">http://riemenschneider.hayko.at/vision/dataset/</a></p>
-<h1 id="物体">物体</h1><h3 id="INSTRE:_for_INSTance-level_object_REtrieval_and_REcognition">INSTRE: for INSTance-level object REtrieval and REcognition</h3><p><a href="http://vipl.ict.ac.cn/isia/instre/" target="_blank" rel="external">http://vipl.ict.ac.cn/isia/instre/</a><br>(中科院计算所)新的图像数据集（共计28,543幅图像，100个类），用于验证实例级对象检索、识别算法及其他机器视觉算法，如检测、不变特征和特征匹配等</p>
-<h1 id="LOGO图">LOGO图</h1><h3 id="Dataset:_FlickrLogos-32">Dataset: FlickrLogos-32</h3><p><a href="http://www.multimedia-computing.de/flickrlogos/" target="_blank" rel="external">http://www.multimedia-computing.de/flickrlogos/</a><br>2011年公布的一个数据集，包含32类知名商标品牌的logo。</p>
-<h1 id="动植物图像">动植物图像</h1><h3 id="水果FIDS30:_Fruit_Image_Data_set">水果FIDS30: Fruit Image Data set</h3><p><a href="http://www.vicos.si/Downloads/FIDS30" target="_blank" rel="external">http://www.vicos.si/Downloads/FIDS30</a><br>2014年公布的水果图片集，包含971张图片，覆盖30种不同的水果</p>
-<h3 id="鲜花102_Category_Flower_Dataset">鲜花102 Category Flower Dataset</h3><p><a href="http://www.robots.ox.ac.uk/~vgg/data/flowers/102/index.html" target="_blank" rel="external">http://www.robots.ox.ac.uk/~vgg/data/flowers/102/index.html</a><br>牛津大学vgg组2009年搞的花卉图片，包含102类花卉8189张图片，对应标签<code>imagelabels.mat</code></p>
-<h3 id="植物图像库">植物图像库</h3><p><a href="http://www.plantphoto.cn/" target="_blank" rel="external">http://www.plantphoto.cn/</a><br>收录图片208万幅，1.86万种</p>
-<h1 id="人脸">人脸</h1><h3 id="CelebA:_Large-scale_CelebFaces_Attributes_(CelebA)_Dataset">CelebA: Large-scale CelebFaces Attributes (CelebA) Dataset</h3><p><a href="http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html" target="_blank" rel="external">http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html</a><br>香港中文大学组2015年搞的一个最新的目前最大的人脸集，包含10177个人，202599张人脸图片，而且每张图片有5个关键点标注信息以及40个2值属性，属性包括是否带眼睛，是否在笑，是否带帽子，是不是卷发，是否年轻，性别等等，是非常珍贵的人脸数据。</p>
-<h3 id="WIDER_FACE:_A_Face_Detection_Benchmark">WIDER FACE: A Face Detection Benchmark</h3><p><a href="http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/" target="_blank" rel="external">http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/</a><br>香港中文大学再放大招，2015年11月又推出人脸检测标注数据库，包含32203张图片，393703张人脸。其中50%的测试数据集并没有公开标注信息。</p>
-<h3 id="IMDB-WIKI">IMDB-WIKI</h3><p><a href="https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/" target="_blank" rel="external">https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/</a><br>有人脸位置、性别、年龄的标注信息，共52万的标注图片</p>
-<h3 id="CASIA_WebFace_Database">CASIA WebFace Database</h3><p><a href="http://www.cbsr.ia.ac.cn/english/CASIA-WebFace-Database.html" target="_blank" rel="external">http://www.cbsr.ia.ac.cn/english/CASIA-WebFace-Database.html</a><br>10,575 subjects and 494,414 images</p>
-<h3 id="Labeled_Faces_in_the_Wild">Labeled Faces in the Wild</h3><p><a href="http://vis-www.cs.umass.edu/lfw/" target="_blank" rel="external">http://vis-www.cs.umass.edu/lfw/</a><br>13,000 images and 5749 subjects</p>
-<h3 id="MSRA-CFW">MSRA-CFW</h3><p><a href="http://research.microsoft.com/en-us/projects/msra-cfw/" target="_blank" rel="external">http://research.microsoft.com/en-us/projects/msra-cfw/</a><br>202,792 images and 1,583 subjects.</p>
-<h3 id="MegaFace_Dataset">MegaFace Dataset</h3><p><a href="http://megaface.cs.washington.edu" target="_blank" rel="external">http://megaface.cs.washington.edu</a><br>1 Million Faces for Recognition at Scale 690,572 unique people</p>
-<h3 id="FaceScrub">FaceScrub</h3><p><a href="http://vintage.winklerbros.net/facescrub.html" target="_blank" rel="external">http://vintage.winklerbros.net/facescrub.html</a><br>A Dataset With Over 100,000 Face Images of 530 People.</p>
-<h3 id="FDDB">FDDB</h3><p><a href="http://vis-www.cs.umass.edu/fddb" target="_blank" rel="external">http://vis-www.cs.umass.edu/fddb</a><br>Face Detection and Data Set Benchmark. 5k images.</p>
-<h3 id="AFLW">AFLW</h3><p><a href="https://lrs.icg.tugraz.at/research/aflw/" target="_blank" rel="external">https://lrs.icg.tugraz.at/research/aflw/</a><br>Annotated Facial Landmarks in the Wild: A Large-scale, Real-world Database for Facial Landmark Localization. 25k images.</p>
-<h3 id="AFW">AFW</h3><p><a href="http://www.ics.uci.edu/~xzhu/face/" target="_blank" rel="external">http://www.ics.uci.edu/~xzhu/face/</a><br>Annotated Faces in the Wild. ~1k images.</p>
-<h3 id="3D_Mask_Attack_Dataset]">3D Mask Attack Dataset]</h3><p><a href="https://www.idiap.ch/dataset/3dmad" target="_blank" rel="external">https://www.idiap.ch/dataset/3dmad</a><br>76500 frames of 17 persons using Kinect RGBD with eye positions (Sebastien Marcel)</p>
-<h3 id="Audio-visual_database_for_face_and_speaker_recognition">Audio-visual database for face and speaker recognition</h3><p><a href="https://www.idiap.ch/dataset/mobio" target="_blank" rel="external">https://www.idiap.ch/dataset/mobio</a><br>Mobile Biometry MOBIO <a href="http://www.mobioproject.org/" target="_blank" rel="external">http://www.mobioproject.org/</a></p>
-<h3 id="BANCA_face_and_voice_database">BANCA face and voice database</h3><p><a href="http://www.ee.surrey.ac.uk/CVSSP/banca/" target="_blank" rel="external">http://www.ee.surrey.ac.uk/CVSSP/banca/</a><br>Univ of Surrey</p>
-<h3 id="Binghampton_Univ_3D_static_and_dynamic_facial_expression_database">Binghampton Univ 3D static and dynamic facial expression database</h3><p><a href="http://www.cs.binghamton.edu/~lijun/Research/3DFE/3DFE_Analysis.html" target="_blank" rel="external">http://www.cs.binghamton.edu/~lijun/Research/3DFE/3DFE_Analysis.html</a><br>(Lijun Yin, Peter Gerhardstein and teammates)</p>
-<h3 id="The_BioID_Face_Database">The BioID Face Database</h3><p><a href="https://www.bioid.com/About/BioID-Face-Database" target="_blank" rel="external">https://www.bioid.com/About/BioID-Face-Database</a><br>BioID group</p>
-<h3 id="Biwi_3D_Audiovisual_Corpus_of_Affective_Communication">Biwi 3D Audiovisual Corpus of Affective Communication</h3><p><a href="http://www.vision.ee.ethz.ch/datasets/b3dac2.en.html" target="_blank" rel="external">http://www.vision.ee.ethz.ch/datasets/b3dac2.en.html</a><br>1000 high quality, dynamic 3D scans of faces, recorded while pronouncing a set of English sentences.</p>
-<h3 id="Cohn-Kanade_AU-Coded_Expression_Database">Cohn-Kanade AU-Coded Expression Database</h3><p><a href="http://www.pitt.edu/~emotion/ck-spread.htm" target="_blank" rel="external">http://www.pitt.edu/~emotion/ck-spread.htm</a><br>500+ expression sequences of 100+ subjects, coded by activated Action Units (Affect Analysis Group, Univ. of Pittsburgh.</p>
-<h3 id="CMU/MIT_Frontal_Faces">CMU/MIT Frontal Faces</h3><p><a href="http://cbcl.mit.edu/software-datasets/FaceData2.html" target="_blank" rel="external">http://cbcl.mit.edu/software-datasets/FaceData2.html</a><br>Training set:  2,429 faces, 4,548 non-faces; Test set: 472 faces, 23,573 non-faces.</p>
-<h3 id="kaggle表情数据">kaggle表情数据</h3><p><a href="https://www.kaggle.com/c/challenges-in-representation-learning-facial-expression-recognition-challenge/data" target="_blank" rel="external">https://www.kaggle.com/c/challenges-in-representation-learning-facial-expression-recognition-challenge/data</a><br>人脸表情数据集，7种表情(0=Angry, 1=Disgust, 2=Fear, 3=Happy, 4=Sad, 5=Surprise, 6=Neutral)，训练集28709张图片，测试集3589张，像素48*48</p>
-<h3 id="人脸素描数据集">人脸素描数据集</h3><p><a href="http://mmlab.ie.cuhk.edu.hk/archive/facesketch.html" target="_blank" rel="external">http://mmlab.ie.cuhk.edu.hk/archive/facesketch.html</a><br>606张人脸的素描和证件照的一一对应图像</p>
-<h1 id="汽车">汽车</h1><h3 id="KITTI_Vision_Benchmark">KITTI Vision Benchmark</h3><p><a href="http://www.cvlibs.net/datasets/kitti/index.php" target="_blank" rel="external">http://www.cvlibs.net/datasets/kitti/index.php</a><br>这个就厉害了，包括车载环境的机动车、非机动车、行人以及车道等多方面的标注信息。用于专业的车辆辅助驾驶的检测算法测评。</p>
-<h3 id="CompCars:_The_comprehensive_cars_dataset">CompCars: The comprehensive cars dataset</h3><p><a href="http://mmlab.ie.cuhk.edu.hk/datasets/comp_cars/index.html" target="_blank" rel="external">http://mmlab.ie.cuhk.edu.hk/datasets/comp_cars/index.html</a></p>
-<h1 id="图像知识图谱">图像知识图谱</h1><h3 id="Visual_Genome">Visual Genome</h3><p><a href="https://visualgenome.org/" target="_blank" rel="external">https://visualgenome.org/</a><br>100K+图像，400万区域描述，170万图像问答，210万物体，180万的属性和关系，所有都映射到Wordnet Synsets</p>
-<h1 id="OCR">OCR</h1><h3 id="COCO-TEXT">COCO-TEXT</h3><p><a href="http://vision.cornell.edu/se3/coco-text/" target="_blank" rel="external">http://vision.cornell.edu/se3/coco-text/</a><br>该数据库含63686张图像，123589个文本区域及标注（位置、手写/印刷等属性、语言、可辨识性、文本）</p>
-<h1 id="视频">视频</h1><h3 id="ActivityNet">ActivityNet</h3><p><a href="http://activity-net.org/" target="_blank" rel="external">http://activity-net.org/</a><br>人类活动理解建模，200个类和2万个训练/调试/测试视频</p>
-<h3 id="WWW_Crowd">WWW Crowd</h3><p><a href="http://www.ee.cuhk.edu.hk/~jshao/WWWCrowdDataset.html" target="_blank" rel="external">http://www.ee.cuhk.edu.hk/~jshao/WWWCrowdDataset.html</a><br>10000个视频、8257种不同场景、超过800万帧图像。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cjco8w9rr0035l8fhzevgxz4i" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dataset/">dataset</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-dlib-face-detect" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/11/04/dlib-face-detect/" class="article-date">
-  <time datetime="2015-11-04T13:53:46.000Z" itemprop="datePublished">2015-11-04</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Computer-Vision/">Computer Vision</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/11/04/dlib-face-detect/">基于dlib的人脸检测</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>dlib的人脸检测模块要比OpenCV的效果好一些，归功于其使用的是HOG特征。</p>
-<h2 id="dlib安装">dlib安装</h2><p>在windows下我的环境是vs2013和cmake3.2，cmake版本低了会导致编译失败。下载dlib的zip包，然后解压，然后执行如下，就把c++和python的配置好了。注意其中的CMakeLists.txt文件中的OpenCV宏与新版本的OpenCV不相配，需要改成OpenCV REQUIRED，否则<code>webcam_face_pose_ex</code>这个与摄像头有关的模块不会执行成功。</p>
-<pre><code>cd examples
-vim CMakeLists.txt
-<span class="comment">######</span><span class="comment">######</span><span class="comment">######</span><span class="comment">####[open CMakeList.txt]
-# find_package(OpenCV) --&gt;
-find_package(OpenCV REQUIRED)
-###</span><span class="comment">######</span><span class="comment">######</span><span class="comment">######</span><span class="comment">#[close CMakeList.txt]</span>
-mkdir build
-cd build
-cmake .. -DUSE_AVX_INSTRUCTIONS=ON
-cmake --build . --config Release
-cd ..<span class="regexp">/../</span>
-python setup.py install --<span class="literal">yes</span> USE_AVX_INSTRUCTIONS <span class="comment"># AVX为object detector的加速开关</span>
-</code></pre><h2 id="人脸检测demo">人脸检测demo</h2><p>在<code>exmaples/faces</code>文件夹下面新建文件<code>face_detector.py</code>，根据官网例程添加代码：</p>
-<pre><code>import sys
-
-import dlib
-from skimage import io
-
-detector = dlib.get_frontal_face_detector()
-<span class="keyword">win</span> = dlib.image_window()
-
-<span class="keyword">for</span> f <span class="keyword">in</span> sys.argv[1:]:
-    <span class="keyword">print</span>(<span class="string">"Processing file: {}"</span>.<span class="keyword">format</span>(f))
-    img = io.imread(f)
-    # The 1 <span class="keyword">in</span> the second argument indicates that we should upsample the image
-    # 1 time.  This will make everything bigger and allow <span class="keyword">us</span> to detect <span class="keyword">more</span>
-    # faces.
-    dets = detector(img, 1)
-    <span class="keyword">print</span>(<span class="string">"Number of faces detected: {}"</span>.<span class="keyword">format</span>(len(dets)))
-    <span class="keyword">for</span> i, <span class="keyword">d</span> <span class="keyword">in</span> enumerate(dets):
-        <span class="keyword">print</span>(<span class="string">"Detection {}: Left: {} Top: {} Right: {} Bottom: {}"</span>.<span class="keyword">format</span>(
-            i, <span class="keyword">d</span>.left(), <span class="keyword">d</span>.top(), <span class="keyword">d</span>.right(), <span class="keyword">d</span>.bottom()))
-
-    <span class="keyword">win</span>.clear_overlay()
-    <span class="keyword">win</span>.set_image(img)
-    <span class="keyword">win</span>.add_overlay(dets)
-    dlib.hit_enter_to_continue()
-
-
-# Finally, <span class="keyword">if</span> you really want to you can ask the detector to tell you the <span class="keyword">score</span>
-# <span class="keyword">for</span> each detection.  The <span class="keyword">score</span> is bigger <span class="keyword">for</span> <span class="keyword">more</span> confident detections.
-# Also, the idx tells you <span class="keyword">which</span> of the face sub-detectors matched.  This can be
-# used to broadly identify faces <span class="keyword">in</span> different orientations.
-<span class="keyword">if</span> (len(sys.argv[1:]) &gt; 0):
-    img = io.imread(sys.argv[1])
-    dets, scores, idx = detector.<span class="keyword">run</span>(img, 1)
-    <span class="keyword">for</span> i, <span class="keyword">d</span> <span class="keyword">in</span> enumerate(dets):
-        <span class="keyword">print</span>(<span class="string">"Detection {}, score: {}, face_type:{}"</span>.<span class="keyword">format</span>(
-            <span class="keyword">d</span>, scores[i], idx[i]))
-</code></pre><p>然后执行如下命令即可看到人脸检测效果：</p>
-<pre><code><span class="tag">python</span> <span class="tag">face_detector</span><span class="class">.py</span> *<span class="class">.jpg</span>
-</code></pre><h2 id="补充">补充</h2><p>C++环境也是一样的，执行<code>cmake build</code>后在<code>examples/build</code>目录下生成可执行文件<code>face_detection_ex</code>，执行</p>
-<pre><code><span class="title">face_detection_ex</span> ../faces/<span class="regexp">*.jpg</span>
-</code></pre><p>注意<strong>C++接口要想得到矩形框对应的置信度的话也是可以的，也可以根据置信度设置矩形框筛选的阈值，默认阈值为0</strong>，下面为两种接口的函数声明：</p>
-<pre><code><span class="keyword">template</span> &lt;
-    <span class="keyword">typename</span> image_type
-    &gt;
-<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;rectangle&gt; <span class="keyword">operator</span>() (
-    <span class="keyword">const</span> image_type&amp; img,
-    <span class="keyword">double</span> adjust_threshold = <span class="number">0</span>
-);
-
-<span class="keyword">template</span> &lt;
-    <span class="keyword">typename</span> image_type
-    &gt;
-<span class="function"><span class="keyword">void</span> <span class="title">operator</span><span class="params">()</span> <span class="params">(
-    <span class="keyword">const</span> image_type&amp; img,
-    <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::pair&lt;<span class="keyword">double</span>, rectangle&gt; &gt;&amp; final_dets,
-    <span class="keyword">double</span> adjust_threshold = <span class="number">0</span>
-)</span></span>;
-</code></pre><h2 id="dlib的人脸关键点检测">dlib的人脸关键点检测</h2><p>下载文件<a href="http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2" target="_blank" rel="external">http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2</a>解压后将<code>shape_predictor_68_face_landmarks.dat</code>放到<code>examples/build</code>目录，执行</p>
-<pre><code><span class="tag">webcam_face_pose_ex</span> <span class="tag">shape_predictor_68_face_landmarks</span><span class="class">.dat</span>
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cjco8w9rn0032l8fhf288b2dx" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/face/">face</a></li></ul>
 
     </footer>
   </div>
@@ -2322,7 +2313,7 @@ detector = dlib.get_frontal_face_detector()
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">12</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">27</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">12</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">27</span></li></ul>
     </div>
   </div>
 
@@ -2331,7 +2322,7 @@ detector = dlib.get_frontal_face_detector()
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReID/">ReID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe2/">caffe2</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">5</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReID/">ReID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe2/">caffe2</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/product-recognition/">product recognition</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">6</span></li></ul>
     </div>
   </div>
 
@@ -2340,7 +2331,7 @@ detector = dlib.get_frontal_face_detector()
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/ReID/" style="font-size: 10px;">ReID</a> <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 12px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 18px;">caffe</a> <a href="/tags/caffe2/" style="font-size: 12px;">caffe2</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 14px;">face</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/machine-learning/" style="font-size: 12px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/python/" style="font-size: 12px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 16px;">生活</a>
+      <a href="/tags/ReID/" style="font-size: 10px;">ReID</a> <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 12px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 18px;">caffe</a> <a href="/tags/caffe2/" style="font-size: 12px;">caffe2</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 14px;">face</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/machine-learning/" style="font-size: 12px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/product-recognition/" style="font-size: 10px;">product recognition</a> <a href="/tags/python/" style="font-size: 12px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 16px;">生活</a>
     </div>
   </div>
 
@@ -2349,7 +2340,7 @@ detector = dlib.get_frontal_face_detector()
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -2361,6 +2352,14 @@ detector = dlib.get_frontal_face_detector()
       <ul>
         
           <li>
+            <a href="/2018/03/04/product-recognition-resource/">商品识别拍照购资料</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/04/buy-list/">长草清单</a>
+          </li>
+        
+          <li>
             <a href="/2018/01/21/linux-tips/">linux-tips</a>
           </li>
         
@@ -2370,14 +2369,6 @@ detector = dlib.get_frontal_face_detector()
         
           <li>
             <a href="/2017/11/18/face-algorithm/">人脸算法资源汇总</a>
-          </li>
-        
-          <li>
-            <a href="/2017/11/16/face-resource/">人脸资讯数据资源汇总</a>
-          </li>
-        
-          <li>
-            <a href="/2017/10/07/caffe2-abc/">caffe2学习（二）基础</a>
           </li>
         
       </ul>
