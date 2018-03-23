@@ -3,27 +3,48 @@
 <head>
   <meta charset="utf-8">
   
-  <title>tensorflow学习（十三）GPU使用技巧整理 | 杨现的个人博客</title>
+  <title>caffe2学习（三）推理预测C++ | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="显存使用控制如果不设置，tensorflow会默认占用所有的GPU显存。解决方法如下，GPU会根据使用的情况根据需求增加GPU显存的使用
-config = tf.ConfigProto()  
-config.gpu_options.allow_growth=True
-sess = tf.Session(config=config)">
+  <meta name="description" content="编译caffe2看一下caffe2的CMakeLists.txt，其中很多模块都是服务端c++ inference时候用不到的
+在默认配置的基础上，其他用不到的模块有
+
+BUILD_PYTHON OFF
+BUILD_TEST OFF
+USE_CUDA OFF
+USE_LEVELDB OFF
+USE_LMDB OFF
+USE_METAL OFF
+USE_MOBILE_OPENGL OFF
+USE_M">
 <meta property="og:type" content="article">
-<meta property="og:title" content="tensorflow学习（十三）GPU使用技巧整理">
-<meta property="og:url" content="http://yoursite.com/2017/04/22/tensorflow-gpu/index.html">
+<meta property="og:title" content="caffe2学习（三）推理预测C++">
+<meta property="og:url" content="http://yoursite.com/2018/03/23/caffe2-c-inference/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="显存使用控制如果不设置，tensorflow会默认占用所有的GPU显存。解决方法如下，GPU会根据使用的情况根据需求增加GPU显存的使用
-config = tf.ConfigProto()  
-config.gpu_options.allow_growth=True
-sess = tf.Session(config=config)">
-<meta property="og:updated_time" content="2017-04-22T08:30:59.822Z">
+<meta property="og:description" content="编译caffe2看一下caffe2的CMakeLists.txt，其中很多模块都是服务端c++ inference时候用不到的
+在默认配置的基础上，其他用不到的模块有
+
+BUILD_PYTHON OFF
+BUILD_TEST OFF
+USE_CUDA OFF
+USE_LEVELDB OFF
+USE_LMDB OFF
+USE_METAL OFF
+USE_MOBILE_OPENGL OFF
+USE_M">
+<meta property="og:updated_time" content="2018-03-23T11:51:55.812Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="tensorflow学习（十三）GPU使用技巧整理">
-<meta name="twitter:description" content="显存使用控制如果不设置，tensorflow会默认占用所有的GPU显存。解决方法如下，GPU会根据使用的情况根据需求增加GPU显存的使用
-config = tf.ConfigProto()  
-config.gpu_options.allow_growth=True
-sess = tf.Session(config=config)">
+<meta name="twitter:title" content="caffe2学习（三）推理预测C++">
+<meta name="twitter:description" content="编译caffe2看一下caffe2的CMakeLists.txt，其中很多模块都是服务端c++ inference时候用不到的
+在默认配置的基础上，其他用不到的模块有
+
+BUILD_PYTHON OFF
+BUILD_TEST OFF
+USE_CUDA OFF
+USE_LEVELDB OFF
+USE_LMDB OFF
+USE_METAL OFF
+USE_MOBILE_OPENGL OFF
+USE_M">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -73,10 +94,10 @@ sess = tf.Session(config=config)">
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-tensorflow-gpu" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-caffe2-c-inference" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2017/04/22/tensorflow-gpu/" class="article-date">
-  <time datetime="2017-04-22T08:29:36.000Z" itemprop="datePublished">2017-04-22</time>
+    <a href="/2018/03/23/caffe2-c-inference/" class="article-date">
+  <time datetime="2018-03-23T11:50:34.000Z" itemprop="datePublished">2018-03-23</time>
 </a>
     
   <div class="article-category">
@@ -91,7 +112,7 @@ sess = tf.Session(config=config)">
         
   
     <h1 class="article-title" itemprop="name">
-      tensorflow学习（十三）GPU使用技巧整理
+      caffe2学习（三）推理预测C++
     </h1>
   
 
@@ -99,18 +120,147 @@ sess = tf.Session(config=config)">
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="显存使用控制">显存使用控制</h2><p>如果不设置，tensorflow会默认占用所有的GPU显存。解决方法如下，GPU会根据使用的情况根据需求增加GPU显存的使用</p>
-<pre><code>config = tf.<span class="function"><span class="title">ConfigProto</span><span class="params">()</span></span>  
-config<span class="class">.gpu_options</span><span class="class">.allow_growth</span>=True
-sess = tf.<span class="function"><span class="title">Session</span><span class="params">(config=config)</span></span>
+        <h2 id="编译caffe2">编译caffe2</h2><p>看一下caffe2的CMakeLists.txt，其中很多模块都是服务端c++ inference时候用不到的</p>
+<p>在默认配置的基础上，其他用不到的模块有</p>
+<ul>
+<li>BUILD_PYTHON OFF</li>
+<li>BUILD_TEST OFF</li>
+<li>USE_CUDA OFF</li>
+<li>USE_LEVELDB OFF</li>
+<li>USE_LMDB OFF</li>
+<li>USE_METAL OFF</li>
+<li>USE_MOBILE_OPENGL OFF</li>
+<li>USE_MPI OFF</li>
+<li>USE_NCCL OFF</li>
+<li>USE_NNPACK OFF</li>
+<li>USE_OPENCV OFF</li>
+<li>USE_OPENMP ON (很影响inference的性能)</li>
+</ul>
+<h2 id="inference工程">inference工程</h2><h3 id="CMake配置">CMake配置</h3><p>CMakeLists.txt需要注意的几个点</p>
+<pre><code><span class="function"><span class="title">add_definitions</span><span class="params">(-DCAFFE2_USE_GOOGLE_GLOG)</span></span>
+<span class="function"><span class="title">add_definitions</span><span class="params">(-DCAFFE2_USE_GFLAGS)</span></span>
+
+<span class="function"><span class="title">set</span><span class="params">(CMAKE_SKIP_BUILD_RPATH FALSE)</span></span>
+<span class="function"><span class="title">set</span><span class="params">(CMAKE_INSTALL_RPATH <span class="variable">$ORIGIN</span>)</span></span>
+<span class="function"><span class="title">set</span><span class="params">(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)</span></span>
+<span class="function"><span class="title">set</span><span class="params">(CMAKE_BUILD_TYPE Release)</span></span>
+</code></pre><h3 id="include">include</h3><p>inference会用到的caffe2的几个头文件都在<code>core\proto\utils</code>几个文件夹中</p>
+<pre><code><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;opencv2/opencv.hpp&gt;</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;caffe2/core/init.h&gt;</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;caffe2/core/predictor.h&gt;</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;caffe2/utils/proto_utils.h&gt;</span></span>
+
+<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;
+<span class="keyword">using</span> <span class="keyword">namespace</span> cv;
+<span class="keyword">using</span> <span class="keyword">namespace</span> caffe2;
+
+<span class="keyword">class</span> Caffe2Net {
+<span class="keyword">public</span>:
+    Caffe2Net(<span class="built_in">string</span> initNet,<span class="built_in">string</span> predictNet);
+    <span class="built_in">vector</span>&lt;<span class="keyword">float</span>&gt; predict(Mat img);
+<span class="keyword">protected</span>:
+    <span class="function">TensorCPU <span class="title">preProcess</span><span class="params">(Mat img)</span></span>;
+    <span class="built_in">vector</span>&lt;<span class="keyword">float</span>&gt; postProcess(TensorCPU output);
+
+    Workspace workspace;
+    unique_ptr&lt;NetBase&gt; predict_net;
+};
+</code></pre><h3 id="net_init">net init</h3><pre><code><span class="attribute">Caffe2Net</span>::Caffe2Net(string initNet, string predictNet)
+:workspace(nullptr)
+{
+<span class="comment">#ifdef WITH_CUDA</span>
+    DeviceOption option;
+    option.set_device_type(CUDA);
+    <span class="keyword">new</span> CUDAContext(option);
+<span class="comment">#endif</span>
+    NetDef init_net_def, predict_net_def;
+    CAFFE_ENFORCE(ReadProtoFromFile(initNet, &amp;init_net_def));
+    CAFFE_ENFORCE(ReadProtoFromFile(predictNet, &amp;predict_net_def));
+<span class="comment">#ifdef WITH_CUDA</span>
+    init_net_def.mutable_device_option<span class="function"><span class="params">()</span>-&gt;</span>set_device_type(CUDA);
+    predict_net_def.mutable_device_option<span class="function"><span class="params">()</span>-&gt;</span>set_device_type(CUDA);
+<span class="comment">#else</span>
+    init_net_def.mutable_device_option<span class="function"><span class="params">()</span>-&gt;</span>set_device_type(CPU);
+    predict_net_def.mutable_device_option<span class="function"><span class="params">()</span>-&gt;</span>set_device_type(CPU);    
+<span class="comment">#endif</span>
+    workspace.RunNetOnce(init_net_def);
+    predict_net = CreateNet(predict_net_def,&amp;workspace);
+}
+</code></pre><h3 id="image_preprocess">image preprocess</h3><pre><code>TensorCPU Caffe2Net::preProcess(Mat img) {
+    <span class="comment">// resize and crop</span>
+    cv::resize(image, image, cv::Size(<span class="number">256</span>, <span class="number">256</span>));
+    image = image(cv::Rect(<span class="number">16</span>,<span class="number">16</span>,<span class="number">224</span>,<span class="number">224</span>));
+    <span class="comment">// convert to float, normalize to [-1,1]</span>
+    image.convertTo(image, CV_32FC3, <span class="number">1.0</span>, -<span class="number">128</span>);
+    image = image*<span class="number">0.0078125</span>
+    <span class="comment">// convert NHWC to NCHW</span>
+    <span class="built_in">vector</span>&lt;cv::Mat&gt; channels(<span class="number">3</span>);
+    cv::split(image, channels);
+    <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="keyword">float</span>&gt; data;
+    <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;c : channels) {
+        data.insert(data.end(), (<span class="keyword">float</span> *)c.datastart, (<span class="keyword">float</span> *)c.dataend);
+    }
+    <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;TIndex&gt; dims({<span class="number">1</span>, <span class="number">3</span>, <span class="number">224</span>, <span class="number">224</span>});
+    <span class="keyword">return</span> TensorCPU(dims, data, <span class="literal">NULL</span>);
+}
+</code></pre><h3 id="net_inference">net inference</h3><pre><code><span class="built_in">vector</span>&lt;<span class="keyword">float</span>&gt; Caffe2Net::predict(Mat img)
+{
+    <span class="comment">//create input blob</span>
+<span class="preprocessor">#<span class="keyword">ifdef</span> WITH_CUDA</span>
+    TensorCUDA input = TensorCUDA(preProcess(img));
+    <span class="keyword">auto</span> tensor = workspace.CreateBlob(<span class="string">"data"</span>)-&gt;GetMutable&lt;TensorCUDA&gt;();
+<span class="preprocessor">#<span class="keyword">else</span></span>
+    TensorCPU input = preProcess(img);
+    <span class="keyword">auto</span> tensor = workspace.CreateBlob(<span class="string">"data"</span>)-&gt;GetMutable&lt;TensorCPU&gt;();
+<span class="preprocessor">#<span class="keyword">endif</span></span>
+    tensor-&gt;ResizeLike(input);
+    tensor-&gt;ShareData(input);
+    <span class="comment">//predict</span>
+    predict_net-&gt;Run();
+    <span class="comment">//get output blob</span>
+<span class="preprocessor">#<span class="keyword">ifdef</span> WITH_CUDA</span>
+    TensorCPU output = TensorCPU(workspace.GetBlob(<span class="string">"fc1"</span>)-&gt;Get&lt;TensorCUDA&gt;());
+<span class="preprocessor">#<span class="keyword">else</span></span>
+    TensorCPU output = TensorCPU(workspace.GetBlob(<span class="string">"fc1"</span>)-&gt;Get&lt;TensorCPU&gt;());
+<span class="preprocessor">#<span class="keyword">endif</span></span>
+    <span class="keyword">return</span> postProcess(output);
+}
+
+<span class="built_in">vector</span>&lt;<span class="keyword">float</span>&gt; Caffe2Net::postProcess(TensorCPU output)
+{
+    <span class="keyword">const</span> <span class="keyword">float</span> * probs = output.data&lt;<span class="keyword">float</span>&gt;();
+    <span class="built_in">vector</span>&lt;TIndex&gt; dims = output.dims();
+    assert(<span class="number">2</span> == output.ndim());
+    assert(<span class="number">1</span> == dims[<span class="number">0</span>]);
+    assert(<span class="number">512</span> == dims[<span class="number">1</span>]);
+    <span class="built_in">vector</span>&lt;<span class="keyword">float</span>&gt; retVal(dims[<span class="number">1</span>]);
+    copy(probs, probs+dims[<span class="number">1</span>], retVal.begin());
+    <span class="keyword">return</span> retVal;
+}
+</code></pre><h3 id="destruction">destruction</h3><pre><code><span class="rule"><span class="attribute">google</span>:<span class="value">:protobuf::<span class="function">ShutdownProtobufLibrary</span>()</span></span>;
+</code></pre><h2 id="tips">tips</h2><h3 id="修改spatialBN源码支持fc_layer">修改spatialBN源码支持fc layer</h3><p>原生的caffe2只支持卷积层的batch norm操作，有点尴尬，github上也有人遇到过这个问题<a href="https://github.com/caffe2/caffe2/issues/865" target="_blank" rel="external">https://github.com/caffe2/caffe2/issues/865</a>，给出的方案也很姜，将fc层reshape到4通道，最后两通道设为1，再做spatial_bn，但这种实现不太优美，看了caffe2的spatial_bn的实现后，通道的限制其实没有必要，所以修改源码</p>
+<pre><code>vim caffe2/operators/spatial_batch_norm_op.cc
+<span class="comment">//CAFFE_ENFORCE(X.ndim() &gt;= 3 &amp;&amp; X.ndim() &lt;= 5);</span>
+CAFFE_ENFORCE(X.ndim() &gt;= <span class="number">2</span> &amp;&amp; X.ndim() &lt;= <span class="number">5</span>);
+<span class="keyword">const</span> <span class="keyword">int</span> N = X.dim32(<span class="number">0</span>);
+<span class="keyword">const</span> <span class="keyword">int</span> C =
+    (order_ == StorageOrder::NCHW ? X.dim32(<span class="number">1</span>) : X.dim32(X.ndim() - <span class="number">1</span>));
+<span class="comment">//const int H = (order_ == StorageOrder::NCHW ? X.dim32(2) : X.dim32(1));</span>
+<span class="keyword">const</span> <span class="keyword">int</span> H = X.ndim() &gt; <span class="number">2</span>
+    ? (order_ == StorageOrder::NCHW ? X.dim32(<span class="number">2</span>) : X.dim32(<span class="number">1</span>))
+    : <span class="number">1</span>;
 </code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/04/22/tensorflow-gpu/" data-id="cjf3vykbx0016qgfh94rppnkk" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/03/23/caffe2-c-inference/" data-id="cjf3vykeq003wqgfhiycl3e6t" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe2/">caffe2</a></li></ul>
 
     </footer>
   </div>
@@ -118,19 +268,10 @@ sess = tf.<span class="function"><span class="title">Session</span><span class="
     
 <nav id="article-nav">
   
-    <a href="/2017/06/03/interview/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          试题整理
-        
-      </div>
-    </a>
   
-  
-    <a href="/2017/03/29/tensorflow-mydata/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2018/03/04/slam-resource/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">tensorflow学习（十二）加载自定义图像数据集</div>
+      <div class="article-nav-title">slam资料</div>
     </a>
   
 </nav>
