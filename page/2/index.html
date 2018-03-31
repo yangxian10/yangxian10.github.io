@@ -65,6 +65,54 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-tensorflow-modelresource" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/07/22/tensorflow-modelresource/" class="article-date">
+  <time datetime="2016-07-22T15:59:03.000Z" itemprop="datePublished">2016-07-22</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/深度学习/">深度学习</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/07/22/tensorflow-modelresource/">tensorflow学习（八）模型资源</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>网上有众多基于tensorflow实现的各种网络，这里整理梳理一下</p>
+<h2 id="VGG-16">VGG-16</h2><p><a href="https://github.com/ry/tensorflow-vgg16" target="_blank" rel="external">https://github.com/ry/tensorflow-vgg16</a><br>这是一个基于caffe转换过来的预训练好的vgg16的模型，参数文件可以通过torrent下载，模型的结构详见<code>vgg16.py</code>，这个网络没有训练的代码，不够nice</p>
+<h2 id="ResNet">ResNet</h2><p><a href="https://github.com/ry/tensorflow-resnet" target="_blank" rel="external">https://github.com/ry/tensorflow-resnet</a><br>这也是一个从caffe转换过来的模型，训练好的模型文件可以通过torrent下载，其模型所需要的模块函数在<code>resnet.py</code>中，其<code>inference</code>和<code>inference_small</code>函数是完整网络。在<code>train_imagenet.py</code>中将模型声明logits传入<code>resnet_train.py</code>进行训练。</p>
+<h2 id="fcn_(Fully_Convolutional_Networks)">fcn (Fully Convolutional Networks)</h2><p><a href="https://github.com/MarvinTeichmann/tensorflow-fcn" target="_blank" rel="external">https://github.com/MarvinTeichmann/tensorflow-fcn</a><br>将caffe的VGG-16模型转换成npy格式后，<code>fcnxx_vgg.py</code>定义了模型，并加载vgg.npy的数据参数。通过<code>test_fcn_vgg.py</code>参数测试图片的分割结果。该网络没有提供训练代码。</p>
+<h2 id="YOLO">YOLO</h2><p><a href="https://github.com/gliese581gg/YOLO_tensorflow" target="_blank" rel="external">https://github.com/gliese581gg/YOLO_tensorflow</a><br>实现的一个YOLO的图像测试代码，比较简单，使用之前要下载对应的ckpt模型参数文件。没有训练代码，无法重现训练。</p>
+<h2 id="Inception-V3">Inception-V3</h2><p><a href="https://github.com/tensorflow/models/tree/master/inception" target="_blank" rel="external">https://github.com/tensorflow/models/tree/master/inception</a><br>tensorflow官方提供的一个inception-v3的实现，有较为详细的数据加载，训练，测试的代码。值得仔细研究。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2016/07/22/tensorflow-modelresource/" data-id="cjfevqqgk000xjgfh2cl6n9cv" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-caffe-yolo" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/07/13/caffe-yolo/" class="article-date">
@@ -100,7 +148,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="cjf3vykeq0042qgfhn0gpxges" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/13/caffe-yolo/" data-id="cjfevqqn40046jgfhf01ukzdt" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -163,7 +211,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="cjf3vykdu002xqgfhlnlc2bu9" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/07/06/guides-japan/" data-id="cjfevqqks0031jgfhmkophx31" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -289,7 +337,7 @@ images = re.<span class="function"><span class="title">findall</span><span class
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cjf3vykcj001uqgfh4txuhlsf" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/22/python-spider/" data-id="cjfevqqii001ujgfh0kgggyrl" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
@@ -346,7 +394,7 @@ params = params.<span class="function"><span class="title">item</span><span clas
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cjf3vykce001iqgfh6guq0nzz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/14/tensorflow-caffe2tensorflow/" data-id="cjfevqqhx001ijgfhlv46tm6z" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -412,7 +460,7 @@ label_n
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cjf3vykbx0013qgfhc5psjrfh" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-inception/" data-id="cjfevqqh30013jgfh3c9lt07w" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -682,7 +730,7 @@ config.gpu_options.allow_growth = <span class="keyword">True</span>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/06/13/tensorflow-captcha/" data-id="cjf3vykbx001fqgfhw749zirh" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/06/13/tensorflow-captcha/" data-id="cjfevqqhr001fjgfhuyqe0ufz" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -934,7 +982,7 @@ init = tf.initialize_all_variables()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/28/tensorflow-cnn/" data-id="cjf3vykbx001cqgfh5q8astg5" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/28/tensorflow-cnn/" data-id="cjfevqqhn001cjgfhffvqp6ek" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1020,7 +1068,7 @@ tf<span class="class">.summary</span><span class="class">.merge_all</span>(key=<
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cjf3vykb2000oqgfh0ghuleww" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/23/tensorflow-tensorboard/" data-id="cjfevqqfz000ojgfh43t771ho" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1161,7 +1209,7 @@ saver.<span class="function"><span class="title">save</span><span class="params"
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cjf3vykbx0019qgfh5kdg8tdv" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/05/19/tensorflow-data/" data-id="cjfevqqhg0019jgfhxms7jgqr" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1265,7 +1313,7 @@ pip install /tmp/tensorflow_pkg/tensorflow-<span class="number">0.10</span>.<spa
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cjf3vykbi0010qgfhi7kj4go8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/20/tensorflow-install/" data-id="cjfevqqgt0010jgfh41yt7jpw" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tensorflow/">tensorflow</a></li></ul>
@@ -1359,7 +1407,7 @@ n = p1.<span class="function"><span class="title">query</span><span class="param
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cjf3vykcz0025qgfhmyaodxrv" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/11/panns-nnsearch/" data-id="cjfevqqj90025jgfh55swpp23" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nnsearch/">nnsearch</a></li></ul>
@@ -1429,7 +1477,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cjf3vykea003hqgfhb3d81xiv" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/04/07/data-visualization/" data-id="cjfevqqm5003ljgfh0om8zlm1" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/visualization/">visualization</a></li></ul>
@@ -1472,7 +1520,7 @@ x_tsne = tsne.<span class="function"><span class="title">fit_transform</span><sp
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cjf3vykdu0030qgfh4p6okeku" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/30/good-site/" data-id="cjfevqqlc0034jgfhg21i77yw" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -1747,7 +1795,7 @@ wget http:<span class="comment">//pjreddie.com/media/files/extraction.conv.weigh
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="cjf3vykea003lqgfhvfi7okzc" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/25/darknet-yolo/" data-id="cjfevqqmc003pjgfhhyue62ef" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/darknet/">darknet</a></li></ul>
@@ -1853,7 +1901,7 @@ layer {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cjf3vykfc004oqgfh3fct7rbd" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/23/caffe-add-layer/" data-id="cjfevqqo9004sjgfhty53er6f" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -2037,7 +2085,7 @@ awk <span class="string">'{print vara}'</span> vara=$<span class="keyword">var</
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cjf3vykdf002lqgfhe18wuvqo" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/19/linux-shell-skill/" data-id="cjfevqqk6002pjgfhdh4dxg6t" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell/">shell</a></li></ul>
@@ -2097,7 +2145,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cjf3vykch001lqgfhl1k38y7a" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/23/spark-learn/" data-id="cjfevqqi5001ljgfhjk010m1p" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spark/">Spark</a></li></ul>
@@ -2154,7 +2202,7 @@ hadoop fs -put <span class="variable">&lt;localsrc&gt;</span> <span class="varia
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cjf3vykcz002dqgfhb20y2wq8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/ml-skill/" data-id="cjfevqqjs002hjgfhsb96v47k" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
@@ -2221,94 +2269,10 @@ import py2exe
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cjf3vykcj001yqgfhxep6g9x0" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/02/18/python-skill/" data-id="cjfevqqiw001yjgfhpsigl5tz" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-linux-c-skill" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/01/18/linux-c-skill/" class="article-date">
-  <time datetime="2016-01-18T14:07:18.000Z" itemprop="datePublished">2016-01-18</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/study/">study</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/01/18/linux-c-skill/">Linux c/c++ 技巧总结</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="遍历目录内文件">遍历目录内文件</h2><p>Linux下的dirent.h头文件是专门为了获取文件夹目录内容而设计的结构体。使用示例如下：</p>
-<pre><code><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;dirent.h&gt;</span></span>
-<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span>
-<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span>
-<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span>
-
-<span class="function"><span class="keyword">void</span> <span class="title">List</span><span class="params">(<span class="keyword">char</span>* path, <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt;&amp; files)</span>
-</span>{
-    <span class="keyword">struct</span> dirent* ent = <span class="literal">NULL</span>;
-    DIR* pDir;
-    <span class="keyword">char</span> dir[<span class="number">512</span>];
-    <span class="keyword">struct</span> stat statbuf;  
-    <span class="keyword">if</span> ( (pDir=opendir(path))==<span class="literal">NULL</span> )
-    {
-    <span class="built_in">fprintf</span>( <span class="built_in">stderr</span>, <span class="string">"Cannot open directory:%s\n"</span>, path );
-        <span class="keyword">return</span>;
-    }
-    <span class="keyword">while</span>( (ent=readdir(pDir)) != <span class="literal">NULL</span> )
-    {
-        <span class="comment">//得到读取文件的绝对路径名</span>
-        <span class="built_in">snprintf</span>(dir, <span class="number">512</span>, <span class="string">"%s/%s"</span>, path, ent-&gt;d_name);   
-        <span class="comment">//得到文件信息</span>
-        lstat(dir, &amp;statbuf);
-        <span class="comment">//判断是目录还是文件</span>
-        <span class="keyword">if</span> ( S_ISDIR(statbuf.st_mode) )
-        {
-            <span class="comment">//排除当前目录和上级目录</span>
-            <span class="keyword">if</span> (<span class="built_in">strcmp</span>(<span class="string">"."</span>,ent-&gt;d_name) == <span class="number">0</span> || <span class="built_in">strcmp</span>( <span class="string">".."</span>,ent-&gt;d_name) == <span class="number">0</span>) 
-                <span class="keyword">continue</span>;
-            <span class="comment">//如果是子目录,递归调用函数本身,实现子目录中文件遍历</span>
-            <span class="built_in">printf</span>( <span class="string">"子目录:%s/\n"</span>, ent-&gt;d_name );
-            <span class="comment">//递归调用,遍历子目录中文件</span>
-            <span class="comment">//List(dir);</span>
-        }
-        <span class="keyword">else</span>
-        {
-            <span class="built_in">printf</span>( <span class="string">"文件:%s\n"</span>, ent-&gt;d_name );
-            files.push_back(pathName.assign(path).append(<span class="string">"/"</span>).append(ent-&gt;d_name));
-        }       
-    }
-    closedir(pDir);
-}
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cjf3vykdf002pqgfhes522bz1" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
 
     </footer>
   </div>
@@ -2330,7 +2294,7 @@ import py2exe
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">12</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">28</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Computer-Vision/">Computer Vision</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/study/">study</a><span class="category-list-count">12</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/深度学习/">深度学习</a><span class="category-list-count">28</span></li></ul>
     </div>
   </div>
 
@@ -2339,7 +2303,7 @@ import py2exe
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReID/">ReID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe2/">caffe2</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/product-recognition/">product recognition</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/slam/">slam</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">6</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/OCR/">OCR</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReID/">ReID</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spark/">Spark</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-c/">c/c++</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe/">caffe</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/caffe2/">caffe2</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/darknet/">darknet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dataset/">dataset</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/face/">face</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mxnet/">mxnet</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nnsearch/">nnsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/product-recognition/">product recognition</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/slam/">slam</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/source/">source</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tensorflow/">tensorflow</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tricks/">tricks</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/visualization/">visualization</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/生活/">生活</a><span class="tag-list-count">6</span></li></ul>
     </div>
   </div>
 
@@ -2348,7 +2312,7 @@ import py2exe
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/ReID/" style="font-size: 10px;">ReID</a> <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 12px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 18px;">caffe</a> <a href="/tags/caffe2/" style="font-size: 14px;">caffe2</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 14px;">face</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/machine-learning/" style="font-size: 12px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/product-recognition/" style="font-size: 10px;">product recognition</a> <a href="/tags/python/" style="font-size: 12px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/slam/" style="font-size: 10px;">slam</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 16px;">生活</a>
+      <a href="/tags/OCR/" style="font-size: 10px;">OCR</a> <a href="/tags/ReID/" style="font-size: 10px;">ReID</a> <a href="/tags/Spark/" style="font-size: 10px;">Spark</a> <a href="/tags/c-c/" style="font-size: 12px;">c/c++</a> <a href="/tags/caffe/" style="font-size: 18px;">caffe</a> <a href="/tags/caffe2/" style="font-size: 14px;">caffe2</a> <a href="/tags/darknet/" style="font-size: 10px;">darknet</a> <a href="/tags/dataset/" style="font-size: 10px;">dataset</a> <a href="/tags/face/" style="font-size: 14px;">face</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/machine-learning/" style="font-size: 12px;">machine learning</a> <a href="/tags/mxnet/" style="font-size: 10px;">mxnet</a> <a href="/tags/nnsearch/" style="font-size: 10px;">nnsearch</a> <a href="/tags/product-recognition/" style="font-size: 10px;">product recognition</a> <a href="/tags/python/" style="font-size: 12px;">python</a> <a href="/tags/shell/" style="font-size: 10px;">shell</a> <a href="/tags/slam/" style="font-size: 10px;">slam</a> <a href="/tags/source/" style="font-size: 10px;">source</a> <a href="/tags/tensorflow/" style="font-size: 20px;">tensorflow</a> <a href="/tags/tricks/" style="font-size: 10px;">tricks</a> <a href="/tags/visualization/" style="font-size: 10px;">visualization</a> <a href="/tags/生活/" style="font-size: 16px;">生活</a>
     </div>
   </div>
 
@@ -2357,7 +2321,7 @@ import py2exe
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/03/">三月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">三月 2015</a><span class="archive-list-count">2</span></li></ul>
     </div>
   </div>
 
@@ -2367,6 +2331,10 @@ import py2exe
     <h3 class="widget-title">Recents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2018/03/31/ocr-resource/">OCR技术资料</a>
+          </li>
         
           <li>
             <a href="/2018/03/23/caffe2-c-inference/">caffe2学习（三）推理预测C++</a>
@@ -2382,10 +2350,6 @@ import py2exe
         
           <li>
             <a href="/2018/03/04/buy-list/">长草清单</a>
-          </li>
-        
-          <li>
-            <a href="/2018/01/21/linux-tips/">linux-tips</a>
           </li>
         
       </ul>
