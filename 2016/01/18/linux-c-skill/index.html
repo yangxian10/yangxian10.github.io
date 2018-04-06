@@ -5,34 +5,19 @@
   
   <title>Linux c/c++ 技巧总结 | 杨现的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="遍历目录内文件Linux下的dirent.h头文件是专门为了获取文件夹目录内容而设计的结构体。使用示例如下：
-#include &amp;lt;dirent.h&amp;gt;
-#include &amp;lt;string.h&amp;gt;
-#include &amp;lt;stdio.h&amp;gt;
-#include &amp;lt;sys/stat.h&amp;gt;
-
-void List(char* path, vector&amp;lt;string&amp;">
+  <meta name="description" content="技术blogC语言结构体里的成员数组和指针https://coolshell.cn/articles/11377.htmlLinux系统中“动态库”和“静态库”那点事儿http://blog.jobbole.com/107977/C++中new与malloc的10点区别https://blog.csdn.net/linux_ever/article/details/50533149
+book高质量">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux c/c++ 技巧总结">
 <meta property="og:url" content="http://yoursite.com/2016/01/18/linux-c-skill/index.html">
 <meta property="og:site_name" content="杨现的个人博客">
-<meta property="og:description" content="遍历目录内文件Linux下的dirent.h头文件是专门为了获取文件夹目录内容而设计的结构体。使用示例如下：
-#include &amp;lt;dirent.h&amp;gt;
-#include &amp;lt;string.h&amp;gt;
-#include &amp;lt;stdio.h&amp;gt;
-#include &amp;lt;sys/stat.h&amp;gt;
-
-void List(char* path, vector&amp;lt;string&amp;">
-<meta property="og:updated_time" content="2016-01-18T14:08:19.224Z">
+<meta property="og:description" content="技术blogC语言结构体里的成员数组和指针https://coolshell.cn/articles/11377.htmlLinux系统中“动态库”和“静态库”那点事儿http://blog.jobbole.com/107977/C++中new与malloc的10点区别https://blog.csdn.net/linux_ever/article/details/50533149
+book高质量">
+<meta property="og:updated_time" content="2018-04-06T12:08:42.987Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux c/c++ 技巧总结">
-<meta name="twitter:description" content="遍历目录内文件Linux下的dirent.h头文件是专门为了获取文件夹目录内容而设计的结构体。使用示例如下：
-#include &amp;lt;dirent.h&amp;gt;
-#include &amp;lt;string.h&amp;gt;
-#include &amp;lt;stdio.h&amp;gt;
-#include &amp;lt;sys/stat.h&amp;gt;
-
-void List(char* path, vector&amp;lt;string&amp;">
+<meta name="twitter:description" content="技术blogC语言结构体里的成员数组和指针https://coolshell.cn/articles/11377.htmlLinux系统中“动态库”和“静态库”那点事儿http://blog.jobbole.com/107977/C++中new与malloc的10点区别https://blog.csdn.net/linux_ever/article/details/50533149
+book高质量">
   
     <link rel="alternative" href="/atom.xml" title="杨现的个人博客" type="application/atom+xml">
   
@@ -108,7 +93,40 @@ void List(char* path, vector&amp;lt;string&amp;">
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="遍历目录内文件">遍历目录内文件</h2><p>Linux下的dirent.h头文件是专门为了获取文件夹目录内容而设计的结构体。使用示例如下：</p>
+        <h2 id="技术blog">技术blog</h2><p>C语言结构体里的成员数组和指针<br><a href="https://coolshell.cn/articles/11377.html" target="_blank" rel="external">https://coolshell.cn/articles/11377.html</a><br>Linux系统中“动态库”和“静态库”那点事儿<br><a href="http://blog.jobbole.com/107977/" target="_blank" rel="external">http://blog.jobbole.com/107977/</a><br>C++中new与malloc的10点区别<br><a href="https://blog.csdn.net/linux_ever/article/details/50533149" target="_blank" rel="external">https://blog.csdn.net/linux_ever/article/details/50533149</a></p>
+<h2 id="book">book</h2><p>高质量C++/C编程指南<br><a href="https://yq.aliyun.com/articles/4864?spm=5176.100239.yqblog1.18.gKW5LN" target="_blank" rel="external">https://yq.aliyun.com/articles/4864?spm=5176.100239.yqblog1.18.gKW5LN</a></p>
+<h2 id="动态库的使用">动态库的使用</h2><h3 id="动态链接">动态链接</h3><p>这个比较常用，保证ldd时候可以找到对应的so，告诉连接器在哪找需要链接的so</p>
+<h3 id="动态加载">动态加载</h3><p>依赖linux的API，<code>dlfcn.h</code>中的几个方法<code>dlerror、dlopen、dlsym、dlclose</code>。<br>dlopen中的filename:如果名字不以“/”开头，则非绝对路径名，将按下列先后顺序查找该文件。</p>
+<ol>
+<li>用户环境变量中的LD_LIBRARY值</li>
+<li>动态链接缓冲文件/etc/ld.so.cache</li>
+<li>目录/lib,/usr/lib</li>
+</ol>
+<p>flag表示在什么时候解决未定义的符号（调用）。取值有两个：</p>
+<ol>
+<li>RTLD_LAZY : 表明在动态链接库的函数代码执行时解决。</li>
+<li>RTLD_NOW :表明在dlopen返回前就解决所有未定义的符号，一旦未解决，dlopen将返回错误。</li>
+</ol>
+<p>具体示例：</p>
+<pre><code><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;dlfcn.h&gt;</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">"my_so_test.h"</span></span>
+
+<span class="keyword">void</span> (*fn)();
+<span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>{
+    <span class="keyword">void</span> *handle = dlopen(<span class="string">"./libtest.so"</span>, RTLD_LAZY);
+    <span class="keyword">const</span> <span class="keyword">char</span> *err = dlerror();
+    <span class="keyword">if</span> (err != <span class="literal">NULL</span>) {
+        perror(<span class="string">"could not open shared object!"</span>);
+    }
+    fn = dlsym(handle, <span class="string">"testA"</span>);
+    fn();
+    fn = dlsym(handle, <span class="string">"testB"</span>);
+    fn();
+    dlclose(handle);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</code></pre><h2 id="遍历目录内文件">遍历目录内文件</h2><p>Linux下的dirent.h头文件是专门为了获取文件夹目录内容而设计的结构体。使用示例如下：</p>
 <pre><code><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;dirent.h&gt;</span></span>
 <span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span>
 <span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span>
@@ -154,7 +172,7 @@ void List(char* path, vector&amp;lt;string&amp;">
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cjfevqqkd002tjgfhxn4ufma6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cjfnwq8jb002t6sfhdh6nxdgt" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>

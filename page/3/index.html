@@ -91,7 +91,40 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="遍历目录内文件">遍历目录内文件</h2><p>Linux下的dirent.h头文件是专门为了获取文件夹目录内容而设计的结构体。使用示例如下：</p>
+        <h2 id="技术blog">技术blog</h2><p>C语言结构体里的成员数组和指针<br><a href="https://coolshell.cn/articles/11377.html" target="_blank" rel="external">https://coolshell.cn/articles/11377.html</a><br>Linux系统中“动态库”和“静态库”那点事儿<br><a href="http://blog.jobbole.com/107977/" target="_blank" rel="external">http://blog.jobbole.com/107977/</a><br>C++中new与malloc的10点区别<br><a href="https://blog.csdn.net/linux_ever/article/details/50533149" target="_blank" rel="external">https://blog.csdn.net/linux_ever/article/details/50533149</a></p>
+<h2 id="book">book</h2><p>高质量C++/C编程指南<br><a href="https://yq.aliyun.com/articles/4864?spm=5176.100239.yqblog1.18.gKW5LN" target="_blank" rel="external">https://yq.aliyun.com/articles/4864?spm=5176.100239.yqblog1.18.gKW5LN</a></p>
+<h2 id="动态库的使用">动态库的使用</h2><h3 id="动态链接">动态链接</h3><p>这个比较常用，保证ldd时候可以找到对应的so，告诉连接器在哪找需要链接的so</p>
+<h3 id="动态加载">动态加载</h3><p>依赖linux的API，<code>dlfcn.h</code>中的几个方法<code>dlerror、dlopen、dlsym、dlclose</code>。<br>dlopen中的filename:如果名字不以“/”开头，则非绝对路径名，将按下列先后顺序查找该文件。</p>
+<ol>
+<li>用户环境变量中的LD_LIBRARY值</li>
+<li>动态链接缓冲文件/etc/ld.so.cache</li>
+<li>目录/lib,/usr/lib</li>
+</ol>
+<p>flag表示在什么时候解决未定义的符号（调用）。取值有两个：</p>
+<ol>
+<li>RTLD_LAZY : 表明在动态链接库的函数代码执行时解决。</li>
+<li>RTLD_NOW :表明在dlopen返回前就解决所有未定义的符号，一旦未解决，dlopen将返回错误。</li>
+</ol>
+<p>具体示例：</p>
+<pre><code><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;dlfcn.h&gt;</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span>
+<span class="preprocessor">#<span class="keyword">include</span> <span class="string">"my_so_test.h"</span></span>
+
+<span class="keyword">void</span> (*fn)();
+<span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>{
+    <span class="keyword">void</span> *handle = dlopen(<span class="string">"./libtest.so"</span>, RTLD_LAZY);
+    <span class="keyword">const</span> <span class="keyword">char</span> *err = dlerror();
+    <span class="keyword">if</span> (err != <span class="literal">NULL</span>) {
+        perror(<span class="string">"could not open shared object!"</span>);
+    }
+    fn = dlsym(handle, <span class="string">"testA"</span>);
+    fn();
+    fn = dlsym(handle, <span class="string">"testB"</span>);
+    fn();
+    dlclose(handle);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+</code></pre><h2 id="遍历目录内文件">遍历目录内文件</h2><p>Linux下的dirent.h头文件是专门为了获取文件夹目录内容而设计的结构体。使用示例如下：</p>
 <pre><code><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;dirent.h&gt;</span></span>
 <span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span>
 <span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span>
@@ -137,7 +170,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cjfevqqkd002tjgfhxn4ufma6" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/18/linux-c-skill/" data-id="cjfnwq8jb002t6sfhdh6nxdgt" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-c/">c/c++</a></li></ul>
@@ -185,7 +218,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cjfevqqop0051jgfhlo9djon9" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/01/12/book-list/" data-id="cjfnwq8mz00516sfhopr9a6gp" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/source/">source</a></li></ul>
@@ -230,7 +263,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cjfevqqot0055jgfhv41m5cqc" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/12/06/adusting-parameter/" data-id="cjfnwq8n400556sfhtw512pps" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tricks/">tricks</a></li></ul>
@@ -306,7 +339,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cjfevqqlz003hjgfhwi1hwfij" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/05/dataset-cv/" data-id="cjfnwq8kq003h6sfh0orw887z" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dataset/">dataset</a></li></ul>
@@ -422,7 +455,7 @@ detector = dlib.get_frontal_face_detector()
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cjfevqqlt003ejgfhv141wz3h" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/11/04/dlib-face-detect/" data-id="cjfnwq8km003e6sfhty588hhb" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/face/">face</a></li></ul>
@@ -483,7 +516,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cjfevqqjn002djgfh2cade3hg" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/10/09/mxnet-install/" data-id="cjfnwq8is002d6sfhpcnl83aa" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mxnet/">mxnet</a></li></ul>
@@ -548,7 +581,7 @@ USE_INTEL_PATH = /<span class="keyword">opt</span>/intel/
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cjfevqqny004mjgfhjr2atvu3" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/09/15/caffe-fine-tuning/" data-id="cjfnwq8mc004m6sfh5ukv702i" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -620,7 +653,7 @@ caffe <span class="keyword">time</span> -<span class="keyword">model</span> exam
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cjfevqqnn004gjgfhscp0hc32" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/23/caffe-interface/" data-id="cjfnwq8m3004g6sfhzcm0b3cl" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -878,7 +911,7 @@ chmod -R +r *
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cjfevqqna004ajgfhvxqu11wz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/18/caffe-setup2/" data-id="cjfnwq8lv004a6sfh9w2ja4uu" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -968,7 +1001,7 @@ chmod -R +r *
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cjfevqqo4004pjgfhtoudclw3" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/15/caffe-dataprepare/" data-id="cjfnwq8mh004p6sfhxcxjg059" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -1092,7 +1125,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cjfevqqnf004djgfh2c7434h7" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/08/01/caffe-setup/" data-id="cjfnwq8lz004d6sfhvy3an6hy" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/caffe/">caffe</a></li></ul>
@@ -1206,7 +1239,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cjfevqqe40005jgfh45q435r1" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/12/单反拍摄入门/" data-id="cjfnwq8ez00056sfhjic4kp58" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -1266,7 +1299,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cjfevqqfh000djgfh16ajchn3" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/04/04/三万元搞定两室两厅装修攻略/" data-id="cjfnwq8f9000d6sfhlpsnw6no" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -1327,7 +1360,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cjfevqqf2000ajgfhdjh06l5x" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/23/五险一金/" data-id="cjfnwq8f5000a6sfhwc3czuwm" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/生活/">生活</a></li></ul>
@@ -1374,7 +1407,7 @@ ldconfig
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="cjfevqqkp0030jgfh49gqtw6y" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2015/03/17/hello-world/" data-id="cjfnwq8jy00306sfhcq0t03wz" class="article-share-link">Share</a>
       
       
     </footer>
